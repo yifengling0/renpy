@@ -8,6 +8,9 @@ import re
 
 def shaders(incdir="source/inc"):
 
+    # Ensure output directory exists before writing files.
+    os.makedirs(incdir, exist_ok=True)
+
     def p(s):
         print(s, file=outf)
 

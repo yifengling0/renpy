@@ -1,0 +1,8 @@
+#!/bin/bash
+exec "/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/native/llvm/bin/clang++.exe" \
+    --target=aarch64-unknown-linux-ohos \
+    --sysroot="/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/native/sysroot" \
+    --gcc-toolchain=/dev/null \
+    -fuse-ld=lld \
+    -fPIC \
+    "$@"

@@ -891,7 +891,7 @@ class Interface:
             return
 
         # Avoid starting on Android if we don't have focus.
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             self.check_android_start()
 
         gc.collect()
@@ -969,7 +969,7 @@ class Interface:
 
         s = "Total time until interface ready: {}s.".format(time.time() - import_time)
 
-        if renpy.android and not renpy.config.log_to_stdout:
+        if (renpy.android or renpy.harmonyos) and not renpy.config.log_to_stdout:
             print(s)
 
         # Clear out any pending events.
@@ -1023,7 +1023,7 @@ class Interface:
         Called after the first frame has been drawn.
         """
 
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             from jnius import autoclass
 
             PythonSDLActivity = autoclass("org.renpy.android.PythonSDLActivity")
@@ -1102,7 +1102,7 @@ class Interface:
 
         renpy.config.renderer = renderer
 
-        if renpy.android or renpy.ios or renpy.emscripten:
+        if renpy.android or renpy.ios or renpy.emscripten or renpy.harmonyos:
             renderers = ["gles2"]
         elif renpy.windows:
             renderers = ["gl2", "angle2", "gles2"]
@@ -1117,7 +1117,7 @@ class Interface:
             renderer = "auto"
 
         # Software renderer is the last hope for PC .
-        if not (renpy.android or renpy.ios or renpy.emscripten):
+        if not (renpy.android or renpy.ios or renpy.emscripten or renpy.harmonyos):
             renderers = renderers + ["sw"]
 
         if renderer in renderers:
@@ -1175,7 +1175,7 @@ class Interface:
         if renpy.display.draw is None:
             return
 
-        if keep_const_size and not (renpy.android or renpy.ios):
+        if keep_const_size and not (renpy.android or renpy.ios or renpy.harmonyos):
             renpy.display.im.cache.clear_variable_size()
         else:
             renpy.display.im.cache.clear()
@@ -1265,7 +1265,7 @@ class Interface:
 
         renpy.session["renderer"] = draw.info["renderer"]
 
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             android.init()
             pygame.event.get()
 
@@ -1951,7 +1951,7 @@ class Interface:
             traceback.print_exc()
 
         if renpy.config.quit_on_mobile_background:
-            if renpy.android:
+            if renpy.android and not renpy.harmonyos:
                 try:
                     android.activity.finishAndRemoveTask()
                 except Exception:
@@ -1970,7 +1970,7 @@ class Interface:
 
         print("Releasing wakelock.")
 
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             android.wakelock(False)
 
             # Tell Android to end the onStop method.
@@ -1995,7 +1995,7 @@ class Interface:
 
         renpy.audio.audio.unpause_all()
 
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             android.wakelock(True)
             android.activity.armOnStop()
 
@@ -3046,7 +3046,7 @@ class Interface:
                 # merge a mouse down and mouse up event with its successor. This
                 # prevents us from getting overwhelmed with too many events on
                 # a multitouch screen.
-                if renpy.android and (ev.type == pygame.MOUSEBUTTONDOWN or ev.type == pygame.MOUSEBUTTONUP):
+                if (renpy.android or renpy.harmonyos) and (ev.type == pygame.MOUSEBUTTONDOWN or ev.type == pygame.MOUSEBUTTONUP):
                     pygame.event.clear(ev.type)
 
                 # Handle redraw timeouts.

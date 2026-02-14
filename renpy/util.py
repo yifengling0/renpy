@@ -29,7 +29,7 @@ def expose_file(fn):
     that may not be the default.
     """
 
-    if renpy.android:
+    if renpy.android or renpy.harmonyos:
         try:
             os.chmod(fn, 0o660)
         except Exception:
@@ -42,7 +42,7 @@ def expose_directory(dn):
     that may not be the default.
     """
 
-    if renpy.android:
+    if renpy.android or renpy.harmonyos:
         try:
             os.chmod(dn, 0o770)
         except Exception:

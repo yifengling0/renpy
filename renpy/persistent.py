@@ -594,7 +594,7 @@ def MultiPersistent(name, save_on_quit=False):
     if "RENPY_MULTIPERSISTENT" in os.environ:
         files = [renpy.exports.fsdecode(os.environ["RENPY_MULTIPERSISTENT"])]
 
-    elif renpy.android or renpy.ios:
+    elif renpy.android or renpy.ios or renpy.harmonyos:
         # Due to the security policy of mobile devices, we store MultiPersistent
         # in the same place as common persistent.
         # This is better than not working at all.

@@ -143,9 +143,19 @@ emscripten: bool = False
 # Should we enable experimental features and debugging?
 experimental = "RENPY_EXPERIMENTAL" in os.environ
 
-if platform.win32_ver()[0]:
+# HarmonyOS detection (must be checked BEFORE ANDROID_PRIVATE,
+# since renpy_bridge.c sets ANDROID_PRIVATE on HarmonyOS too).
+# HarmonyOS is NOT Android — it has no JNI/jnius, no android.activity,
+# no wakelock, etc. We treat it as its own mobile platform with
+# Linux-kernel base, GLES rendering, and forced fullscreen.
+_renpy_platform = os.environ.get("RENPY_PLATFORM", "")
+harmonyos: bool = (_renpy_platform == "harmonyos")
+
+if harmonyos:
+    linux = True  # HarmonyOS is Linux-kernel based
+elif platform.win32_ver()[0]:
     windows = True
-elif os.environ.get("RENPY_PLATFORM", "").startswith("ios"):
+elif _renpy_platform.startswith("ios"):
     ios = True
 elif platform.mac_ver()[0]:
     macintosh = True
@@ -156,10 +166,11 @@ elif sys.platform == "emscripten" or "RENPY_EMSCRIPTEN" in os.environ:
 else:
     linux = True
 
-arch: str = os.environ.get("RENPY_PLATFORM", "unknown-unknown-unknown").rpartition("-")[2]
+arch: str = _renpy_platform.rpartition("-")[2] if _renpy_platform else "unknown"
 
 # A flag that's true if we're on a smartphone or tablet-like platform.
-mobile: bool = android or ios or emscripten
+# HarmonyOS is mobile (forced fullscreen, touch input, GLES, no window management).
+mobile: bool = android or ios or emscripten or harmonyos
 
 # A flag that's set to true if the game directory is bundled inside a mac app.
 macapp: bool = False

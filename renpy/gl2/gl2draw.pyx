@@ -373,7 +373,7 @@ cdef class GL2Draw:
 
         pwidth, pheight = self.select_physical_size(physical_size)
 
-        if renpy.android or renpy.ios:
+        if renpy.android or renpy.ios or renpy.harmonyos:
             fullscreen = True
         elif renpy.emscripten:
             fullscreen = False
@@ -408,7 +408,7 @@ cdef class GL2Draw:
         gles = self.gles
         window_flags = pygame.OPENGL | pygame.DOUBLEBUF
 
-        if renpy.android:
+        if renpy.android or renpy.harmonyos:
             pwidth = 0
             pheight = 0
             gles = True
@@ -507,7 +507,7 @@ cdef class GL2Draw:
         # Do additional setup needed.
         renpy.display.pgrender.set_rgba_masks()
 
-        if renpy.android or renpy.ios:
+        if renpy.android or renpy.ios or renpy.harmonyos:
             self.redraw_period = 1.0
 
         elif renpy.emscripten:
@@ -528,7 +528,7 @@ cdef class GL2Draw:
         if first:
             full_reset = True
 
-        if renpy.android or renpy.ios or renpy.emscripten:
+        if renpy.android or renpy.ios or renpy.emscripten or renpy.harmonyos:
             full_reset = True
 
         if not first:
@@ -543,6 +543,12 @@ cdef class GL2Draw:
         # Are we in fullscreen mode?
         if renpy.emscripten:
             fullscreen = bool(emscripten.run_script_int("isFullscreen()"))
+        elif renpy.harmonyos:
+            # HarmonyOS: always treat as fullscreen regardless of SDL window flags.
+            # SDL on HarmonyOS (XComponent) may not report FULLSCREEN flags correctly,
+            # which can cause the engine to fall into windowed mode with a tiny window
+            # and persist that size. Force fullscreen unconditionally.
+            fullscreen = True
         else:
             fullscreen = bool(pygame.display.get_window().get_window_flags() & (pygame.WINDOW_FULLSCREEN_DESKTOP | pygame.WINDOW_FULLSCREEN))
 
@@ -571,7 +577,10 @@ cdef class GL2Draw:
         if not fullscreen:
             renpy.game.preferences.maximized = maximized
 
-        if not fullscreen and not maximized:
+        # On HarmonyOS, never save physical_size to prevent tiny-window persistence.
+        if renpy.harmonyos:
+            pass
+        elif not fullscreen and not maximized:
             renpy.game.preferences.physical_size = self.get_physical_size()
 
         if renpy.config.adjust_view_size is not None:
@@ -649,7 +658,7 @@ cdef class GL2Draw:
 
         if renpy.emscripten:
             fullscreen = False
-        elif renpy.android or renpy.ios:
+        elif renpy.android or renpy.ios or renpy.harmonyos:
             fullscreen = True
 
         if renpy.game.preferences.physical_size:
@@ -662,7 +671,7 @@ cdef class GL2Draw:
         width *= self.dpi_scale
         height *= self.dpi_scale
 
-        if not renpy.android or renpy.ios or renpy.emscripten:
+        if not (renpy.android or renpy.ios or renpy.emscripten or renpy.harmonyos):
             max_w, max_h = self.info["max_window_size"]
             width = min(width, max_w)
             height = min(height, max_h)

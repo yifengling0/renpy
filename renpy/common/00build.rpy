@@ -29,6 +29,7 @@ init -1500 python in build:
     from store import config, store
 
     import sys, os
+    import renpy as _renpy
 
     def make_file_lists(s):
         """
@@ -213,7 +214,7 @@ init -1500 python in build:
 
         ("steam_appid.txt", None),
 
-        ("game/" + renpy.script.BYTECODE_FILE, "all"),
+        ("game/" + _renpy.script.BYTECODE_FILE, "all"),
         ("game/cache/bytecode-*.rpyb", None),
         ("game/cache/build_info.json", None),
         ("game/cache/build_time.txt", None),

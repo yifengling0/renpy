@@ -612,7 +612,12 @@ class Info(object):
 
         format = SDL_AllocFormat(dm.format)
         if format == NULL:
-            raise error()
+            # Fallback for platforms (e.g. HarmonyOS) where the display mode
+            # format may be FOURCC or otherwise unsupported by SDL_AllocFormat.
+            # Try RGBA8888 as a safe default.
+            format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)
+            if format == NULL:
+                raise error()
 
         self.bitsize = format.BitsPerPixel
         self.bytesize = format.BytesPerPixel

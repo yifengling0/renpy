@@ -91,25 +91,120 @@ def package_flags(*packages: str) -> dict[str, Any]:
 
     rv["include_dirs"] = include_dirs
 
-    import pkgconfig
+    # Packages to skip (for cross-compilation where some libs are unavailable)
+    skip_packages = set(os.environ.get("RENPY_SKIP_PACKAGES", "").split())
+
+    # Library name fallback map (when pkg-config is entirely unavailable)
+    library_map = {
+        "sdl2": ["SDL2"],
+        "SDL2_image": ["SDL2_image-2.0"],
+        "SDL2_ttf": ["SDL2_ttf-2.0"],
+        "SDL2_mixer": ["SDL2_mixer-2.0"],
+        "libavcodec": ["avcodec"],
+        "libavformat": ["avformat"],
+        "libavutil": ["avutil"],
+        "libswscale": ["swscale"],
+        "libswresample": ["swresample"],
+        "libpng": ["png16"],
+        "libjpeg": ["jpeg"],
+        "freetype2": ["freetype"],
+        "fribidi": ["fribidi"],
+        "harfbuzz": ["harfbuzz"],
+        "assimp": ["assimp"],
+        "openssl": ["ssl", "crypto"],
+    }
+
+    # Try to import pkgconfig Python module
+    try:
+        import pkgconfig
+        pkgconfig_available = True
+    except ImportError:
+        pkgconfig_available = False
 
     for package in packages:
+        # Skip packages explicitly excluded (cross-compilation)
+        if package in skip_packages:
+            print(f"INFO: Skipping package '{package}' (RENPY_SKIP_PACKAGES)")
+            continue
+
+        # Check cache first
         if package in pkgconfig_cache:
             pc = pkgconfig_cache[package]
-        else:
+            for k, v in pc.items():
+                for i in v:
+                    if i not in rv[k]:
+                        rv[k].append(i)
+            continue
+
+        resolved = False
+
+        # Method 1: Python pkgconfig module
+        if pkgconfig_available:
             try:
                 pc = pkgconfig.parse(package)
-            except pkgconfig.PackageNotFoundError:
-                raise SystemExit(f"Could not find pkg-config package '{package}'.")
-                continue
+                pkgconfig_cache[package] = pc
+                for k, v in pc.items():
+                    for i in v:
+                        if i not in rv[k]:
+                            rv[k].append(i)
+                resolved = True
+            except Exception:
+                pass
 
-            pkgconfig_cache[package] = pc
+        # Method 2: pkg-config CLI (works with PKG_CONFIG_LIBDIR for cross-compilation)
+        if not resolved:
+            try:
+                cflags_str = subprocess.check_output(
+                    ["pkg-config", "--cflags", package],
+                    text=True, stderr=subprocess.DEVNULL
+                ).strip()
+                libs_str = subprocess.check_output(
+                    ["pkg-config", "--libs", package],
+                    text=True, stderr=subprocess.DEVNULL
+                ).strip()
 
-        for k, v in pc.items():
-            for i in v:
-                if i not in rv[k]:
-                    rv[k].append(i)
+                # Convert MSYS2-style paths (/d/foo) to Windows (D:/foo) for cross-compilation
+                def _msys2_to_win(path):
+                    return re.sub(r'^/([a-zA-Z])/', lambda m: m.group(1).upper() + ':/', path)
+
+                pc = collections.defaultdict(list)
+                for flag in cflags_str.split():
+                    if flag.startswith("-I"):
+                        pc["include_dirs"].append(_msys2_to_win(flag[2:]))
+                    elif flag.startswith("-D"):
+                        name_val = flag[2:].split("=", 1)
+                        pc["define_macros"].append(
+                            (name_val[0], name_val[1] if len(name_val) > 1 else None)
+                        )
+                for flag in libs_str.split():
+                    if flag.startswith("-L"):
+                        pc["library_dirs"].append(_msys2_to_win(flag[2:]))
+                    elif flag.startswith("-l"):
+                        pc["libraries"].append(flag[2:])
+
+                pkgconfig_cache[package] = dict(pc)
+                for k, v in pc.items():
+                    for i in v:
+                        if i not in rv[k]:
+                            rv[k].append(i)
+                resolved = True
+            except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+                pass
+
+        # Method 3: library_map fallback
+        if not resolved:
+            if package in library_map:
+                print(f"INFO: Using library_map fallback for '{package}'")
+                for lib in library_map[package]:
+                    if lib not in rv.get("libraries", []):
+                        rv["libraries"].append(lib)
+                resolved = True
+
+        if not resolved:
+            raise SystemExit(f"Could not find package '{package}' via pkgconfig, pkg-config CLI, or library_map.")
+
     return rv
+
 
 
 
@@ -135,6 +230,12 @@ def cmodule(name, source, language="c", define_macros=[], compile_args=[], packa
         A list of additional arguments that are passed to the compiler.
     """
 
+    # Skip entire module if listed in RENPY_SKIP_MODULES (cross-compilation)
+    skip_modules = set(os.environ.get("RENPY_SKIP_MODULES", "").split())
+    if name in skip_modules:
+        print(f"INFO: Skipping module '{name}' (RENPY_SKIP_MODULES)")
+        return
+
     kwargs = package_flags(*packages.split())
 
     if language == "c":
@@ -145,6 +246,10 @@ def cmodule(name, source, language="c", define_macros=[], compile_args=[], packa
     kwargs["extra_compile_args"].extend(extra_compile_args)
     kwargs["define_macros"].extend(define_macros)
     kwargs["extra_link_args"].extend(extra_link_args)
+    
+    # Windows-specific link flags for tinyfiledialogs (renpy.tfd)
+    if windows and name == "renpy.tfd":
+        kwargs["extra_link_args"].extend(["-lole32", "-lcomdlg32"])
 
     extensions.append(
         setuptools.Extension(
@@ -192,7 +297,7 @@ def cython(name, source=[], pyx=None, language="c", compile_args=[], define_macr
     # Figure out what it depends on.
     deps = [fn]
 
-    with open(fn) as f:
+    with open(fn, encoding='utf-8') as f:
         for line in f:
             m = re.search(r"from\s*([\w.]+)\s*cimport", line)
             if m:
