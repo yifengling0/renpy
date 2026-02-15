@@ -488,6 +488,13 @@ def main():
         game.preferences = game.persistent._preferences
         log_clock("Loading persistent")
 
+        # HarmonyOS: Force fullscreen and clear stale physical_size.
+        # Persistent data saved on PC may contain a small window size
+        # (e.g. 800x600) which would cause SDL to shrink the XComponent.
+        if renpy.harmonyos:
+            game.preferences.fullscreen = True
+            game.preferences.physical_size = None
+
         # Clear the list of seen statements in this game.
         game.seen_session = {}
 

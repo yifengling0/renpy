@@ -661,15 +661,22 @@ cdef class GL2Draw:
         elif renpy.android or renpy.ios or renpy.harmonyos:
             fullscreen = True
 
-        if renpy.game.preferences.physical_size:
+        if renpy.android or renpy.harmonyos:
+            # Mobile fullscreen: use (0, 0) to let SDL pick the native display size.
+            # Ignore preferences.physical_size which may contain a stale PC-sized value
+            # (e.g. 800x600) saved by game scripts calling set_physical_size().
+            width = 0
+            height = 0
+        elif renpy.game.preferences.physical_size:
             width = renpy.game.preferences.physical_size[0] or self.virtual_size[0]
             height = renpy.game.preferences.physical_size[1] or self.virtual_size[1]
         else:
             width = self.virtual_size[0]
             height = self.virtual_size[1]
 
-        width *= self.dpi_scale
-        height *= self.dpi_scale
+        if not (renpy.android or renpy.harmonyos):
+            width *= self.dpi_scale
+            height *= self.dpi_scale
 
         if not (renpy.android or renpy.ios or renpy.emscripten or renpy.harmonyos):
             max_w, max_h = self.info["max_window_size"]

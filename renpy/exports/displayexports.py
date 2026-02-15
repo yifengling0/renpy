@@ -599,6 +599,10 @@ def toggle_fullscreen():
     Toggles the fullscreen mode.
     """
 
+    # HarmonyOS: always fullscreen, don't toggle.
+    if renpy.harmonyos:
+        return
+
     renpy.game.preferences.fullscreen = not renpy.game.preferences.fullscreen  # type: ignore
 
 
@@ -1105,6 +1109,12 @@ def set_physical_size(size):
     Attempts to set the size of the physical window to `size`. This has the
     side effect of taking the screen out of fullscreen mode.
     """
+
+    # HarmonyOS: always fullscreen, ignore size change requests from game scripts.
+    # Games designed for PC may call this to set a small window size (e.g. 800x600),
+    # which would be persisted and cause a tiny unusable window on next launch.
+    if renpy.harmonyos:
+        return
 
     width = int(size[0])
     height = int(size[1])
