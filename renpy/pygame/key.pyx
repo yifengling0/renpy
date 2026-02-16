@@ -23,6 +23,7 @@ from renpy.pygame.display cimport Window, main_window
 from renpy.pygame.rect cimport to_sdl_rect
 
 from renpy.pygame.error import error
+import renpy
 
 
 cdef class KeyboardState:
@@ -91,14 +92,18 @@ def start_text_input():
     global text_input
     text_input = True
 
-    if SDL_HasScreenKeyboardSupport():
+    # On HarmonyOS, always enable text input for IME support
+    # On other platforms, check if screen keyboard is supported
+    if renpy.harmonyos or SDL_HasScreenKeyboardSupport():
         SDL_StartTextInput()
 
 def stop_text_input():
     global text_input
     text_input = False
 
-    if SDL_HasScreenKeyboardSupport():
+    # On HarmonyOS, always disable text input
+    # On other platforms, check if screen keyboard is supported
+    if renpy.harmonyos or SDL_HasScreenKeyboardSupport():
         SDL_StopTextInput()
 
 def set_text_input_rect(rect):
