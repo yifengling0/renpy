@@ -127,7 +127,9 @@ class FileLocation(object):
             os.unlink(fn)
 
             self.active = True
-        except Exception:
+        except Exception as e:
+            if renpy.harmonyos:
+                print("FileLocation {} write test failed: {}".format(self.directory, e))
             self.active = False
 
         # A map from slotname to the mtime of that slot.

@@ -872,6 +872,10 @@ class LocationFixer:
 
             node.end_lineno += self.line_delta
 
+            if node.end_lineno < node.lineno:
+                node.end_lineno = node.lineno
+                node.end_col_offset = node.col_offset
+
         except (AttributeError, TypeError):
             node.end_lineno = node.lineno
             node.end_col_offset = node.col_offset

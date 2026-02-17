@@ -139,6 +139,49 @@ def path_to_saves(gamedir, save_directory=None): # type: (str, str|None) -> str
         print("Saving to", rv)
         return rv
 
+    if renpy.harmonyos:
+        # HarmonyOS: Prefer saving in the game directory (persistent) 
+        # so saves survive app uninstallation. Fallback to sandbox if not writable.
+        
+        # basedir is usually the parent of gamedir
+        basedir = os.path.dirname(gamedir)
+        game_saves = os.path.join(basedir, "saves")
+        
+        # Sandbox fallback path
+        private = os.environ.get("ANDROID_PRIVATE", "")
+        sandbox_saves = ""
+        if private:
+            sandbox_saves = os.path.join(os.path.dirname(private.rstrip("/\\")), "saves")
+        else:
+            sandbox_saves = os.path.join(gamedir, "saves")
+
+        # Select base directory
+        if not os.path.exists(game_saves):
+            try:
+                os.makedirs(game_saves)
+            except Exception:
+                pass
+        
+        if os.path.isdir(game_saves) and test_writable(game_saves):
+            base = game_saves
+            print("HarmonyOS: Using persistent game directory for saves:", base)
+        else:
+            base = sandbox_saves
+            if not os.path.exists(base):
+                try: os.makedirs(base)
+                except Exception: pass
+            print("HarmonyOS: Game directory not writable, using sandbox:", base)
+
+        if not save_directory:
+            rv = base
+        else:
+            if isinstance(save_directory, bytes):
+                save_directory = save_directory.decode("utf-8")
+            rv = os.path.join(base, save_directory)
+
+        print("HarmonyOS: path_to_saves returning:", rv)
+        return rv
+
     if renpy.ios:
         from pyobjus import autoclass # type: ignore
         from pyobjus.objc_py_types import enum # type: ignore

@@ -163,9 +163,6 @@ def get_git_version(nightly: bool = False) -> VersionDict:
         commit = int(f"{key}{commits_per_day[key]:02d}")
 
     except Exception:
-        import traceback
-
-        traceback.print_exc()
         branch = "unknown"
         dirty = False
         commit = 0

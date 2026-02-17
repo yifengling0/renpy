@@ -209,8 +209,15 @@ def create_token(filename):
     if vk is not None:
         line = encode_line("signing-key", sk, vk)
 
-        with open(filename, "a") as f:
-            f.write(line)
+        try:
+            with open(filename, "a") as f:
+                f.write(line)
+        except Exception as e:
+            if renpy.harmonyos:
+                import traceback
+                print("Failed to write token to {}:".format(filename))
+                traceback.print_exc()
+            raise
 
 
 def upgrade_savefile(fn):
