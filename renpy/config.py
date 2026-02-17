@@ -678,7 +678,11 @@ after_replay_callback = None
 wrap_shown_transforms = True
 
 # A list of prefixes Ren'Py will search for assets.
-search_prefixes = [""]
+# VintagePomelo: Restore "images/" prefix for backward compatibility with
+# Ren'Py <= 8.4 games that call renpy.loadable() without directory= parameter.
+# The original 8.6.0 default [""] breaks games using missing_image_callback
+# with split images (.base.jpg/.mask.jpg) stored under images/ in archives.
+search_prefixes = ["", "images/"]
 
 # Should Ren'Py clear the database of code lines?
 clear_lines = True

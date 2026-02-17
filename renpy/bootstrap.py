@@ -334,7 +334,7 @@ def bootstrap(renpy_base):
     gamedir = renpy.__main__.path_to_gamedir(basedir, name)
 
     # If we're not given a command, show the presplash.
-    if args.command == "run" and not renpy.mobile:
+    if args.command == "run" and (not renpy.mobile or renpy.harmonyos):
         import renpy.display.presplash
 
         renpy.display.presplash.start(basedir, gamedir)
@@ -430,12 +430,21 @@ def bootstrap(renpy_base):
 
         renpy.display.tts.tts(None)  # type: ignore
 
-        renpy.display.im.cache.quit()  # type: ignore
+        if not renpy.harmonyos:
+            # On HarmonyOS, skip Python-side resource cleanup.
+            # renpy_bridge.c's C-side cleanup handles audio (channel fadeout +
+            # Mix_CloseAudio in cleanupSDL) and GL (glFinish + SDL_GL_DeleteContext)
+            # on the correct threads. Calling them here races with SDL's audio
+            # callback thread → use-after-free SIGSEGV or deadlock, which blocks
+            # PyEval_SaveThread() → GIL never released → next game can't start.
+            renpy.display.im.cache.quit()  # type: ignore
 
-        if renpy.display.draw:  # type: ignore
-            renpy.display.draw.quit()  # type: ignore
+            if renpy.display.draw:  # type: ignore
+                renpy.display.draw.quit()  # type: ignore
 
-        renpy.audio.audio.quit()
+            renpy.audio.audio.quit()
+        else:
+            print('[RenpyBridge] HarmonyOS: skipping audio/draw quit in bootstrap (handled by C bridge)')
 
         for cb in renpy.config.python_exit_callbacks:
             cb()

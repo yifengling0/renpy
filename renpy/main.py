@@ -250,6 +250,15 @@ def choose_variants():
         renpy.config.variants.insert(0, "harmonyos")  # type: ignore
         renpy.config.variants.insert(0, "touch")  # type: ignore
 
+        # Always use "medium" variant on HarmonyOS.
+        # Most Ren'Py games are designed for PC and only provide default
+        # (large) and "small" screen layouts.  The "small" variant often
+        # causes UI issues (text box overlapping character names) because
+        # it wasn't tested on the exact aspect ratio of modern phones.
+        # "medium" keeps the PC-like layout while allowing touch input.
+        renpy.config.variants.insert(0, "tablet")  # type: ignore
+        renpy.config.variants.insert(0, "medium")  # type: ignore
+
         import math
         import renpy.pygame as pygame
 
@@ -261,13 +270,6 @@ def choose_variants():
             dpi = 160
         diag = math.hypot(info.current_w, info.current_h) / dpi
         print("HarmonyOS screen diagonal is", diag, "inches.")
-
-        if diag >= 6:
-            renpy.config.variants.insert(0, "tablet")  # type: ignore
-            renpy.config.variants.insert(0, "medium")  # type: ignore
-        else:
-            renpy.config.variants.insert(0, "phone")  # type: ignore
-            renpy.config.variants.insert(0, "small")  # type: ignore
 
     elif renpy.emscripten:
         import emscripten  # type: ignore

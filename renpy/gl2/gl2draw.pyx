@@ -563,10 +563,22 @@ cdef class GL2Draw:
         # Get the size of the created screen.
         pwidth, pheight = renpy.display.core.get_size()
 
+        self.drawable_size = pygame.display.get_drawable_size()
+
+        # On HarmonyOS/Android, some games may request a large physical size via
+        # renpy.set_physical_size(). If this size exceeds the actual screen 
+        # resolution, it causes screen boundary overflow.
+        # Ensure physical_size never exceeds drawable_size for mobile platforms.
+        if (renpy.harmonyos or renpy.android) and (self.drawable_size[0] > 0):
+            if pwidth > self.drawable_size[0] or pheight > self.drawable_size[1]:
+                renpy.display.log.write("Clamping physical size %dx%d to drawable size %dx%d" % 
+                                        (pwidth, pheight, self.drawable_size[0], self.drawable_size[1]))
+                pwidth = min(pwidth, self.drawable_size[0])
+                pheight = min(pheight, self.drawable_size[1])
+
         vwidth, vheight = self.virtual_size
 
         self.physical_size = (pwidth, pheight)
-        self.drawable_size = pygame.display.get_drawable_size()
 
         renpy.display.log.write("Screen sizes: virtual=%r physical=%r drawable=%r" % (self.virtual_size, self.physical_size, self.drawable_size))
 
@@ -615,10 +627,10 @@ cdef class GL2Draw:
         # The location of the virtual screen on the physical screen, in
         # physical pixels.
         self.physical_box = (
-            px_padding / 2,
-            py_padding / 2,
-            pwidth - px_padding,
-            pheight - py_padding,
+            max(0, px_padding / 2),
+            max(0, py_padding / 2),
+            min(pwidth, pwidth - px_padding),
+            min(pheight, pheight - py_padding),
             )
 
         # The scaling factor of physical_pixels to drawable pixels.
