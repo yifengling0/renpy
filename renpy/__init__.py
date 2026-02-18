@@ -249,6 +249,10 @@ name_blacklist = {
     "renpy.gl2.assimp.loader",
     "renpy.gl2.assimp.loader_lock",
     "renpy.gl2.gl2draw.default_position",
+    # meta_backup contains sys.meta_path finders (including _HarmonyExtFinder
+    # instances) which are not picklable. Exclude from backup; init_importer()
+    # re-populates it after restore anyway.
+    "renpy.importer.meta_backup",
 }
 
 
@@ -281,7 +285,33 @@ class Backup:
             self.backup_module(m)
 
         # A pickled version of self.objects.
-        self.objects_pickle = pickle.dumps(self.objects, highest=True)
+        # Iteratively remove any objects that still can't be pickled (e.g. because
+        # they are referenced *inside* another object's dict/attrs rather than
+        # as a top-level variable).  Without this loop, a single
+        # un-picklable transitive reference poisons the whole dump.
+        while True:
+            try:
+                self.objects_pickle = pickle.dumps(self.objects, highest=True)
+                break
+            except Exception as _e:
+                # Try to identify the offending id by scanning every value.
+                culprit_ids = []
+                for _oid, _ov in list(self.objects.items()):
+                    try:
+                        pickle.dumps(_ov, highest=True)
+                    except Exception:
+                        culprit_ids.append(_oid)
+                if not culprit_ids:
+                    # Cannot identify individual culprit – give up and store empty.
+                    print("backup: could not isolate unpicklable object, storing empty backup. Error:", _e)
+                    self.objects_pickle = pickle.dumps({}, highest=True)
+                    break
+                for _oid in culprit_ids:
+                    print("backup: removing transitively-unpicklable object id=%x val=%r" % (_oid, self.objects[_oid]))
+                    del self.objects[_oid]
+                    # Also remove all variables that reference this id.
+                    for _vk in [k for k, v in self.variables.items() if v == _oid]:
+                        del self.variables[_vk]
 
         self.objects = {}
 
@@ -324,13 +354,18 @@ class Backup:
             self.variables[mod, k] = idv
             self.objects[idv] = v
 
-            # If we have a problem pickling things, uncomment the next block.
-
+            # If a variable cannot be pickled, remove it from the backup
+            # so it does not poison the whole objects_pickle dump.
             try:
                 pickle.dumps(v, highest=True)
             except Exception:
                 print("Cannot pickle", name + "." + k, "=", repr(v))
-                print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                try:
+                    print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                except Exception as _re:
+                    print("Reduce Ex also failed:", _re)
+                del self.variables[mod, k]
+                del self.objects[idv]
 
     def restore(self):
         """
