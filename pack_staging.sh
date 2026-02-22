@@ -1,9 +1,14 @@
 #!/bin/bash
 set -e
 STAGING=/tmp/renpy_staging
-PY=/d/MyProject/MyApplication/Python-3.12.12
-FF=/d/MyProject/MyApplication/third_party_ffmpeg
-RP=/d/MyProject/MyApplication/vintage-pomelo/renpy
+
+# Calculate root relative to script location
+RENPY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$RENPY_DIR/../.." && pwd)"
+
+PY="$ROOT_DIR/Python-3.12.12"
+FF="$ROOT_DIR/third_party_ffmpeg"
+RP="$RENPY_DIR"
 ARCH=x86_64
 
 rm -rf "$STAGING"
