@@ -95,8 +95,14 @@ def main():
     if mode in ('ldcc', 'ldcxx'):
         fixed_flags.append('-shared')
 
-    # Convert all argument paths from MSYS2 to Windows format
-    converted_args = [convert_arg(a) for a in args]
+    # Convert all argument paths from MSYS2 to Windows format.
+    # Also drop host Python auto-link flags (e.g. -lpython3.14) injected by
+    # setuptools on MSYS2, keeping the target runtime libpython3.12 only.
+    converted_args = []
+    for a in args:
+        if a.startswith('-lpython3.') and a != '-lpython3.12':
+            continue
+        converted_args.append(convert_arg(a))
 
     # Build final command
     cmd = [compiler] + fixed_flags + converted_args

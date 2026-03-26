@@ -233,11 +233,23 @@ export RANLIB="$(cygpath -m "$OHOS_NDK/bin/llvm-ranlib.exe")"
 export STRIP="$(cygpath -m "$OHOS_NDK/bin/llvm-strip.exe")"
 
 # Include paths (Windows format for clang.exe)
-export CFLAGS="-I$WIN_PYTHON_INSTALL/include/python3.12 -I$WIN_HARMONY_DEPS/include -I$WIN_HARMONY_DEPS/include/SDL2 -I$WIN_FFMPEG_INSTALL/include -O2"
+# -march=armv8.2-a: 仅 aarch64 加微架构优化（x86_64 不加）
+if [ "$ARCH" = "aarch64" ]; then
+    MARCH_FLAG="-march=armv8.2-a"
+else
+    MARCH_FLAG=""
+fi
+export CFLAGS="-I$WIN_PYTHON_INSTALL/include/python3.12 -I$WIN_HARMONY_DEPS/include -I$WIN_HARMONY_DEPS/include/SDL2 -I$WIN_FFMPEG_INSTALL/include -O2 $MARCH_FLAG"
 export CXXFLAGS="$CFLAGS"
 
 # Library paths and link flags (Windows format)
 export LDFLAGS="-L$WIN_PYTHON_INSTALL/lib -L$WIN_HARMONY_DEPS/lib -L$WIN_FFMPEG_INSTALL/lib -lpython3.12"
+
+# Pass target Python runtime paths to harmony_setup_wrapper.py so distutils
+# won't inject host Python (MSYS2) include/lib options.
+export HARMONY_PYTHON_INCLUDE="$WIN_PYTHON_INSTALL/include/python3.12"
+export HARMONY_PYTHON_LIBDIR="$WIN_PYTHON_INSTALL/lib"
+export HARMONY_PYTHON_LDLIBRARY="libpython3.12.so"
 
 # Tell distutils/setuptools this is a cross-compilation for Linux
 export _PYTHON_HOST_PLATFORM="$HOST_PLATFORM"
@@ -245,7 +257,7 @@ export _PYTHON_HOST_PLATFORM="$HOST_PLATFORM"
 # Skip packages and modules without HarmonyOS libraries
 # Note: OpenSSL is now available (built in Python-3.12.12/harmony_deps)
 export RENPY_SKIP_PACKAGES="assimp"
-export RENPY_SKIP_MODULES="renpy.gl2.assimp"
+export RENPY_SKIP_MODULES="renpy.gl2.assimp renpy.tfd"
 
 echo "  CC=$CC"
 echo "  LDSHARED=$LDSHARED"

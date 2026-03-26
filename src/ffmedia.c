@@ -14,6 +14,132 @@
 #define USE_POSIX_MEMALIGN
 #endif
 
+/* HarmonyOS OH_VideoDecoder hardware acceleration */
+#ifdef __OHOS__
+#include <dlfcn.h>
+#include <multimedia/player_framework/native_avcodec_videodecoder.h>
+#include <multimedia/player_framework/native_avcodec_base.h>
+#include <multimedia/player_framework/native_avbuffer.h>
+#include <multimedia/player_framework/native_avformat.h>
+
+/* Override extern const char* key symbols with inline string literals
+ * so renpysound.so has no link-time dependency on libnative_media_*.z.so.
+ * Values are stable public API since OHOS API 9. */
+#define OH_MD_KEY_WIDTH              "width"
+#define OH_MD_KEY_HEIGHT             "height"
+#define OH_MD_KEY_PIXEL_FORMAT       "pixel_format"
+#define OH_MD_KEY_CODEC_CONFIG       "codec_config"
+#define OH_MD_KEY_VIDEO_STRIDE       "video_stride"
+#define OH_MD_KEY_VIDEO_SLICE_HEIGHT "video_slice_height"
+
+/* OH_AVPixelFormat NV12 = 2 (YUV 420 semiplanar) */
+#define OHOS_AV_PIXEL_FORMAT_NV12 2
+
+/* Ring buffer capacity for input slot queue */
+#define HW_INPUT_QUEUE_SIZE 8
+
+/* ---- Runtime-loaded OHOS multimedia function pointers ----
+ * We dlopen the system libs at first use so that renpysound.so loads
+ * even on systems/namespaces where the multimedia NDK is unavailable. */
+typedef OH_AVCodec*  (*pfn_VDec_CreateByMime)(const char *);
+typedef OH_AVErrCode (*pfn_VDec_ErrCode_Codec)(OH_AVCodec *);
+typedef OH_AVErrCode (*pfn_VDec_RegCB)(OH_AVCodec *, OH_AVCodecCallback, void *);
+typedef OH_AVErrCode (*pfn_VDec_Configure)(OH_AVCodec *, const OH_AVFormat *);
+typedef OH_AVErrCode (*pfn_VDec_PushInput)(OH_AVCodec *, uint32_t);
+typedef OH_AVErrCode (*pfn_VDec_FreeOutput)(OH_AVCodec *, uint32_t);
+typedef OH_AVFormat* (*pfn_AVFmt_Create)(void);
+typedef void         (*pfn_AVFmt_Destroy)(OH_AVFormat *);
+typedef bool         (*pfn_AVFmt_SetInt)(OH_AVFormat *, const char *, int32_t);
+typedef bool         (*pfn_AVFmt_GetInt)(const OH_AVFormat *, const char *, int32_t *);
+typedef bool         (*pfn_AVFmt_SetBuf)(OH_AVFormat *, const char *, const uint8_t *, size_t);
+typedef int32_t      (*pfn_AVBuf_GetCap)(const OH_AVBuffer *);
+typedef uint8_t*     (*pfn_AVBuf_GetAddr)(const OH_AVBuffer *);
+typedef OH_AVErrCode (*pfn_AVBuf_SetAttr)(OH_AVBuffer *, const OH_AVCodecBufferAttr *);
+typedef OH_AVErrCode (*pfn_AVBuf_GetAttr)(const OH_AVBuffer *, OH_AVCodecBufferAttr *);
+
+static pfn_VDec_CreateByMime  p_OH_VideoDecoder_CreateByMime;
+static pfn_VDec_RegCB         p_OH_VideoDecoder_RegisterCallback;
+static pfn_VDec_Configure     p_OH_VideoDecoder_Configure;
+static pfn_VDec_ErrCode_Codec p_OH_VideoDecoder_Prepare;
+static pfn_VDec_ErrCode_Codec p_OH_VideoDecoder_Start;
+static pfn_VDec_ErrCode_Codec p_OH_VideoDecoder_Stop;
+static pfn_VDec_ErrCode_Codec p_OH_VideoDecoder_Destroy;
+static pfn_VDec_PushInput     p_OH_VideoDecoder_PushInputBuffer;
+static pfn_VDec_FreeOutput    p_OH_VideoDecoder_FreeOutputBuffer;
+static pfn_AVFmt_Create       p_OH_AVFormat_Create;
+static pfn_AVFmt_Destroy      p_OH_AVFormat_Destroy;
+static pfn_AVFmt_SetInt        p_OH_AVFormat_SetIntValue;
+static pfn_AVFmt_GetInt        p_OH_AVFormat_GetIntValue;
+static pfn_AVFmt_SetBuf        p_OH_AVFormat_SetBuffer;
+static pfn_AVBuf_GetCap        p_OH_AVBuffer_GetCapacity;
+static pfn_AVBuf_GetAddr       p_OH_AVBuffer_GetAddr;
+static pfn_AVBuf_SetAttr       p_OH_AVBuffer_SetBufferAttr;
+static pfn_AVBuf_GetAttr       p_OH_AVBuffer_GetBufferAttr;
+
+/* Redirect all call sites to use function pointers */
+#define OH_VideoDecoder_CreateByMime    p_OH_VideoDecoder_CreateByMime
+#define OH_VideoDecoder_RegisterCallback p_OH_VideoDecoder_RegisterCallback
+#define OH_VideoDecoder_Configure       p_OH_VideoDecoder_Configure
+#define OH_VideoDecoder_Prepare         p_OH_VideoDecoder_Prepare
+#define OH_VideoDecoder_Start           p_OH_VideoDecoder_Start
+#define OH_VideoDecoder_Stop            p_OH_VideoDecoder_Stop
+#define OH_VideoDecoder_Destroy         p_OH_VideoDecoder_Destroy
+#define OH_VideoDecoder_PushInputBuffer p_OH_VideoDecoder_PushInputBuffer
+#define OH_VideoDecoder_FreeOutputBuffer p_OH_VideoDecoder_FreeOutputBuffer
+#define OH_AVFormat_Create              p_OH_AVFormat_Create
+#define OH_AVFormat_Destroy             p_OH_AVFormat_Destroy
+#define OH_AVFormat_SetIntValue         p_OH_AVFormat_SetIntValue
+#define OH_AVFormat_GetIntValue         p_OH_AVFormat_GetIntValue
+#define OH_AVFormat_SetBuffer           p_OH_AVFormat_SetBuffer
+#define OH_AVBuffer_GetCapacity         p_OH_AVBuffer_GetCapacity
+#define OH_AVBuffer_GetAddr             p_OH_AVBuffer_GetAddr
+#define OH_AVBuffer_SetBufferAttr       p_OH_AVBuffer_SetBufferAttr
+#define OH_AVBuffer_GetBufferAttr       p_OH_AVBuffer_GetBufferAttr
+
+static int ohos_hw_loaded = 0; /* 0=not tried, 1=ok, -1=failed */
+
+static int load_ohos_hw_libs(void) {
+    if (ohos_hw_loaded) return ohos_hw_loaded > 0;
+
+    void *h_vdec = dlopen("libnative_media_vdec.z.so", RTLD_LAZY);
+    void *h_core = dlopen("libnative_media_core.z.so", RTLD_LAZY);
+    void *h_base = dlopen("libnative_media_codecbase.z.so", RTLD_LAZY);
+
+    if (!h_vdec || !h_core) {
+        ohos_hw_loaded = -1;
+        return 0;
+    }
+
+#define LOAD_SYM(handle, var, name) \
+    var = (typeof(var))dlsym(handle, #name); \
+    if (!var) { ohos_hw_loaded = -1; return 0; }
+
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_CreateByMime,    OH_VideoDecoder_CreateByMime)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_RegisterCallback, OH_VideoDecoder_RegisterCallback)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_Configure,       OH_VideoDecoder_Configure)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_Prepare,         OH_VideoDecoder_Prepare)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_Start,           OH_VideoDecoder_Start)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_Stop,            OH_VideoDecoder_Stop)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_Destroy,         OH_VideoDecoder_Destroy)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_PushInputBuffer, OH_VideoDecoder_PushInputBuffer)
+    LOAD_SYM(h_vdec, p_OH_VideoDecoder_FreeOutputBuffer, OH_VideoDecoder_FreeOutputBuffer)
+    LOAD_SYM(h_core, p_OH_AVFormat_Create,              OH_AVFormat_Create)
+    LOAD_SYM(h_core, p_OH_AVFormat_Destroy,             OH_AVFormat_Destroy)
+    LOAD_SYM(h_core, p_OH_AVFormat_SetIntValue,         OH_AVFormat_SetIntValue)
+    LOAD_SYM(h_core, p_OH_AVFormat_GetIntValue,         OH_AVFormat_GetIntValue)
+    LOAD_SYM(h_core, p_OH_AVFormat_SetBuffer,           OH_AVFormat_SetBuffer)
+    LOAD_SYM(h_core, p_OH_AVBuffer_GetCapacity,         OH_AVBuffer_GetCapacity)
+    LOAD_SYM(h_core, p_OH_AVBuffer_GetAddr,             OH_AVBuffer_GetAddr)
+    LOAD_SYM(h_core, p_OH_AVBuffer_SetBufferAttr,       OH_AVBuffer_SetBufferAttr)
+    LOAD_SYM(h_core, p_OH_AVBuffer_GetBufferAttr,       OH_AVBuffer_GetBufferAttr)
+
+#undef LOAD_SYM
+
+    ohos_hw_loaded = 1;
+    return 1;
+}
+#endif /* __OHOS__ */
+
 /* Should a mono channel be split into two equal stero channels (true) or
  * should the energy be split onto two stereo channels with 1/2 the energy
  * (false).
@@ -51,6 +177,8 @@ static const double frame_early_delivery = .005;
 
 static SDL_Surface *rgb_surface = NULL;
 static SDL_Surface *rgba_surface = NULL;
+
+static enum AVPixelFormat get_pixel_format(SDL_Surface *surf);
 
 // http://dranger.com/ffmpeg/
 
@@ -274,6 +402,37 @@ typedef struct MediaState {
 	/* The offset between now and the time of the current frame, at least for video. */
 	double time_offset;
 
+#ifdef __OHOS__
+	/* HarmonyOS OH_VideoDecoder hardware path (H.264 / H.265 only).
+	 * Non-NULL means the HW decoder is active; video_context is NULL in that case. */
+	OH_AVCodec *hw_vdec;
+
+	/* Protects all hw_* fields below */
+	SDL_mutex  *hw_lock;
+
+	/* Input slot ring buffer: decoder calls onNeedInputBuffer, we queue the slot */
+	SDL_cond   *hw_input_cond;
+	uint32_t    hw_input_idx[HW_INPUT_QUEUE_SIZE];
+	OH_AVBuffer *hw_input_buf[HW_INPUT_QUEUE_SIZE];
+	int         hw_input_head;
+	int         hw_input_tail;
+	int         hw_input_count;
+
+	/* Single output slot: decoder calls onNewOutputBuffer */
+	SDL_cond   *hw_output_cond;
+	uint32_t    hw_output_idx;
+	OH_AVBuffer *hw_output_buf;
+	int         hw_output_ready;
+
+	/* Geometry reported via onStreamChanged; initialised from codecpar */
+	int32_t     hw_width;
+	int32_t     hw_height;
+	int32_t     hw_stride;        /* luma row stride in bytes */
+	int32_t     hw_slice_height;  /* vertical stride (height of Y plane buffer) */
+
+	int         hw_error;         /* set on decoder error */
+#endif /* __OHOS__ */
+
 } MediaState;
 
 static AVFrame *dequeue_frame(FrameQueue *fq);
@@ -341,6 +500,26 @@ static void deallocate(MediaState *ms) {
 	/* Destroy/Close core stuff. */
 	free_packet_queue(&ms->audio_packet_queue);
 	free_packet_queue(&ms->video_packet_queue);
+
+#ifdef __OHOS__
+	if (ms->hw_vdec) {
+		OH_VideoDecoder_Stop(ms->hw_vdec);
+		OH_VideoDecoder_Destroy(ms->hw_vdec);
+		ms->hw_vdec = NULL;
+	}
+	if (ms->hw_lock) {
+		SDL_DestroyMutex(ms->hw_lock);
+		ms->hw_lock = NULL;
+	}
+	if (ms->hw_input_cond) {
+		SDL_DestroyCond(ms->hw_input_cond);
+		ms->hw_input_cond = NULL;
+	}
+	if (ms->hw_output_cond) {
+		SDL_DestroyCond(ms->hw_output_cond);
+		ms->hw_output_cond = NULL;
+	}
+#endif /* __OHOS__ */
 
 	if (ms->video_context) {
 		avcodec_free_context(&ms->video_context);
@@ -579,6 +758,347 @@ static void check_surface_queue(MediaState *ms) {
 #endif
 
 /* Find decoder context ******************************************************/
+
+#ifdef __OHOS__
+
+/* --- OH_VideoDecoder callbacks -------------------------------------------- */
+
+static void hw_cb_error(OH_AVCodec *codec, int32_t errorCode, void *userData) {
+    MediaState *ms = (MediaState *)userData;
+    SDL_LockMutex(ms->hw_lock);
+    ms->hw_error = 1;
+    SDL_CondBroadcast(ms->hw_input_cond);
+    SDL_CondBroadcast(ms->hw_output_cond);
+    SDL_UnlockMutex(ms->hw_lock);
+}
+
+static void hw_cb_stream_changed(OH_AVCodec *codec, OH_AVFormat *format, void *userData) {
+    MediaState *ms = (MediaState *)userData;
+    int32_t w = 0, h = 0, stride = 0, slice_h = 0;
+    OH_AVFormat_GetIntValue(format, OH_MD_KEY_WIDTH, &w);
+    OH_AVFormat_GetIntValue(format, OH_MD_KEY_HEIGHT, &h);
+    OH_AVFormat_GetIntValue(format, OH_MD_KEY_VIDEO_STRIDE, &stride);
+    OH_AVFormat_GetIntValue(format, OH_MD_KEY_VIDEO_SLICE_HEIGHT, &slice_h);
+    SDL_LockMutex(ms->hw_lock);
+    if (w > 0) ms->hw_width = w;
+    if (h > 0) ms->hw_height = h;
+    ms->hw_stride      = (stride  > 0) ? stride  : ms->hw_width;
+    ms->hw_slice_height = (slice_h > 0) ? slice_h : ms->hw_height;
+    SDL_UnlockMutex(ms->hw_lock);
+}
+
+/* Called by the decoder when it has a free input slot ready for us to fill. */
+static void hw_cb_need_input(OH_AVCodec *codec, uint32_t index,
+                             OH_AVBuffer *buffer, void *userData) {
+    MediaState *ms = (MediaState *)userData;
+    SDL_LockMutex(ms->hw_lock);
+    if (ms->hw_input_count < HW_INPUT_QUEUE_SIZE) {
+        int tail = ms->hw_input_tail;
+        ms->hw_input_idx[tail] = index;
+        ms->hw_input_buf[tail] = buffer;
+        ms->hw_input_tail = (tail + 1) % HW_INPUT_QUEUE_SIZE;
+        ms->hw_input_count++;
+        SDL_CondSignal(ms->hw_input_cond);
+    }
+    /* If the queue is full (shouldn't happen in normal flow), the slot is
+     * simply dropped — the decoder will re-request it via a further callback. */
+    SDL_UnlockMutex(ms->hw_lock);
+}
+
+/* Called by the decoder when a decoded frame is ready. */
+static void hw_cb_new_output(OH_AVCodec *codec, uint32_t index,
+                             OH_AVBuffer *buffer, void *userData) {
+    MediaState *ms = (MediaState *)userData;
+    SDL_LockMutex(ms->hw_lock);
+    /* If the previous output frame was not consumed yet, drop it. */
+    if (ms->hw_output_ready) {
+        OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, ms->hw_output_idx);
+    }
+    ms->hw_output_idx   = index;
+    ms->hw_output_buf   = buffer;
+    ms->hw_output_ready = 1;
+    SDL_CondSignal(ms->hw_output_cond);
+    SDL_UnlockMutex(ms->hw_lock);
+}
+
+/* --- OH_VideoDecoder initialisation --------------------------------------- */
+
+/*
+ * Try to create a hardware video decoder for the given stream.
+ * Returns 1 on success (ms->hw_vdec set), 0 if the codec is unsupported,
+ * -1 on initialisation failure.
+ */
+static int init_hw_vdec(MediaState *ms, AVCodecParameters *par) {
+    /* Try to load OHOS multimedia libs at first use */
+    if (!load_ohos_hw_libs()) {
+        return 0; /* Multimedia framework unavailable — software fallback */
+    }
+
+    const char *mime;
+    if (par->codec_id == AV_CODEC_ID_H264) {
+        mime = "video/avc";
+    } else if (par->codec_id == AV_CODEC_ID_HEVC) {
+        mime = "video/hevc";
+    } else {
+        return 0; /* Unsupported for HW — fall through to software */
+    }
+
+    ms->hw_lock       = SDL_CreateMutex();
+    ms->hw_input_cond = SDL_CreateCond();
+    ms->hw_output_cond = SDL_CreateCond();
+    if (!ms->hw_lock || !ms->hw_input_cond || !ms->hw_output_cond) {
+        return -1;
+    }
+
+    ms->hw_vdec = OH_VideoDecoder_CreateByMime(mime);
+    if (!ms->hw_vdec) {
+        return -1;
+    }
+
+    /* Register callbacks (API 11+) */
+    OH_AVCodecCallback cb;
+    cb.onError            = hw_cb_error;
+    cb.onStreamChanged    = hw_cb_stream_changed;
+    cb.onNeedInputBuffer  = hw_cb_need_input;
+    cb.onNewOutputBuffer  = hw_cb_new_output;
+    if (OH_VideoDecoder_RegisterCallback(ms->hw_vdec, cb, ms) != AV_ERR_OK) {
+        goto fail;
+    }
+
+    /* Configure decoder */
+    OH_AVFormat *fmt = OH_AVFormat_Create();
+    OH_AVFormat_SetIntValue(fmt, OH_MD_KEY_WIDTH,        par->width);
+    OH_AVFormat_SetIntValue(fmt, OH_MD_KEY_HEIGHT,       par->height);
+    OH_AVFormat_SetIntValue(fmt, OH_MD_KEY_PIXEL_FORMAT, OHOS_AV_PIXEL_FORMAT_NV12);
+
+    /* Supply SPS/PPS from the stream's extradata */
+    if (par->extradata && par->extradata_size > 0) {
+        OH_AVFormat_SetBuffer(fmt, OH_MD_KEY_CODEC_CONFIG,
+                              par->extradata, par->extradata_size);
+    }
+
+    OH_AVErrCode rc = OH_VideoDecoder_Configure(ms->hw_vdec, fmt);
+    OH_AVFormat_Destroy(fmt);
+    if (rc != AV_ERR_OK) {
+        goto fail;
+    }
+
+    if (OH_VideoDecoder_Prepare(ms->hw_vdec) != AV_ERR_OK) goto fail;
+    if (OH_VideoDecoder_Start(ms->hw_vdec)   != AV_ERR_OK) goto fail;
+
+    /* Initialise geometry from codecpar; hw_cb_stream_changed may override */
+    ms->hw_width        = par->width;
+    ms->hw_height       = par->height;
+    ms->hw_stride       = par->width;
+    ms->hw_slice_height = par->height;
+
+    return 1;
+
+fail:
+    OH_VideoDecoder_Destroy(ms->hw_vdec);
+    ms->hw_vdec = NULL;
+    return -1;
+}
+
+/* --- Hardware decode_video_frame ------------------------------------------ */
+
+/*
+ * Decode one video frame through OH_VideoDecoder.
+ * Returns a SurfaceQueueEntry (caller frees) or NULL.
+ *
+ * Packet flow:
+ *   1. Pop a packet from ms->video_packet_queue.
+ *   2. Wait for a free input slot from the decoder (hw_cb_need_input).
+ *   3. Copy packet bytes into the slot buffer and push it.
+ *   4. Wait for the decoder to produce an output frame (hw_cb_new_output).
+ *   5. Map the NV12 data into a temporary AVFrame and run sws_scale.
+ */
+static SurfaceQueueEntry *decode_video_frame_hw(MediaState *ms) {
+    SDL_Surface *sample = rgba_surface;
+
+    while (1) {
+        /* --- Feed one packet to the hardware decoder --- */
+        AVPacket *pkt = read_packet(ms, &ms->video_packet_queue);
+
+        /* Wait for an input slot (with 200 ms timeout) */
+        SDL_LockMutex(ms->hw_lock);
+        while (ms->hw_input_count == 0 && !ms->hw_error) {
+            SDL_CondWaitTimeout(ms->hw_input_cond, ms->hw_lock, 200);
+        }
+        if (ms->hw_error) {
+            SDL_UnlockMutex(ms->hw_lock);
+            ms->video_finished = 1;
+            return NULL;
+        }
+        int head = ms->hw_input_head;
+        uint32_t    in_idx = ms->hw_input_idx[head];
+        OH_AVBuffer *in_buf = ms->hw_input_buf[head];
+        ms->hw_input_head  = (head + 1) % HW_INPUT_QUEUE_SIZE;
+        ms->hw_input_count--;
+        SDL_UnlockMutex(ms->hw_lock);
+
+        if (!pkt) {
+            /* End of stream: send EOS */
+            OH_AVCodecBufferAttr attr;
+            attr.pts    = 0;
+            attr.size   = 0;
+            attr.offset = 0;
+            attr.flags  = AVCODEC_BUFFER_FLAGS_EOS;
+            OH_AVBuffer_SetBufferAttr(in_buf, &attr);
+            OH_VideoDecoder_PushInputBuffer(ms->hw_vdec, in_idx);
+        } else {
+            int data_size = pkt->size;
+            int cap = OH_AVBuffer_GetCapacity(in_buf);
+            if (data_size > cap) data_size = cap;
+
+            uint8_t *buf_addr = OH_AVBuffer_GetAddr(in_buf);
+            memcpy(buf_addr, pkt->data, data_size);
+
+            OH_AVCodecBufferAttr attr;
+            attr.pts    = pkt->pts;
+            attr.size   = data_size;
+            attr.offset = 0;
+            attr.flags  = 0;
+            OH_AVBuffer_SetBufferAttr(in_buf, &attr);
+            OH_VideoDecoder_PushInputBuffer(ms->hw_vdec, in_idx);
+            dequeue_packet(&ms->video_packet_queue);
+        }
+
+        /* --- Wait for a decoded output frame --- */
+        SDL_LockMutex(ms->hw_lock);
+        while (!ms->hw_output_ready && !ms->hw_error) {
+            SDL_CondWaitTimeout(ms->hw_output_cond, ms->hw_lock, 200);
+        }
+        if (ms->hw_error || !ms->hw_output_ready) {
+            SDL_UnlockMutex(ms->hw_lock);
+            if (!ms->hw_error && !pkt) {
+                /* EOS: no more frames */
+                ms->video_finished = 1;
+            }
+            return NULL;
+        }
+        uint32_t    out_idx = ms->hw_output_idx;
+        OH_AVBuffer *out_buf = ms->hw_output_buf;
+        ms->hw_output_ready = 0;
+        SDL_UnlockMutex(ms->hw_lock);
+
+        /* --- Read geometry (may have been updated by onStreamChanged) --- */
+        SDL_LockMutex(ms->hw_lock);
+        int32_t width      = ms->hw_width;
+        int32_t height     = ms->hw_height;
+        int32_t stride     = ms->hw_stride;
+        int32_t slice_h    = ms->hw_slice_height;
+        SDL_UnlockMutex(ms->hw_lock);
+
+        /* --- Get PTS --- */
+        OH_AVCodecBufferAttr out_attr;
+        OH_AVBuffer_GetBufferAttr(out_buf, &out_attr);
+        /* pts from the buffer is in stream time_base ticks; convert to seconds */
+        double pts = 0.0;
+        if (ms->video_stream >= 0 && ms->ctx) {
+            pts = out_attr.pts * av_q2d(ms->ctx->streams[ms->video_stream]->time_base);
+        }
+
+        if (pts < ms->skip) {
+            OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+            continue;
+        }
+        if (ms->video_pts_offset &&
+            (ms->video_pts_offset + pts < ms->video_read_time)) {
+            if (ms->video_pts_offset + pts < ms->video_read_time - 5.0) {
+                ms->video_finished = 1;
+            }
+            if (ms->frame_drops) {
+                OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+                return NULL;
+            }
+        }
+
+        /* --- Set up a temporary AVFrame pointing at the NV12 data --- */
+        uint8_t *yuv = OH_AVBuffer_GetAddr(out_buf);
+        /* NV12 layout: Y plane followed by interleaved UV plane */
+        AVFrame hw_frame;
+        memset(&hw_frame, 0, sizeof(hw_frame));
+        hw_frame.format          = AV_PIX_FMT_NV12;
+        hw_frame.width           = width;
+        hw_frame.height          = height;
+        hw_frame.data[0]         = yuv;
+        hw_frame.data[1]         = yuv + (size_t)stride * slice_h;
+        hw_frame.linesize[0]     = stride;
+        hw_frame.linesize[1]     = stride;
+
+        /* --- (Re-)create sws context if needed --- */
+        if (ms->sws) {
+            /* Invalidate sws if geometry changed */
+			struct SwsContext *old = ms->sws;
+            /* sws_getCachedContext would be cleaner but this is safe */
+            ms->sws = sws_getCachedContext(old,
+                hw_frame.width, hw_frame.height, AV_PIX_FMT_NV12,
+                hw_frame.width, hw_frame.height, get_pixel_format(sample),
+                SWS_POINT | SWS_FULL_CHR_H_INP | SWS_FULL_CHR_H_INT,
+                NULL, NULL, NULL);
+        } else {
+            ms->sws = sws_getContext(
+                hw_frame.width, hw_frame.height, AV_PIX_FMT_NV12,
+                hw_frame.width, hw_frame.height, get_pixel_format(sample),
+                SWS_POINT | SWS_FULL_CHR_H_INP | SWS_FULL_CHR_H_INT,
+                NULL, NULL, NULL);
+        }
+        if (!ms->sws) {
+            OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+            ms->video_finished = 1;
+            return NULL;
+        }
+        sws_setColorspaceDetails(ms->sws,
+            sws_getCoefficients(SWS_CS_DEFAULT), 0,
+            sws_getCoefficients(SWS_CS_DEFAULT), 0,
+            0, 1 << 16, 1 << 16);
+
+        /* --- Allocate output surface entry --- */
+        SurfaceQueueEntry *rv = av_malloc(sizeof(SurfaceQueueEntry));
+        if (!rv) {
+            OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+            ms->video_finished = 1;
+            return NULL;
+        }
+        rv->w     = width  + FRAME_PADDING * 2;
+        rv->h     = height + FRAME_PADDING * 2;
+        rv->pitch = rv->w * sample->format->BytesPerPixel;
+        if (rv->pitch % ROW_ALIGNMENT) {
+            rv->pitch += ROW_ALIGNMENT - (rv->pitch % ROW_ALIGNMENT);
+        }
+#ifndef USE_POSIX_MEMALIGN
+        rv->pixels = SDL_calloc(rv->pitch * rv->h, 1);
+#else
+        if (posix_memalign(&rv->pixels, ROW_ALIGNMENT, rv->pitch * rv->h)) {
+            av_free(rv);
+            OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+            return NULL;
+        }
+        memset(rv->pixels, 0, rv->pitch * rv->h);
+#endif
+        rv->format = sample->format;
+        rv->next   = NULL;
+        rv->pts    = pts;
+
+        uint8_t *surf_pixels = (uint8_t *)rv->pixels;
+        uint8_t *surf_data[] = {
+            &surf_pixels[FRAME_PADDING * rv->pitch +
+                         FRAME_PADDING * sample->format->BytesPerPixel]
+        };
+        int surf_linesize[] = { rv->pitch };
+
+        sws_scale(ms->sws,
+                  (const uint8_t * const *)hw_frame.data, hw_frame.linesize,
+                  0, height,
+                  surf_data, surf_linesize);
+
+        OH_VideoDecoder_FreeOutputBuffer(ms->hw_vdec, out_idx);
+        return rv;
+    }
+}
+
+#endif /* __OHOS__ */
 
 
 static AVCodecContext *find_context(AVFormatContext *ctx, int index) {
@@ -937,10 +1457,18 @@ static SurfaceQueueEntry *decode_video_frame(MediaState *ms) {
 
 
 static void decode_video(MediaState *ms) {
+#ifdef __OHOS__
+	/* HW path: video_context is NULL when hw_vdec is active */
+	if (!ms->video_context && !ms->hw_vdec) {
+		ms->video_finished = 1;
+		return;
+	}
+#else
 	if (!ms->video_context) {
 		ms->video_finished = 1;
 		return;
 	}
+#endif
 
 	if (!ms->video_decode_frame) {
 		ms->video_decode_frame = av_frame_alloc();
@@ -957,7 +1485,13 @@ static void decode_video(MediaState *ms) {
 
 		SDL_UnlockMutex(ms->lock);
 
+#ifdef __OHOS__
+		SurfaceQueueEntry *sqe = ms->hw_vdec
+		    ? decode_video_frame_hw(ms)
+		    : decode_video_frame(ms);
+#else
 		SurfaceQueueEntry *sqe = decode_video_frame(ms);
+#endif
 
 		SDL_LockMutex(ms->lock);
 
@@ -1178,8 +1712,18 @@ static int decode_thread(void *arg) {
 		}
 	}
 
-	ms->video_context = find_context(ctx, ms->video_stream);
 	ms->audio_context = find_context(ctx, ms->audio_stream);
+
+#ifdef __OHOS__
+	if (ms->video_stream >= 0) {
+		AVCodecParameters *vpar = ctx->streams[ms->video_stream]->codecpar;
+		if (init_hw_vdec(ms, vpar) <= 0) {
+			ms->video_context = find_context(ctx, ms->video_stream);
+		}
+	}
+#else
+	ms->video_context = find_context(ctx, ms->video_stream);
+#endif
 
 	ms->swr = swr_alloc();
 	if (ms->swr == NULL) {
@@ -1342,8 +1886,18 @@ static int decode_sync_start(void *arg) {
 		}
 	}
 
-	ms->video_context = find_context(ctx, ms->video_stream);
 	ms->audio_context = find_context(ctx, ms->audio_stream);
+
+#ifdef __OHOS__
+	if (ms->video_stream >= 0) {
+		AVCodecParameters *vpar = ctx->streams[ms->video_stream]->codecpar;
+		if (init_hw_vdec(ms, vpar) <= 0) {
+			ms->video_context = find_context(ctx, ms->video_stream);
+		}
+	}
+#else
+	ms->video_context = find_context(ctx, ms->video_stream);
+#endif
 
 	ms->swr = swr_alloc();
 	if (ms->swr == NULL) {
