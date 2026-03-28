@@ -100,6 +100,9 @@ cdef class GL2Draw:
     # Was the window maximized?
     cdef public bint maximized
 
+    # HarmonyOS: cached portrait offset env var for change detection
+    cdef public object _cached_portrait_offset
+
     cdef void change_fbo(self, GLuint fbo)
 
 

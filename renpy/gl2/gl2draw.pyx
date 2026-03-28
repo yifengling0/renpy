@@ -26,7 +26,7 @@ from typing import Literal
 
 DEF ANGLE = False
 
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport malloc, free, getenv as c_getenv
 from libc.math cimport roundf
 from sdl2 cimport *
 from renpy.uguu.gl cimport *
@@ -140,6 +140,9 @@ cdef class GL2Draw:
 
         # Should mipmaps be generated when mipmap == "auto"?
         self.auto_mipmap = False
+
+        # HarmonyOS: cached portrait offset env var for change detection
+        self._cached_portrait_offset = "0"
 
     def get_texture_size(self):
         """
@@ -525,6 +528,8 @@ cdef class GL2Draw:
 
     def on_resize(self, first=False, full_reset=False):
 
+        cdef const char* _env_raw = NULL
+
         if first:
             full_reset = True
 
@@ -618,17 +623,37 @@ cdef class GL2Draw:
         # (x, y, w, h). Since the physical screen will always contain
         # the virtual screen, the corners are often off the virtual
         # screen.
+        # Portrait: use top offset from env var (set by ArkTS via NAPI).
+        cdef int _top_offset_px = 0
+        if pheight > pwidth:
+            _env_raw = c_getenv("TAPIR_PORTRAIT_TOP_OFFSET")
+            _env_val = _env_raw.decode("ascii") if _env_raw != NULL else "0"
+            try:
+                _pct = int(_env_val)
+            except Exception:
+                _pct = 0
+            if _pct < 0:
+                _pct = 0
+            if _pct > 100:
+                _pct = 100
+            # Percentage-based: 0=top, 50=center, 100=bottom
+            # GL Y=0 is bottom; phy_y = py_padding * (100 - pct) / 100
+            phy_y = py_padding * (100 - _pct) / 100
+            # Virtual box: shift proportionally
+            virt_y = -(py_padding - phy_y) * vheight / view_height
+        else:
+            virt_y = -y_padding / 2.0
+            phy_y = max(0, py_padding / 2)
+
         self.virtual_box = (
             -x_padding / 2.0,
-            -y_padding / 2.0,
+            virt_y,
              vwidth + x_padding,
              vheight + y_padding)
 
-        # The location of the virtual screen on the physical screen, in
-        # physical pixels.
         self.physical_box = (
             max(0, px_padding / 2),
-            max(0, py_padding / 2),
+            phy_y,
             min(pwidth, pwidth - px_padding),
             min(pheight, pheight - py_padding),
             )
@@ -712,6 +737,17 @@ cdef class GL2Draw:
         """
         Documented in renderer.
         """
+
+        cdef const char* _poll_raw = NULL
+
+        # HarmonyOS: 检查竖屏偏移环境变量是否变化
+        # 用户在设置页面修改偏移后返回游戏，不触发 window resize，需要主动检测
+        if renpy.harmonyos:
+            _poll_raw = c_getenv("TAPIR_PORTRAIT_TOP_OFFSET")
+            _cur_offset = _poll_raw.decode("ascii") if _poll_raw != NULL else "0"
+            if _cur_offset != self._cached_portrait_offset:
+                self._cached_portrait_offset = _cur_offset
+                force = True
 
         flags = pygame.display.get_window().get_window_flags()
 
