@@ -257,6 +257,32 @@ def choose_variants():
             renpy.config.variants.insert(0, 'phone') # type: ignore
             renpy.config.variants.insert(0, 'small') # type: ignore
 
+    elif renpy.harmonyos:
+        # HarmonyOS: mobile platform with touch, fullscreen, GLES.
+        # Similar to Android variants but without Android Java APIs.
+        renpy.config.variants.insert(0, 'mobile') # type: ignore
+        renpy.config.variants.insert(0, 'harmonyos') # type: ignore
+        renpy.config.variants.insert(0, 'touch') # type: ignore
+
+        import math
+        import renpy.pygame as pygame
+
+        pygame.display.init()
+
+        info = renpy.display.get_info()
+        dpi = int(os.environ.get("RENPY_DPI", "160"))
+        if dpi <= 0:
+            dpi = 160
+        diag = math.hypot(info.current_w, info.current_h) / dpi
+        print("HarmonyOS screen diagonal is", diag, "inches.")
+
+        if diag >= 6:
+            renpy.config.variants.insert(0, 'tablet') # type: ignore
+            renpy.config.variants.insert(0, 'medium') # type: ignore
+        else:
+            renpy.config.variants.insert(0, 'phone') # type: ignore
+            renpy.config.variants.insert(0, 'small') # type: ignore
+
     elif renpy.emscripten:
         import emscripten # type: ignore
         import re
@@ -354,7 +380,7 @@ def main():
     choose_variants()
     renpy.display.touch = "touch" in renpy.config.variants
 
-    if (renpy.android or renpy.ios) and not renpy.config.log_to_stdout:
+    if (renpy.android or renpy.ios or renpy.harmonyos) and not renpy.config.log_to_stdout:
         print("Version:", renpy.version)
 
     # Note the game directory.

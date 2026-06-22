@@ -138,8 +138,8 @@ def get_alternate_base(basedir, always=False):
 
     # Determine the alternate base directory location.
 
-    if renpy.android:
-        altbase = os.path.join(os.environ["ANDROID_PRIVATE"], "base")
+    if renpy.android or renpy.harmonyos:
+        altbase = os.path.join(os.environ.get("ANDROID_PRIVATE", basedir), "base")
 
     elif renpy.ios:
         from pyobjus import autoclass # type: ignore
@@ -260,8 +260,8 @@ def bootstrap(renpy_base):
         sys.stderr.write("Base directory %r does not exist. Giving up.\n" % (basedir,))
         sys.exit(1)
 
-    # Make game/ on Android.
-    if renpy.android:
+    # Make game/ on Android or HarmonyOS.
+    if renpy.android or renpy.harmonyos:
         if not os.path.exists(basedir + "/game"):
             os.mkdir(basedir + "/game", 0o777)
 
@@ -412,7 +412,7 @@ You may be using a system install of python. Please run {0}.sh,
         if not renpy.emscripten:
             subprocess.Popen.__del__ = popen_del # type: ignore
 
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             from jnius import autoclass # type: ignore
 
             import android

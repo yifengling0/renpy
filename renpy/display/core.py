@@ -992,7 +992,7 @@ class Interface(object):
             return
 
         # Avoid starting on Android if we don't have focus.
-        if renpy.android:
+        if renpy.android and not renpy.harmonyos:
             self.check_android_start()
 
         gc.collect()
@@ -1073,7 +1073,7 @@ class Interface(object):
 
         s = "Total time until interface ready: {}s.".format(time.time() - import_time)
 
-        if renpy.android and not renpy.config.log_to_stdout:
+        if (renpy.android or renpy.harmonyos) and not renpy.config.log_to_stdout:
             print(s)
 
         # Clear out any pending events.
