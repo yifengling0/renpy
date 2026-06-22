@@ -204,7 +204,9 @@ def load(dll):
     global csmGetDrawableRenderOrders
     csmGetDrawableRenderOrders = <csmGetDrawableRenderOrdersType> load_live2d_function(object, "csmGetDrawableRenderOrders")
     if not csmGetDrawableRenderOrders:
-        raise Exception("csmGetDrawableRenderOrders not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
+        csmGetDrawableRenderOrders = <csmGetDrawableRenderOrdersType> load_live2d_function(object, "csmGetRenderOrders")
+    if not csmGetDrawableRenderOrders:
+        raise Exception("Neither csmGetDrawableRenderOrders nor csmGetRenderOrders was found in Live2D dll " + dll.decode() + ".")
     global csmGetDrawableOpacities
     csmGetDrawableOpacities = <csmGetDrawableOpacitiesType> load_live2d_function(object, "csmGetDrawableOpacities")
     if not csmGetDrawableOpacities:

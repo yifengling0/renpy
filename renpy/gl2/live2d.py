@@ -30,10 +30,13 @@ import renpy.gl2.live2dmotion
 from renpy.gl2.gl2shadercache import register_shader
 from renpy.display.core import absolute
 
+live2dmodel_import_error = None
+
 try:
     import renpy.gl2.live2dmodel as live2dmodel
-except ImportError:
+except ImportError as e:
     live2dmodel = None
+    live2dmodel_import_error = str(e)
 
 import sys
 import os
@@ -136,6 +139,9 @@ def init():
         return
 
     if live2dmodel is None:
+        if live2dmodel_import_error:
+            raise Exception("Live2D has not been built. ImportError: {}".format(live2dmodel_import_error))
+
         raise Exception("Live2D has not been built.")
 
     onetime_init()

@@ -14,6 +14,7 @@ ehthumbs_vista.db
 /.venv
 *.pyc
 *.pyo
+*.pyd
 *.egg-info
 *.cpython-*.so
 *.cpython-*.pyd
@@ -35,6 +36,7 @@ log.txt
 errors.txt
 traceback.txt
 lint.txt
+build_harmony*.log
 
 # Created directories.
 saves/

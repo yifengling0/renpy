@@ -179,7 +179,8 @@ static EM_JS(void*, live2dGetDrawableDrawOrders, (void* model), {
 });
 
 static EM_JS(void*, live2dGetDrawableRenderOrders, (void* model), {
-    return window.live2d_csm.ccall('csmGetDrawableRenderOrders', 'number', ['number'], [model]);
+    const symbol = window.live2d_csm['_csmGetDrawableRenderOrders'] ? 'csmGetDrawableRenderOrders' : 'csmGetRenderOrders';
+    return window.live2d_csm.ccall(symbol, 'number', ['number'], [model]);
 });
 
 static EM_JS(void*, live2dGetDrawableOpacities, (void* model), {

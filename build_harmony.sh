@@ -28,10 +28,36 @@ HARMONY_DEPS="$PYTHON_ROOT/harmony_deps/$ARCH"
 PYTHON_INSTALL="$PYTHON_ROOT/install-harmony-$ARCH"
 FFMPEG_ROOT="$(cd ../../third_party_ffmpeg && pwd)"
 FFMPEG_INSTALL="$FFMPEG_ROOT/install-harmony-$ARCH"
+SDL_SOURCE_INCLUDE="$(cd ../../SDL2/SDL/include && pwd)"
+DEFAULT_CUBISM="/e/Git/CubismSdkForNative-5-r.5"
 
 OHOS_SDK_ROOT="/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/native"
 OHOS_NDK="$OHOS_SDK_ROOT/llvm"
 OHOS_SYSROOT="$OHOS_SDK_ROOT/sysroot"
+
+resolve_cubism_root() {
+    local root="$1"
+
+    if [ -z "$root" ]; then
+        return 1
+    fi
+
+    if [ -d "$root" ]; then
+        printf '%s\n' "$root"
+        return 0
+    fi
+
+    if command -v cygpath >/dev/null 2>&1; then
+        local normalized
+        normalized=$(cygpath -u "$root" 2>/dev/null || true)
+        if [ -n "$normalized" ] && [ -d "$normalized" ]; then
+            printf '%s\n' "$normalized"
+            return 0
+        fi
+    fi
+
+    return 1
+}
 
 # =============================================================================
 # Validate
@@ -56,6 +82,26 @@ echo "  OK  Python lib:      $PYTHON_INSTALL/lib/libpython3.12.so"
 echo "  OK  harmony_deps:    $HARMONY_DEPS"
 echo "  OK  FFmpeg:          $FFMPEG_INSTALL"
 echo "  OK  NDK:             $OHOS_NDK"
+if [ -d "$SDL_SOURCE_INCLUDE" ]; then
+    echo "  OK  SDL headers:     $SDL_SOURCE_INCLUDE"
+else
+    echo "  WARN SDL source headers not found: $SDL_SOURCE_INCLUDE"
+fi
+
+CUBISM_ROOT=""
+if resolved_cubism_root=$(resolve_cubism_root "${CUBISM:-}"); then
+    CUBISM_ROOT="$resolved_cubism_root"
+elif resolved_cubism_root=$(resolve_cubism_root "$DEFAULT_CUBISM"); then
+    CUBISM_ROOT="$resolved_cubism_root"
+fi
+
+if [ -n "$CUBISM_ROOT" ] && [ -d "$CUBISM_ROOT/Core/include" ]; then
+    export CUBISM="$CUBISM_ROOT"
+    echo "  OK  Cubism SDK:      $CUBISM"
+else
+    unset CUBISM
+    echo "  INFO Cubism SDK not found; Live2D module build disabled"
+fi
 
 # =============================================================================
 # Architecture-specific settings
@@ -103,6 +149,7 @@ WIN_OHOS_SYSROOT=$(cygpath -m "$OHOS_SYSROOT")
 WIN_PYTHON_INSTALL=$(cygpath -m "$PYTHON_INSTALL")
 WIN_HARMONY_DEPS=$(cygpath -m "$HARMONY_DEPS")
 WIN_FFMPEG_INSTALL=$(cygpath -m "$FFMPEG_INSTALL")
+WIN_SDL_SOURCE_INCLUDE=$(cygpath -m "$SDL_SOURCE_INCLUDE")
 WIN_SCRIPT_DIR=$(cygpath -m "$SCRIPT_DIR")
 
 # Set compiler paths for the Python wrapper
@@ -239,7 +286,11 @@ if [ "$ARCH" = "aarch64" ]; then
 else
     MARCH_FLAG=""
 fi
-export CFLAGS="-I$WIN_PYTHON_INSTALL/include/python3.12 -I$WIN_HARMONY_DEPS/include -I$WIN_HARMONY_DEPS/include/SDL2 -I$WIN_FFMPEG_INSTALL/include -O2 $MARCH_FLAG"
+SDL_INCLUDE_FLAGS="-I$WIN_HARMONY_DEPS/include -I$WIN_HARMONY_DEPS/include/SDL2"
+if [ -d "$SDL_SOURCE_INCLUDE" ]; then
+    SDL_INCLUDE_FLAGS="-I$WIN_SDL_SOURCE_INCLUDE $SDL_INCLUDE_FLAGS"
+fi
+export CFLAGS="-I$WIN_PYTHON_INSTALL/include/python3.12 $SDL_INCLUDE_FLAGS -I$WIN_FFMPEG_INSTALL/include -O2 $MARCH_FLAG"
 export CXXFLAGS="$CFLAGS"
 
 # Library paths and link flags (Windows format)
