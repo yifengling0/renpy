@@ -218,6 +218,12 @@ def cython(name, source=[], libs=[], includes=[], compile_if=True, define_macros
     when it, or any of the files it depends on, changes.
     """
 
+    # Skip entire module if listed in RENPY_SKIP_MODULES (cross-compilation)
+    skip_modules = set(os.environ.get("RENPY_SKIP_MODULES", "").split())
+    if name in skip_modules:
+        print("INFO: Skipping module '{}' (RENPY_SKIP_MODULES)".format(name))
+        return
+
     mod_coverage = coverage
 
     # Find the pyx file.
@@ -241,7 +247,7 @@ def cython(name, source=[], libs=[], includes=[], compile_if=True, define_macros
     # Figure out what it depends on.
     deps = [ fn ]
 
-    with open(fn) as f:
+    with open(fn, encoding='utf-8') as f:
         for l in f:
             m = re.search(r'from\s*([\w.]+)\s*cimport', l)
             if m:

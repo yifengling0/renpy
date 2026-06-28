@@ -281,12 +281,13 @@ def bootstrap(renpy_base):
     # directory, we won't get the libraries in the PATH, and hence pygame
     # won't import.)
     try:
-        import pygame_sdl2
+        # HarmonyOS: use renpy.pygame instead of pygame_sdl2
+        import renpy.pygame
         if not ("pygame" in sys.modules):
-            pygame_sdl2.import_as_pygame()
+            renpy.pygame.import_as_pygame()
     except Exception:
         print("""\
-Could not import pygame_sdl2. Please ensure that this program has been built
+Could not import renpy.pygame. Please ensure that this program has been built
 and unpacked properly. Also, make sure that the directories containing
 this program do not contain : or ; in their names.
 

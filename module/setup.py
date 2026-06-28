@@ -111,6 +111,9 @@ else:
 cubism = os.environ.get("CUBISM", None)
 if cubism:
     setuplib.include_dirs.append("{}/Core/include".format(cubism))
+    live2d_support_dir = os.path.abspath(os.path.join(BASE, "..", "..", "renpy", "src"))
+else:
+    live2d_support_dir = None
 
 # Modules directory.
 cython(
@@ -190,7 +193,9 @@ cython("renpy.gl2.gl2texture", libs=sdl)
 cython("renpy.gl2.gl2shader", libs=sdl)
 
 if cubism:
-    cython("renpy.gl2.live2dmodel", libs=sdl)
+    live2d_sources = [ os.path.join(live2d_support_dir, "live2dcsm.c") ] if live2d_support_dir else [ ]
+    live2d_includes = [ live2d_support_dir ] if live2d_support_dir else [ ]
+    cython("renpy.gl2.live2dmodel", source=live2d_sources, libs=sdl, includes=live2d_includes)
 
 # renpy.text
 cython("renpy.text.textsupport")
