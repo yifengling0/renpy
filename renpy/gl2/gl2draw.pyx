@@ -498,6 +498,19 @@ cdef class GL2Draw:
         # The location of the viewport, in drawable pixels.
         self.drawable_viewport = tuple(i * self.draw_per_phys for i in self.physical_box)
 
+        if renpy.harmonyos:
+            renpy.display.log.write(
+                "Harmony viewport: virtual=%r physical=%r drawable=%r view=%r physical_box=%r drawable_viewport=%r draw_per_phys=%r adjust_view_size=%r renderer=%r",
+                self.virtual_size,
+                self.physical_size,
+                self.drawable_size,
+                (view_width, view_height),
+                self.physical_box,
+                self.drawable_viewport,
+                self.draw_per_phys,
+                renpy.config.adjust_view_size is not None,
+                renpy.config.renderer)
+
         dwidth = self.drawable_viewport[2]
         dheight = self.drawable_viewport[3]
 

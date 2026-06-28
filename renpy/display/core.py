@@ -2256,7 +2256,7 @@ class Interface(object):
 
         s = "Total time until interface ready: {}s".format(time.time() - import_time)
 
-        if renpy.android and not renpy.config.log_to_stdout:
+        if (renpy.android or renpy.harmonyos) and not renpy.config.log_to_stdout:
             print(s)
 
     def post_init(self):

@@ -169,7 +169,7 @@ if has_swscale:
 
 cython(
     "renpy.audio.renpysound",
-    [ "renpysound_core.c", "ffmedia.c" ],
+    [ "renpysound_core.c" ],  # ffmedia.c removed (FFmpeg API mismatch)
     libs=sdl + sound,
     define_macros=macros)
 

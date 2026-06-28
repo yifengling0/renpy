@@ -79,6 +79,27 @@ def path_to_saves(gamedir, save_directory=None):
 
         return rv
 
+    if getattr(renpy, "harmonyos", False):
+        base = os.environ.get("RENPY_PATH_TO_SAVES", "")
+
+        if not base:
+            base = os.path.join(os.path.dirname(gamedir), "saves")
+
+        try:
+            if not os.path.isdir(base):
+                os.makedirs(base)
+        except:
+            pass
+
+        if test_writable(base):
+            if not save_directory:
+                return base
+
+            if isinstance(save_directory, bytes):
+                save_directory = save_directory.decode("utf-8")
+
+            return os.path.join(base, save_directory)
+
     if renpy.ios:
         from pyobjus import autoclass
         from pyobjus.objc_py_types import enum
@@ -155,7 +176,8 @@ except:
     print("Ren'Py requires at least python 2.6.")
     sys.exit(0)
 
-android = ("ANDROID_PRIVATE" in os.environ)
+harmonyos = (os.environ.get("RENPY_PLATFORM", "") == "harmonyos")
+android = ("ANDROID_PRIVATE" in os.environ) and not harmonyos
 
 # Android requires us to add code to the main module, and to command some
 # renderers.

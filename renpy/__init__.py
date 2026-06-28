@@ -123,6 +123,7 @@ linux = False
 android = False
 ios = False
 emscripten = False
+harmonyos = False
 
 # Should we enable experimental features and debugging?
 experimental = "RENPY_EXPERIMENTAL" in os.environ
@@ -166,9 +167,14 @@ def get_windows_version():
         return (10, 0)
 
 
+_renpy_platform = os.environ.get("RENPY_PLATFORM", "")
+
 if platform.win32_ver()[0]:
     windows = get_windows_version()
-elif os.environ.get("RENPY_PLATFORM", "").startswith("ios"):
+elif _renpy_platform == "harmonyos":
+    harmonyos = True
+    linux = True
+elif _renpy_platform.startswith("ios"):
     ios = True
 elif platform.mac_ver()[0]:
     macintosh = True
@@ -180,7 +186,7 @@ else:
     linux = True
 
 # A flag that's true if we're on a smartphone or tablet-like platform.
-mobile = android or ios or emscripten
+mobile = android or ios or emscripten or harmonyos
 
 # A flag that's set to true if the game directory is bundled inside a mac app.
 macapp = False
