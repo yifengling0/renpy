@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -23,22 +23,19 @@
 # operations.
 
 from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
-from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode  # *
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
 import renpy
 import string
 import os
 import re
-import sys
-import collections
 
 
 update_translations = "RENPY_UPDATE_TRANSLATIONS" in os.environ
-flags = frozenset("rstiqulc!")
+flags = frozenset('rstiqulc!')
 formatter = string.Formatter()
 
-SIMPLE_NAME = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
-
+SIMPLE_NAME = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 def interpolate(s, scope):
     """
@@ -47,7 +44,7 @@ def interpolate(s, scope):
     f-strings, with a few caveats and additional conversions available.
     """
 
-    rv = ""
+    rv = ''
 
     for lit, expr, conv, fmt in parse(s):
         if lit:
@@ -57,21 +54,21 @@ def interpolate(s, scope):
             continue
 
         if conv is None:
-            conv = ""
+            conv = ''
         elif not conv:
-            raise ValueError("conversion specifier cannot be empty")
+            raise ValueError('conversion specifier cannot be empty')
 
         code = expr.strip()
 
         if not code:
-            raise ValueError("expected expression")
+            raise ValueError('expected expression')
 
-        if code[-1] == "=":
+        if code[-1] == '=':
             rv += expr
             code = code[:-1]
 
             if not conv and fmt is None:
-                conv = "r"
+                conv = 'r'
 
         if renpy.config.interpolate_exprs:
             if (code in scope) and SIMPLE_NAME.match(code):
@@ -95,7 +92,7 @@ def interpolate(s, scope):
             value = convert(value, conv, scope)
 
         if fmt is None:
-            fmt = ""
+            fmt = ''
 
         rv += format(value, fmt)
 
@@ -128,7 +125,7 @@ def parse(s):
     parens = 0
 
     # The parts we've seen.
-    lit = ""
+    lit = ''
     expr = None
     conv = None
     fmt = None
@@ -140,20 +137,20 @@ def parse(s):
         c = s[pos]
 
         if state is LITERAL:
-            if c == "[":
+            if c == '[':
                 lit += s[cut:pos]
                 cut = pos + 1
 
-                if c == s[pos + 1 : pos + 2]:
+                if c == s[pos+1:pos+2]:
                     pos += 1
                 else:
                     state = EXPRESSION
 
         elif state is EXPRESSION:
-            if c == "(":
+            if c == '(':
                 parens += 1
 
-            elif c == ")":
+            elif c == ')':
                 if not parens:
                     break
 
@@ -163,7 +160,7 @@ def parse(s):
                 chars = 1
                 found = 0
 
-                if c * 2 == s[pos + 1 : pos + 3]:
+                if c * 2 == s[pos+1:pos+3]:
                     chars += 2
                     pos += 2
 
@@ -178,7 +175,7 @@ def parse(s):
                             break
 
                     else:
-                        if n == "\\":
+                        if n == '\\':
                             pos += 1
 
                         found = 0
@@ -186,73 +183,73 @@ def parse(s):
             elif parens:
                 pass
 
-            elif c == "[":
+            elif c == '[':
                 brackets += 1
 
-            elif c == "]":
+            elif c == ']':
                 if brackets:
                     brackets -= 1
                 else:
                     yield lit, s[cut:pos], None, None
                     cut = pos + 1
                     state = LITERAL
-                    lit = ""
+                    lit = ''
 
             elif brackets:
                 pass
 
-            elif c == "!":
-                if s[pos + 1 : pos + 2] == "=":
+            elif c == '!':
+                if s[pos+1:pos+2] == '=':
                     pos += 1
                 else:
                     state = CONVERSION
                     expr = s[cut:pos]
                     cut = pos + 1
 
-            elif c == ":":
+            elif c == ':':
                 state = FORMAT
                 expr = s[cut:pos]
                 cut = pos + 1
 
         elif state is CONVERSION:
-            if c == "]":
+            if c == ']':
                 yield lit, expr, s[cut:pos], fmt
                 cut = pos + 1
                 state = LITERAL
-                lit = ""
+                lit = ''
                 expr = None
                 fmt = None
 
-            elif c == ":":
+            elif c == ':':
                 state = FORMAT
                 conv = s[cut:pos]
                 cut = pos + 1
 
             elif c not in FLAGS:
                 if fmt is None:
-                    raise ValueError("invalid conversion {!r}".format(c))
+                    raise ValueError('invalid conversion {!r}'.format(c))
 
                 state = FORMAT
                 pos = cut
                 cut = mark
 
         elif state is FORMAT:
-            if c == "]":
+            if c == ']':
                 yield lit, expr, conv, s[cut:pos]
                 cut = pos + 1
                 state = LITERAL
-                lit = ""
+                lit = ''
                 expr = None
                 conv = None
 
-            elif conv is None and c == "!":
+            elif conv is None and c == '!':
                 state = CONVERSION
                 fmt = s[cut:pos]
                 mark = cut
                 cut = pos + 1
 
     if state is not LITERAL:
-        raise Exception("String {!r} ends with an open format operation.".format(s))
+        raise Exception('String {!r} ends with an open format operation.'.format(s))
 
     if cut <= size:
         lit += s[cut:]
@@ -264,46 +261,63 @@ def parse(s):
 def convert(value, conv, scope):
     conv = set(conv)
 
-    if "r" in conv:
+    if 'r' in conv:
         value = repr(value)
-        conv.discard("r")
+        conv.discard('r')
 
-    elif "s" in conv:
+    elif 's' in conv:
         value = str(value)
-        conv.discard("s")
+        conv.discard('s')
 
     if not conv:
         return value
 
     # All conversion symbols below assume we have a string.
-    if not isinstance(value, str):
+    if not isinstance(value, basestring):
         value = str(value)
 
-    if "t" in conv:
+    if 't' in conv:
         value = renpy.translation.translate_string(value)
 
-    if "i" in conv:
+    if 'i' in conv:
         try:
             value = interpolate(value, scope)
-        except RecursionError:
-            raise ValueError(f"Substitution {value!r} refers to itself in a loop.")
+        except RuntimeError: # PY3 RecursionError
+            raise ValueError('Substitution {!r} refers to itself in a loop.'.format(value))
 
-    if "f" in conv and renpy.config.say_menu_text_filter is not None:
-        value = renpy.config.say_menu_text_filter(value)
+    if 'q' in conv:
+        value = value.replace('{', '{{')
 
-    if "q" in conv:
-        value = value.replace("{", "{{")
-
-    if "u" in conv:
+    if 'u' in conv:
         value = value.upper()
 
-    if "l" in conv:
+    if 'l' in conv:
         value = value.lower()
 
-    if "c" in conv:
+    if 'c' in conv:
         value = value[:1].capitalize() + value[1:]
 
     return value
+
+
+class MultipleDict(object):
+
+    def __init__(self, *dicts):
+        self.dicts = dicts
+
+    def __getitem__(self, key):
+        for d in self.dicts:
+            if key in d:
+                return d[key]
+
+        raise KeyError("Name '{}' is not defined.".format(key))
+
+    def __contains__(self, key):
+        for d in self.dicts:
+            if key in d:
+                return True
+
+        return False
 
 
 def substitute(s, scope=None, force=False, translate=True):
@@ -324,7 +338,7 @@ def substitute(s, scope=None, force=False, translate=True):
     occurred, or False if no substitution occurred.
     """
 
-    if not isinstance(s, str):
+    if not isinstance(s, basestring):
         s = str(s)
 
     if translate:
@@ -339,6 +353,7 @@ def substitute(s, scope=None, force=False, translate=True):
 
     old_s = s
 
+
     dicts = []
 
     if scope is not None:
@@ -352,25 +367,13 @@ def substitute(s, scope=None, force=False, translate=True):
     if len(dicts) == 1:
         variables = dicts[0]
     else:
-        variables = collections.ChainMap(*dicts)
+        variables = MultipleDict(*dicts)
 
     try:
-        s = interpolate(s, variables)  # type: ignore
+        s = interpolate(s, variables) # type: ignore
     except Exception:
-        if renpy.display.predict.predicting:
+        if renpy.display.predict.predicting: # @UndefinedVariable
             return " ", True
         raise
 
     return s, (s != old_s)
-
-
-def ___(s):
-    """
-    :undocumented: Documented directly in the .rst.
-
-    Translates a string, then performs substitutions on it.
-    """
-
-    scope = sys._getframe(1).f_locals
-
-    return substitute(s, scope)[0]

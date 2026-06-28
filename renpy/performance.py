@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -22,14 +22,15 @@
 # This file manages the frame performance log.
 
 from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
-from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode  # *
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
+
 
 
 import time
 import renpy
 
 # A list of (time, depth, message) tuples.
-fpl = []
+fpl = [ ]
 
 # The number of levels of depth we use.
 DEPTH_LEVELS = 4
@@ -41,13 +42,14 @@ running = False
 
 def clear():
     global fpl
-    fpl = []
+    fpl = [ ]
 
     global running
     running = True
 
 
 def log(depth, event, *args):
+
     if (not renpy.config.profile) or (not running):
         return
 
@@ -55,6 +57,7 @@ def log(depth, event, *args):
 
 
 def PPP(event, *args):
+
     if type(event) == int:
         level = event
         event = args[0]
@@ -65,7 +68,7 @@ def PPP(event, *args):
     log(level, event, *args)
 
 
-__builtins__["PPP"] = PPP
+__builtins__['PPP'] = PPP
 
 
 def analyze():
@@ -96,10 +99,10 @@ def analyze():
     renpy.log.real_stdout.write(s)
     renpy.display.log.write(s)
 
-    times = [fpl[0][0]] * DEPTH_LEVELS
+    times = [ fpl[0][0] ] * DEPTH_LEVELS
 
     for t, depth, event, args in fpl:
-        dt = [(1000000 * (t - it)) if i <= depth else 0 for i, it in enumerate(times)]
+        dt = [ (1000000 * (t - it)) if i <= depth else 0 for i, it in enumerate(times) ]
 
         s = "{: 7.0f} {: 7.0f} {: 7.0f} {: 7.0f} {}\n".format(
             dt[0],
@@ -107,7 +110,7 @@ def analyze():
             dt[2],
             dt[3],
             event.format(*args).replace("%", "%%"),
-        )
+            )
 
         renpy.log.real_stdout.write(s)
         renpy.display.log.write(s)

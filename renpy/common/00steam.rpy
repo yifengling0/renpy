@@ -1,4 +1,4 @@
-﻿# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+﻿# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -35,8 +35,7 @@ init -1499 python in _renpysteam:
     import collections
     import time
 
-    from renpy.store import store, config, NoRollback
-    from renpy.store import store, config, NoRollback
+    from renpy.store import store, config
 
     ticket = None
 
@@ -51,7 +50,7 @@ init -1499 python in _renpysteam:
         called with no parameters if and when the statistics become available.
         """
 
-        pass # RequestCurrentStats has been removed in Steamworks SDK 1.61.
+        steamapi.SteamUserStats().RequestCurrentStats()
 
 
     def store_stats():
@@ -480,15 +479,12 @@ init -1499 python in _renpysteam:
 
     ########################################################################### UGC
 
-    def get_subscribed_items(include_disabled=False):
+    def get_subscribed_items():
         """
         :doc: steam_ugc
 
         Returns a list of the item ids the user has subscribed to in the steam
         workshop.
-
-        `include_disabled`
-            If true, include items that are disabled.
         """
 
         from ctypes import c_ulonglong, pointer, POINTER, cast
@@ -497,8 +493,7 @@ init -1499 python in _renpysteam:
 
         count = steamapi.SteamUGC().GetSubscribedItems(
             cast(pointer(subscribed), POINTER(c_ulonglong)),
-            512,
-            include_disabled)
+            512)
 
         rv = [ ]
 
@@ -544,7 +539,7 @@ init -1499 python in _renpysteam:
             The time since the last state change.
         """
 
-        steamapi.SteamTimeline().SetTimelineTooltip(description.encode("utf-8"), time_delta)
+        steamapi.SteamTimeline().SetTimelineStateDescription(description.encode("utf-8"), time_delta)
 
     def clear_timeline_state_description(time_delta):
         """
@@ -553,13 +548,13 @@ init -1499 python in _renpysteam:
         Clears the description of the current state in the timeline.
         """
 
-        steamapi.SteamTimeline().ClearTimelineTooltip(time_delta)
+        steamapi.SteamTimeline().ClearTimelineStateDescription(time_delta)
 
     def add_timeline_event(icon, title, description, priority=0, start_offset=0.0, duration=0.0, possible_clip=None):
         """
         :doc: steam_timeline
 
-        Adds an event to the timeline. Note that the order of arguments here is different than in the Steam API.
+        Adds an event to the timeline.
 
         `icon`
             The icon to display for the event. This should be a string giving one of the standard steam icons,
@@ -588,26 +583,14 @@ init -1499 python in _renpysteam:
         if possible_clip is None:
             possible_clip = CLIP_PRIORITY_STANDARD
 
-        if duration:
-
-            steamapi.SteamTimeline().AddInstantaneousTimelineEvent(
-                title.encode("utf-8"),
-                description.encode("utf-8"),
-                icon.encode("utf-8"),
-                priority,
-                start_offset,
-                possible_clip)
-
-        else:
-
-            steamapi.SteamTimeline().AddRangeTimelineEvent(
-                title.encode("utf-8"),
-                description.encode("utf-8"),
-                icon.encode("utf-8"),
-                priority,
-                start_offset,
-                duration,
-                possible_clip)
+        steamapi.SteamTimeline().AddTimelineEvent(
+            icon.encode("utf-8"),
+            title.encode("utf-8"),
+            description.encode("utf-8"),
+            priority,
+            start_offset,
+            duration,
+            possible_clip)
 
 
     def set_timeline_game_mode(mode):
@@ -624,22 +607,6 @@ init -1499 python in _renpysteam:
         """
 
         steamapi.SteamTimeline().SetTimelineGameMode(mode)
-
-    def start_game_phase(identifier: str):
-        """
-        Starts a Steam Timeline game phase, and sets its identifier to `identifier`.
-        """
-
-        steamapi.SteamTimeline().StartGamePhase()
-        steamapi.SteamTimeline().SetGamePhaseID(identifier.encode("utf-8"))
-
-    def end_game_phase():
-        """
-        Ends a Steam Timeline game phase.
-        """
-
-        steamapi.SteamTimeline().EndGamePhase()
-
 
 
     ############################################ Import API after steam is found.
@@ -683,17 +650,16 @@ init -1499 python in _renpysteam:
 
     callback_handlers = collections.defaultdict(list)
 
-    callback_state = NoRollback()
-    callback_state.menu = None
-    callback_state.save_name = None
-    callback_state = NoRollback()
-    callback_state.menu = None
-    callback_state.save_name = None
+    old_menu = None
+    old_save_name = None
 
     def periodic():
         """
         Called periodically to run Steam callbacks.
         """
+
+        global old_menu
+        global old_save_name
 
         for cb in steamapi.generate_callbacks():
             # print(type(cb).__name__, {k : getattr(cb, k) for k in dir(cb) if not k.startswith("_")})
@@ -710,18 +676,18 @@ init -1499 python in _renpysteam:
             else:
                 new_menu = TIMELINE_GAME_MODE_PLAYING
 
-            if callback_state.menu != new_menu:
+            if old_menu != new_menu:
                 set_timeline_game_mode(new_menu)
-                callback_state.menu = new_menu
+                old_menu = new_menu
 
-            if store.save_name != callback_state.save_name:
-                if callback_state.save_name and isinstance(callback_state.save_name, str):
-                    end_game_phase()
+        if store.save_name != old_save_name:
+            if not store.save_name:
+                clear_timeline_state_description(0.0)
+            else:
+                set_timeline_state_description(store.save_name, 0.0)
 
-                if store.save_name and isinstance(store.save_name, str):
-                    start_game_phase(store.save_name)
+            old_save_name = store.save_name
 
-                callback_state.save_name = store.save_name
 
 
     ################################################################## Keyboard

@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -19,30 +19,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from typing import final, overload
+from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
-import re
+
+
+
+import renpy.display
 import colorsys
 
 
-_SHORT_COLOR_STRING_RE = re.compile(
-    r"#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})?",
-)
-_LONG_COLOR_STRING_RE = re.compile(
-    r"#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?",
-)
-
-type ColorLike = "Color" | tuple[int, int, int, int] | tuple[int, int, int] | str
-"""
-The color, in one of the standard formats Ren'Py understands. These are:
-- A Color object.
-- An (r, g, b) or (r, g, b, a) tuple, in which all the numbers are between 0 and 255.
-- A string giving a hexadecimal color, in the form "#rgb", "#rgba", "#rrggbb", or "#rrggbbaa".
-"""
-
-
-@final
-class Color(tuple[int, int, int, int]):
+class Color(tuple):
     """
     :doc: color class
     :args: (color=None, hls=None, hsv=None, rgb=None, alpha=1.0)
@@ -137,190 +124,132 @@ class Color(tuple[int, int, int, int]):
     these methods always return a new Color object.
     """
 
-    _rgb: tuple[float, float, float] | None = None
-    _hls: tuple[float, float, float] | None = None
-    _hsv: tuple[float, float, float] | None = None
-    _alpha: float | None = None
-    _rgba: tuple[float, float, float, float] | None = None
+    _rgb = None
+    _hls = None
+    _hsv = None
+    _alpha = None
+    _rgba = None
 
-    @overload
-    # Color object
-    def __new__(cls, color: "Color") -> "Color": ...
+    def __new__(cls, color=None, hls=None, hsv=None, rgb=None, alpha=1.0):
 
-    @overload
-    # 4-tuple - no alpha
-    def __new__(cls, color: tuple[int, int, int, int]) -> "Color": ...
+        if color is not None:
+            c = color
 
-    @overload
-    # 3-tuple or string, optional alpha
-    def __new__(cls, color: tuple[int, int, int] | str, *, alpha: float = 1.0) -> "Color": ...
+            if isinstance(c, basestring):
+                if c[0] == '#':
+                    c = c[1:]
 
-    @overload
-    # 3-tuple of HLS, optional alpha
-    def __new__(cls, *, hls: tuple[float, float, float], alpha: float = 1.0) -> "Color": ...
+                lenc = len(c)
 
-    @overload
-    # 3-tuple of HSV, optional alpha
-    def __new__(cls, *, hsv: tuple[float, float, float], alpha: float = 1.0) -> "Color": ...
-
-    @overload
-    # 3-tuple of RGB, optional alpha
-    def __new__(cls, *, rgb: tuple[float, float, float], alpha: float = 1.0) -> "Color": ...
-
-    @overload
-    # No arguments - None
-    def __new__(cls, *, alpha: float = 1.0) -> None: ...
-
-    def __new__(
-        cls,
-        color: ColorLike | None = None,
-        hls: tuple[float, float, float] | None = None,
-        hsv: tuple[float, float, float] | None = None,
-        rgb: tuple[float, float, float] | None = None,
-        alpha: float = 1.0,
-    ) -> "Color | None":
-        if isinstance(color, str):
-            if m := re.fullmatch(_SHORT_COLOR_STRING_RE, color):
-                r, g, b, a = m.groups()
-                r = int(r, 16) * 0x11
-                g = int(g, 16) * 0x11
-                b = int(b, 16) * 0x11
-                if a is None:
+                if lenc == 6:
+                    r = int(c[:2], 16)
+                    g = int(c[2:4], 16)
+                    b = int(c[4:], 16)
                     a = int(alpha * 255)
-                else:
-                    a = int(a, 16) * 0x11
-
-            elif m := re.fullmatch(_LONG_COLOR_STRING_RE, color):
-                r, g, b, a = m.groups()
-                r = int(r, 16)
-                g = int(g, 16)
-                b = int(b, 16)
-                if a is None:
+                elif lenc == 8:
+                    r = int(c[:2], 16)
+                    g = int(c[2:4], 16)
+                    b = int(c[4:6], 16)
+                    a = int(c[6:], 16)
+                elif lenc == 3:
+                    r = int(c[0], 16) * 0x11
+                    g = int(c[1], 16) * 0x11
+                    b = int(c[2], 16) * 0x11
                     a = int(alpha * 255)
+                elif lenc == 4:
+                    r = int(c[0], 16) * 0x11
+                    g = int(c[1], 16) * 0x11
+                    b = int(c[2], 16) * 0x11
+                    a = int(c[3], 16) * 0x11
                 else:
-                    a = int(a, 16)
+                    raise Exception("Color string {!r} must be 3, 4, 6, or 8 hex digits long.".format(c))
 
-            else:
-                raise Exception(f"Color string {color!r} must be 3, 4, 6, or 8 hex digits long.")
+                return tuple.__new__(cls, (r, g, b, a)) # type: ignore
 
-            return super().__new__(cls, (r, g, b, a))
+            if isinstance(c, Color):
+                return c
 
-        elif isinstance(color, Color):
-            return color
+            c = tuple(c)
 
-        elif color is not None:
-            c = tuple(color)
             lenc = len(c)
 
+            if lenc == 4:
+                return tuple.__new__(cls, c)
+
             if lenc == 3:
-                return super().__new__(cls, (*c, int(alpha * 255)))
+                return tuple.__new__(cls, c + (int(255 * alpha),))
 
-            elif lenc == 4:
-                return super().__new__(cls, c)
-
-            else:
-                raise Exception(f"Color tuple {color!r} must be 3 or 4 elements long.")
-
-        elif hsv is not None:
-            hls = None
+        if hsv is not None:
             rgb = colorsys.hsv_to_rgb(*hsv)
 
-        elif hls is not None:
+        if hls is not None:
             hsv = None
             rgb = colorsys.hls_to_rgb(*hls)
 
-        elif rgb is not None:
-            hls = None
-            hsv = None
+        if rgb is not None:
+            r = int(rgb[0] * 255)
+            g = int(rgb[1] * 255)
+            b = int(rgb[2] * 255)
+            a = int(alpha * 255)
 
-        else:
+            rv = tuple.__new__(cls, (r, g, b, a)) # type: ignore
+            rv._rgb = rgb
+            rv._hls = hls
+            rv._hsv = hsv
+            rv._alpha = alpha
+            rv._rgba = tuple(list(rgb) + [alpha])
+
+            return rv
+
+        if color is None:
             return None
 
-        r = int(rgb[0] * 255)
-        g = int(rgb[1] * 255)
-        b = int(rgb[2] * 255)
-        a = int(alpha * 255)
-
-        rv = super().__new__(cls, (r, g, b, a))
-        rv._rgb = rgb
-        rv._hls = hls
-        rv._hsv = hsv
-        rv._alpha = alpha
-        rv._rgba = (*rgb, alpha)
-        return rv
+        raise Exception("Not a color: %r" % (color,))
 
     @property
-    def hexcode(self) -> str:
-        """
-        Returns a string containing a hex color code of the form #rrggbbaa
-        or #rrggbb.
-        """
-
-        r, g, b, a = self
-        if a == 255:
-            return f"#{r:02x}{g:02x}{b:02x}"
+    def hexcode(self):
+        if self.alpha != 1.0:
+            return "#{self[0]:02x}{self[1]:02x}{self[2]:02x}{self[3]:02x}".format(self=self)
         else:
-            return f"#{r:02x}{g:02x}{b:02x}{a:02x}"
+            return "#{self[0]:02x}{self[1]:02x}{self[2]:02x}".format(self=self)
 
     def __repr__(self):
-        return f"renpy.color.Color({self.hexcode!r})"
+        return "<Color {}>".format(self.hexcode)
 
     def __getnewargs__(self):
-        return (tuple(self),)
+        return (tuple(self), )
 
     @property
-    def rgb(self) -> tuple[float, float, float]:
-        """
-        Returns the color as a tuple of three floating point numbers giving
-        the red, green, and blue components. Each component ranges between 0.0
-        and 1.0.
-        """
-
+    def rgb(self):
         if self._rgb is None:
             self._rgb = (
                 self[0] / 255.0,
                 self[1] / 255.0,
                 self[2] / 255.0,
-            )
+                )
 
         return self._rgb
 
     @property
     def rgba(self):
-        """
-        Returns the color as a tuple of four floating point numbers giving
-        the red, green, blue and alpha components as 0.0 to 1.0 values.
-        """
-
         if self._rgba is None:
             self._rgba = (
                 self[0] / 255.0,
                 self[1] / 255.0,
                 self[2] / 255.0,
                 self[3] / 255.0,
-            )
+                )
 
         return self._rgba
 
     @property
     def premultiplied(self):
-        """
-        Returns the color as a tuple of four floating point numbers giving
-        the red, green, blue and alpha components as 0.0 to 1.0 values, with
-        the red, green, and blue components premultiplied by the alpha.
-        """
-
         r, g, b, a = self.rgba
 
         return (r * a, g * a, b * a, a)
 
     @property
     def hls(self):
-        """
-        Returns the color as a tuple of three floating point numbers giving
-        hue, lightness, and saturation. Each component ranges between 0.0 and 1.0.
-        """
-
         if self._hls is None:
             self._hls = colorsys.rgb_to_hls(*self.rgb)
 
@@ -328,11 +257,6 @@ class Color(tuple[int, int, int, int]):
 
     @property
     def hsv(self):
-        """
-        Returns the color as a tuple of three floating point numbers giving
-        hue, saturation, and value. Each component ranges between 0.0 and 1.0.
-        """
-
         if self._hsv is None:
             self._hsv = colorsys.rgb_to_hsv(*self.rgb)
 
@@ -340,11 +264,6 @@ class Color(tuple[int, int, int, int]):
 
     @property
     def alpha(self):
-        """
-        Returns the alpha (opacity) of this Color as a number between 0.0 and
-        1.0, where 0.0 is transparent and 1.0 is opaque.
-        """
-
         if self._alpha is None:
             self._alpha = self[3] / 255.0
 
@@ -365,58 +284,55 @@ class Color(tuple[int, int, int, int]):
 
         return Color((r, g, b, a))
 
-    def __add__(self, other: ColorLike):
-        r1, g1, b1, a1 = self
+    def __add__(self, other):
+        other = Color(other)
 
-        try:
-            r2, g2, b2, a2 = Color(other)
-        except Exception:
-            return NotImplemented
-
-        return Color((r1 + r2, g1 + g2, b1 + b2, a1 + a2))
+        return Color((
+            self[0] + other[0],
+            self[1] + other[1],
+            self[2] + other[2],
+            self[3] + other[3]))
 
     __radd__ = __add__
 
-    def __sub__(self, other: ColorLike):
-        r1, g1, b1, a1 = self
+    def __sub__(self, other):
+        other = Color(other)
 
-        try:
-            r2, g2, b2, a2 = Color(other)
-        except Exception:
-            return NotImplemented
+        return Color((
+            self[0] - other[0],
+            self[1] - other[1],
+            self[2] - other[2],
+            self[3] - other[3]))
 
-        return Color((r1 - r2, g1 - g2, b1 - b2, a1 - a2))
+    def __rsub__(self, other):
+        other = Color(other)
+        return other - self
 
-    def __rsub__(self, other: ColorLike):
-        r1, g1, b1, a1 = self
+    def __mul__(self, other):
 
-        try:
-            r2, g2, b2, a2 = Color(other)
-        except Exception:
-            return NotImplemented
+        if isinstance(other, renpy.display.im.matrix):
+            return Color(tuple(int(i) for i in other.vector_mul(self)[:4]))
 
-        return Color((r2 - r1, g2 - g1, b2 - b1, a2 - a1))
+        other = Color(other)
 
-    def __mul__(self, other: ColorLike):
-        r1, g1, b1, a1 = self
+        return Color((
+            self[0] * other[0],
+            self[1] * other[1],
+            self[2] * other[2],
+            self[3] * other[3]))
 
-        try:
-            r2, g2, b2, a2 = Color(other)
-        except Exception:
-            return NotImplemented
+    __rmul__ = __mul__ # type: ignore
 
-        return Color((r1 * r2, g1 * g2, b1 * b2, a1 * a2))
+    def interpolate_core(self, a, b, fraction):
 
-    __rmul__ = __mul__  # type: ignore
+        if isinstance(a, tuple):
+            rv = tuple(self.interpolate_core(ac, bc, fraction) for ac, bc in zip(a, b))
+        else:
+            rv = a + (b - a) * fraction
 
-    def _interpolate_tuple[T: tuple](self, a: T, b: T, fraction: float) -> T:
-        i = self._interpolate_num
-        return type(a)(tuple(i(ac, bc, fraction) for ac, bc in zip(a, b)))
+        return type(a)(rv)
 
-    def _interpolate_num[T: (float, int)](self, a: T, b: T, fraction: float) -> T:
-        return type(a)(a + (b - a) * fraction)
-
-    def interpolate(self, other: ColorLike, fraction: float) -> "Color":
+    def interpolate(self, other, fraction):
         """
         :doc: color method
 
@@ -425,9 +341,11 @@ class Color(tuple[int, int, int, int]):
         result is the same as this color, if 1.0, it is the same as `other`.
         """
 
-        return self._interpolate_tuple(self, Color(other), fraction)
+        other = Color(other)
 
-    def interpolate_hsv(self, other: "str | Color | tuple[float, float, float]", fraction: float) -> "Color":
+        return self.interpolate_core(self, other, fraction)
+
+    def interpolate_hsv(self, other, fraction):
         """
         :doc: color method
 
@@ -438,17 +356,17 @@ class Color(tuple[int, int, int, int]):
         `other` may be a string, Color or an HSV tuple.
         """
 
-        if isinstance(other, str):
+        if isinstance(other, basestring):
             other = Color(other, alpha=self.alpha)
         elif not isinstance(other, Color):
             other = Color(hsv=other, alpha=self.alpha)
 
-        hsv = self._interpolate_tuple(self.hsv, other.hsv, fraction)
-        alpha = self._interpolate_num(self.alpha, other.alpha, fraction)
+        hsv = self.interpolate_core(self.hsv, other.hsv, fraction)
+        alpha = self.interpolate_core(self.alpha, other.alpha, fraction)
 
-        return Color(hsv=hsv, alpha=alpha)
+        return Color(hsv=hsv, alpha=alpha) # type: ignore
 
-    def interpolate_hls(self, other: "str | Color | tuple[float, float, float]", fraction: float) -> "Color":
+    def interpolate_hls(self, other, fraction):
         """
         :doc: color method
 
@@ -459,17 +377,17 @@ class Color(tuple[int, int, int, int]):
         `other` may be a string, Color or an HLS tuple.
         """
 
-        if isinstance(other, str):
+        if isinstance(other, basestring):
             other = Color(other, alpha=self.alpha)
         elif not isinstance(other, Color):
             other = Color(hls=other, alpha=self.alpha)
 
-        hls = self._interpolate_tuple(self.hls, other.hls, fraction)
-        alpha = self._interpolate_num(self.alpha, other.alpha, fraction)
+        hls = self.interpolate_core(self.hls, other.hls, fraction)
+        alpha = self.interpolate_core(self.alpha, other.alpha, fraction)
 
-        return Color(hls=hls, alpha=alpha)
+        return Color(hls=hls, alpha=alpha) # type: ignore
 
-    def tint(self, fraction: float) -> "Color":
+    def tint(self, fraction):
         """
         :doc: color method
 
@@ -480,9 +398,9 @@ class Color(tuple[int, int, int, int]):
         The alpha channel is unchanged.
         """
 
-        return self._interpolate_tuple(self, Color((255, 255, 255, self[3])), (1.0 - fraction))
+        return self.interpolate_core(self, (255, 255, 255, self[3]), (1.0 - fraction))
 
-    def shade(self, fraction: float) -> "Color":
+    def shade(self, fraction):
         """
         :doc: color method
 
@@ -493,9 +411,9 @@ class Color(tuple[int, int, int, int]):
         The alpha channel is unchanged.
         """
 
-        return self._interpolate_tuple(self, Color((0, 0, 0, self[3])), (1.0 - fraction))
+        return self.interpolate_core(self, (0, 0, 0, self[3]), (1.0 - fraction))
 
-    def opacity(self, opacity: float) -> "Color":
+    def opacity(self, opacity):
         """
         :doc: color method
 
@@ -503,10 +421,13 @@ class Color(tuple[int, int, int, int]):
         the new color.
         """
 
-        r, g, b, a = self
-        return Color((r, g, b, int(a * opacity)))
+        return Color((
+            self[0],
+            self[1],
+            self[2],
+            int(self[3] * opacity)))
 
-    def rotate_hue(self, rotation: float) -> "Color":
+    def rotate_hue(self, rotation):
         """
         :doc: color method
 
@@ -515,11 +436,11 @@ class Color(tuple[int, int, int, int]):
         convert to degrees.
         """
 
-        h, l, s = self.hls  # noqa: E741
+        h, l, s = self.hls
         h = (h + rotation) % 1.0
         return Color(hls=(h, l, s), alpha=self.alpha)
 
-    def replace_hue(self, hue: float) -> "Color":
+    def replace_hue(self, hue):
         """
         :doc: color method
 
@@ -527,11 +448,11 @@ class Color(tuple[int, int, int, int]):
         1.0. Returns the new Color.
         """
 
-        _, l, s = self.hls  # noqa: E741
+        _, l, s = self.hls
         h = hue
         return Color(hls=(h, l, s), alpha=self.alpha)
 
-    def multiply_hls_saturation(self, saturation: float) -> "Color":
+    def multiply_hls_saturation(self, saturation):
         """
         :doc: color method
 
@@ -539,11 +460,11 @@ class Color(tuple[int, int, int, int]):
         the result as a new Color. This is performed in the HLS color space.
         """
 
-        h, l, s = self.hls  # noqa: E741
+        h, l, s = self.hls
         s = min(s * saturation, 1.0)
         return Color(hls=(h, l, s), alpha=self.alpha)
 
-    def multiply_hsv_saturation(self, saturation: float) -> "Color":
+    def multiply_hsv_saturation(self, saturation):
         """
         :doc: color method
 
@@ -555,7 +476,7 @@ class Color(tuple[int, int, int, int]):
         s = min(s * saturation, 1.0)
         return Color(hsv=(h, s, v), alpha=self.alpha)
 
-    def multiply_value(self, value: float) -> "Color":
+    def multiply_value(self, value):
         """
         :doc: color method
 
@@ -567,7 +488,7 @@ class Color(tuple[int, int, int, int]):
         v = min(v * value, 1.0)
         return Color(hsv=(h, s, v), alpha=self.alpha)
 
-    def replace_hls_saturation(self, saturation: float) -> "Color":
+    def replace_hls_saturation(self, saturation):
         """
         :doc: color method
 
@@ -575,11 +496,11 @@ class Color(tuple[int, int, int, int]):
         the result as a new Color. This is performed in the HLS color space.
         """
 
-        h, l, _ = self.hls  # noqa: E741
+        h, l, _ = self.hls
         s = saturation
         return Color(hls=(h, l, s), alpha=self.alpha)
 
-    def replace_hsv_saturation(self, saturation: float) -> "Color":
+    def replace_hsv_saturation(self, saturation):
         """
         :doc: color method
 
@@ -591,7 +512,7 @@ class Color(tuple[int, int, int, int]):
         s = saturation
         return Color(hsv=(h, s, v), alpha=self.alpha)
 
-    def replace_value(self, value: float) -> "Color":
+    def replace_value(self, value):
         """
         :doc: color method
 
@@ -603,7 +524,7 @@ class Color(tuple[int, int, int, int]):
         v = value
         return Color(hsv=(h, s, v), alpha=self.alpha)
 
-    def replace_lightness(self, lightness: float) -> "Color":
+    def replace_lightness(self, lightness):
         """
         :doc: color method
 
@@ -612,10 +533,10 @@ class Color(tuple[int, int, int, int]):
         """
 
         h, _, s = self.hls
-        l = lightness  # noqa: E741
+        l = lightness
         return Color(hls=(h, l, s), alpha=self.alpha)
 
-    def replace_opacity(self, opacity: float) -> "Color":
+    def replace_opacity(self, opacity):
         """
         :doc: color method
 

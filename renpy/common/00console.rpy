@@ -61,7 +61,6 @@ init -1500:
     style _console_input_text is _console_text:
         color "#000000"
         adjust_spacing False
-        font_features { "liga": False, "clig" : False }
 
     style _console_history is _default:
         xfill True
@@ -124,12 +123,10 @@ default persistent._console_traced_short = True
 default persistent._console_unicode_escaping = False
 
 init -1500 python in _console:
-    from store import config, persistent, NoRollback, _ExceptionPrintContext
-    from renpy.error import TracebackException
-
+    from store import config, persistent, NoRollback
     import io
-    import re
     import sys
+    import traceback
     import store
     try:
         import pydoc
@@ -159,8 +156,12 @@ init -1500 python in _console:
                 s = s[:i] + self._ellipsis + s[len(s) - i:]
             return s
 
-        repr_bytes = _repr_bytes
-        repr_str = _repr_string
+        if PY2:
+            repr_str = _repr_bytes
+            repr_unicode = _repr_string
+        else:
+            repr_bytes = _repr_bytes
+            repr_str = _repr_string
 
         def repr_tuple(self, x, level):
             if not x: return "()"
@@ -211,7 +212,7 @@ init -1500 python in _console:
 
             if level <= 0: return "{...}"
 
-            iter_keys = self._to_shorted_list(x, self.maxdict, sort=False)
+            iter_keys = self._to_shorted_list(x, self.maxdict, sort=PY2)
             iter_x = self._make_pretty_items(x, iter_keys, '{', '}')
             return self._repr_iterable(iter_x, level, '{', '}')
 
@@ -226,7 +227,7 @@ init -1500 python in _console:
 
             if level <= 0: return left + "...})"
 
-            iter_keys = self._to_shorted_list(x, self.maxdict, sort=False)
+            iter_keys = self._to_shorted_list(x, self.maxdict, sort=PY2)
             iter_x = self._make_pretty_items(x, iter_keys, left, '})')
             return self._repr_iterable(iter_x, level, left, '})')
 
@@ -456,29 +457,14 @@ init -1500 python in _console:
 
     HistoryEntry = ConsoleHistoryEntry
 
+
     stdio_lines = _list()
-
-    def _strip_ansi(s):
-        # 7-bit C1 ANSI sequences
-        ansi_escape = re.compile(r'''
-            \x1B  # ESC
-            (?:   # 7-bit C1 Fe (except CSI)
-                [@-Z\\-_]
-            |     # or [ for CSI, followed by a control sequence
-                \[
-                [0-?]*  # Parameter bytes
-                [ -/]*  # Intermediate bytes
-                [@-~]   # Final byte
-            )
-        ''', re.VERBOSE)
-
-        return ansi_escape.sub('', s)
 
     def stdout_line(l):
         if not (config.console or config.developer):
             return
 
-        stdio_lines.append((False, _strip_ansi(l)))
+        stdio_lines.append((False, l))
 
         while len(stdio_lines) > config.console_history_lines:
             stdio_lines.pop(0)
@@ -487,7 +473,7 @@ init -1500 python in _console:
         if not (config.console or config.developer):
             return
 
-        stdio_lines.append((True, _strip_ansi(l)))
+        stdio_lines.append((True, l))
 
         while len(stdio_lines) > config.console_history_lines:
             stdio_lines.pop(0)
@@ -497,7 +483,7 @@ init -1500 python in _console:
     config.stderr_callbacks.append(stderr_line)
 
 
-    class ScriptErrorHandler:
+    class ScriptErrorHandler(object):
         """
         Handles error in Ren'Py script.
         """
@@ -505,9 +491,9 @@ init -1500 python in _console:
         def __init__(self):
             self.target_depth = renpy.call_stack_depth()
 
-        def __call__(self, traceback_exception):
+        def __call__(self, short, full, traceback_fn):
             he = console.history[-1]
-            he.result = traceback_exception.format_exception_only(_ExceptionPrintContext(filter_private=False))
+            he.result = short.split("\n")[-2]
             he.is_error = True
 
             while renpy.call_stack_depth() > self.target_depth:
@@ -681,11 +667,9 @@ init -1500 python in _console:
 
             return renpy.game.context().rollback
 
-        def format_exception_only(self, e):
-            return TracebackException(e).format_exception_only(_ExceptionPrintContext(filter_private=False))
-
-        def format_exception(self, e):
-            return TracebackException(e).format(_ExceptionPrintContext(filter_private=False))
+        def format_exception(self):
+            etype, evalue, etb = sys.exc_info()
+            return traceback.format_exception_only(etype, evalue)[-1]
 
         def run(self, lines):
 
@@ -734,13 +718,13 @@ init -1500 python in _console:
                 else:
                     result = renpy.python.py_eval(code)
                     if persistent._console_short and not getattr(result, "_console_always_long", False):
-                        he.result = aRepr.repr(result).replace("{", "{{")
+                        he.result = aRepr.repr(result)
 
                         if not self.did_short_warning and he.result != repr(result):
                             self.did_short_warning = True
                             he.result += "\n\n" + __("The console is using short representations. To disable this, type 'long', and to re-enable, type 'short'")
                     else:
-                        he.result = repr(result).replace("{", "{{")
+                        he.result = repr(result)
 
                     he.update_lines()
                     return
@@ -748,26 +732,26 @@ init -1500 python in _console:
                 # Try to exec it.
                 try:
                     renpy.python.py_compile(code, "exec")
-                except Exception as e:
+                except Exception:
                     if error is None:
-                        error = self.format_exception_only(e)
+                        error = self.format_exception()
                 else:
                     renpy.python.py_exec(code)
                     return
 
                 if error is not None:
-                    error_lines = error.split("\n")
-                    error_lines = [ l for l in error_lines if not l or l.strip(" ~^") ] # remove ^/~ only lines.
-
-                    he.result = "\n".join(error_lines).replace("{", "{{")
+                    he.result = error
                     he.update_lines()
                     he.is_error = True
 
             except renpy.game.CONTROL_EXCEPTIONS:
                 raise
 
-            except Exception as e:
-                he.result = self.format_exception(e)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+
+                he.result = self.format_exception().rstrip()
                 he.update_lines()
                 he.is_error = True
 
@@ -814,7 +798,7 @@ init -1500 python in _console:
     def help(l, doc_generate=False):
 
         if l is not None:
-            rest = l.rest()
+            rest = l.rest_statement()
         else:
             rest = None
 
@@ -1109,15 +1093,15 @@ screen _console:
                     if he.command is not None:
                         frame style "_console_command":
                             xfill True
-                            text "[he.command!q]" style "_console_command_text" safe True
+                            text "[he.command!q]" style "_console_command_text"
 
                     if he.result is not None:
 
                         frame style "_console_result":
                             if he.is_error:
-                                text "[he.result]" style "_console_error_text" safe True
+                                text "[he.result!q]" style "_console_error_text"
                             else:
-                                text "[he.result!q]" style "_console_result_text" safe True
+                                text "[he.result!q]" style "_console_result_text"
 
         # Draw the current input.
         frame style "_console_input":

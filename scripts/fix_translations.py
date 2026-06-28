@@ -8,12 +8,12 @@ import codecs
 ENDINGS = [
     ".rpy",
     ".rpym",
-]
+    ]
 
 BOM = "\ufeff"
 
-
 def process_file(fn):
+
     for i in ENDINGS:
         if fn.endswith(i):
             break
@@ -22,9 +22,10 @@ def process_file(fn):
 
     print("Processing", fn)
 
-    lines = []
+    lines = [ ]
     with open(fn, "r") as f:
         for l in f:
+
             l = l.replace(BOM, "")
 
             if l.startswith("# TO" + "DO: Translation updated"):
@@ -40,6 +41,7 @@ def process_file(fn):
 
 
 def process(root):
+
     for dirname, _dirs, files in os.walk(root):
         for fn in files:
             fn = os.path.join(dirname, fn)

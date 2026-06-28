@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -19,18 +19,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from __future__ import division, absolute_import, with_statement, print_function, unicode_literals  # type: ignore
-from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode  # *
+from __future__ import division, absolute_import, with_statement, print_function, unicode_literals # type: ignore
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
 import os
 import sys
 import threading
 
 import renpy
-import renpy.pygame as pygame
+import pygame_sdl2
 
 from renpy.exports.commonexports import renpy_pure
-
 
 @renpy_pure
 def variant(name):
@@ -46,7 +45,7 @@ def variant(name):
     returns True if any of the variants would.
     """
 
-    if isinstance(name, str):
+    if isinstance(name, basestring):
         return name in renpy.config.variants
     else:
         for n in name:
@@ -68,8 +67,7 @@ def vibrate(duration):
         duration = 0.01
 
     if renpy.android:
-        import android
-
+        import android # @UnresolvedImport
         android.vibrate(duration)
 
 
@@ -85,7 +83,7 @@ def invoke_in_thread(fn, *args, **kwargs):
     stopped when Ren'Py is shutting down.
 
     This thread is very limited in what it can do with the Ren'Py API.
-    Changing store variables is allowed, as are calling the following
+    Changing store variables is allowed, as are calling calling the following
     functions:
 
     * :func:`renpy.restart_interaction`
@@ -107,7 +105,6 @@ def invoke_in_thread(fn, *args, **kwargs):
             fn(*args, **kwargs)
         except Exception:
             import traceback
-
             traceback.print_exc()
 
         renpy.exports.restart_interaction()
@@ -159,11 +156,11 @@ def get_on_battery():
 
     global old_battery
 
-    pi = pygame.power.get_power_info()
+    pi = pygame_sdl2.power.get_power_info() # @UndefinedVariable
 
-    if pi.state == pygame.POWERSTATE_UNKNOWN:
+    if pi.state == pygame_sdl2.POWERSTATE_UNKNOWN: # @UndefinedVariable
         return old_battery
-    elif pi.state == pygame.POWERSTATE_ON_BATTERY:
+    elif pi.state == pygame_sdl2.POWERSTATE_ON_BATTERY: # @UndefinedVariable
         old_battery = True
         return True
     else:
@@ -172,7 +169,6 @@ def get_on_battery():
 
 
 sdl_dll = False
-
 
 def get_sdl_dll():
     """
@@ -188,18 +184,10 @@ def get_sdl_dll():
         return sdl_dll
 
     try:
+
         lib = os.path.dirname(sys.executable) + "/"
 
-        DLLS = [
-            None,
-            lib + "librenpython.dll",
-            lib + "librenpython.dylib",
-            lib + "librenpython.so",
-            "librenpython.so",
-            "SDL2.dll",
-            "libSDL2.dylib",
-            "libSDL2-2.0.so.0",
-        ]
+        DLLS = [ None, lib + "librenpython.dll", lib + "librenpython.dylib", lib + "librenpython.so", "librenpython.so", "SDL2.dll", "libSDL2.dylib", "libSDL2-2.0.so.0" ]
 
         import ctypes
 
@@ -233,7 +221,7 @@ def get_sdl_window_pointer():
     """
 
     try:
-        window = pygame.display.get_window()
+        window = pygame_sdl2.display.get_window()
 
         if window is None:
             return None
@@ -261,12 +249,11 @@ def check_permission(permission):
         return False
 
     from jnius import autoclass
-
     PythonSDLActivity = autoclass("org.renpy.android.PythonSDLActivity")
     activity = PythonSDLActivity.mActivity
 
     try:
-        return activity.checkSelfPermission(permission) == 0  # PackageManager.PERMISSION_GRANTED
+        return activity.checkSelfPermission(permission) == 0 # PackageManager.PERMISSION_GRANTED
     except Exception:
         return False
 
@@ -288,8 +275,7 @@ def request_permission(permission):
     if not renpy.android:
         return False
 
-    return get_sdl_dll().SDL_AndroidRequestPermission(permission.encode("utf-8"))  # type: ignore
-
+    return get_sdl_dll().SDL_AndroidRequestPermission(permission.encode("utf-8")) # type: ignore
 
 def open_url(url):
     """
@@ -303,7 +289,6 @@ def open_url(url):
 
     try:
         import webbrowser
-
         webbrowser.open_new(url)
     except Exception:
         pass

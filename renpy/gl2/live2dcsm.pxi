@@ -92,163 +92,161 @@ def load(dll):
     cdef void *object = NULL
 
     if dll:
-        object = load_live2d_object(dll)
+        object = SDL_LoadObject(dll)
 
         if not object:
             return False
 
     global csmGetVersion
-    csmGetVersion = <csmGetVersionType> load_live2d_function(object, "csmGetVersion")
+    csmGetVersion = <csmGetVersionType> SDL_LoadFunction(object, "csmGetVersion")
     if not csmGetVersion:
         raise Exception("csmGetVersion not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetLatestMocVersion
-    csmGetLatestMocVersion = <csmGetLatestMocVersionType> load_live2d_function(object, "csmGetLatestMocVersion")
+    csmGetLatestMocVersion = <csmGetLatestMocVersionType> SDL_LoadFunction(object, "csmGetLatestMocVersion")
     if not csmGetLatestMocVersion:
         raise Exception("csmGetLatestMocVersion not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetMocVersion
-    csmGetMocVersion = <csmGetMocVersionType> load_live2d_function(object, "csmGetMocVersion")
+    csmGetMocVersion = <csmGetMocVersionType> SDL_LoadFunction(object, "csmGetMocVersion")
     if not csmGetMocVersion:
         raise Exception("csmGetMocVersion not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetLogFunction
-    csmGetLogFunction = <csmGetLogFunctionType> load_live2d_function(object, "csmGetLogFunction")
+    csmGetLogFunction = <csmGetLogFunctionType> SDL_LoadFunction(object, "csmGetLogFunction")
     if not csmGetLogFunction:
         raise Exception("csmGetLogFunction not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmSetLogFunction
-    csmSetLogFunction = <csmSetLogFunctionType> load_live2d_function(object, "csmSetLogFunction")
+    csmSetLogFunction = <csmSetLogFunctionType> SDL_LoadFunction(object, "csmSetLogFunction")
     if not csmSetLogFunction:
         raise Exception("csmSetLogFunction not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmReviveMocInPlace
-    csmReviveMocInPlace = <csmReviveMocInPlaceType> load_live2d_function(object, "csmReviveMocInPlace")
+    csmReviveMocInPlace = <csmReviveMocInPlaceType> SDL_LoadFunction(object, "csmReviveMocInPlace")
     if not csmReviveMocInPlace:
         raise Exception("csmReviveMocInPlace not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetSizeofModel
-    csmGetSizeofModel = <csmGetSizeofModelType> load_live2d_function(object, "csmGetSizeofModel")
+    csmGetSizeofModel = <csmGetSizeofModelType> SDL_LoadFunction(object, "csmGetSizeofModel")
     if not csmGetSizeofModel:
         raise Exception("csmGetSizeofModel not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmInitializeModelInPlace
-    csmInitializeModelInPlace = <csmInitializeModelInPlaceType> load_live2d_function(object, "csmInitializeModelInPlace")
+    csmInitializeModelInPlace = <csmInitializeModelInPlaceType> SDL_LoadFunction(object, "csmInitializeModelInPlace")
     if not csmInitializeModelInPlace:
         raise Exception("csmInitializeModelInPlace not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmUpdateModel
-    csmUpdateModel = <csmUpdateModelType> load_live2d_function(object, "csmUpdateModel")
+    csmUpdateModel = <csmUpdateModelType> SDL_LoadFunction(object, "csmUpdateModel")
     if not csmUpdateModel:
         raise Exception("csmUpdateModel not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmReadCanvasInfo
-    csmReadCanvasInfo = <csmReadCanvasInfoType> load_live2d_function(object, "csmReadCanvasInfo")
+    csmReadCanvasInfo = <csmReadCanvasInfoType> SDL_LoadFunction(object, "csmReadCanvasInfo")
     if not csmReadCanvasInfo:
         raise Exception("csmReadCanvasInfo not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterCount
-    csmGetParameterCount = <csmGetParameterCountType> load_live2d_function(object, "csmGetParameterCount")
+    csmGetParameterCount = <csmGetParameterCountType> SDL_LoadFunction(object, "csmGetParameterCount")
     if not csmGetParameterCount:
         raise Exception("csmGetParameterCount not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterIds
-    csmGetParameterIds = <csmGetParameterIdsType> load_live2d_function(object, "csmGetParameterIds")
+    csmGetParameterIds = <csmGetParameterIdsType> SDL_LoadFunction(object, "csmGetParameterIds")
     if not csmGetParameterIds:
         raise Exception("csmGetParameterIds not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterMinimumValues
-    csmGetParameterMinimumValues = <csmGetParameterMinimumValuesType> load_live2d_function(object, "csmGetParameterMinimumValues")
+    csmGetParameterMinimumValues = <csmGetParameterMinimumValuesType> SDL_LoadFunction(object, "csmGetParameterMinimumValues")
     if not csmGetParameterMinimumValues:
         raise Exception("csmGetParameterMinimumValues not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterMaximumValues
-    csmGetParameterMaximumValues = <csmGetParameterMaximumValuesType> load_live2d_function(object, "csmGetParameterMaximumValues")
+    csmGetParameterMaximumValues = <csmGetParameterMaximumValuesType> SDL_LoadFunction(object, "csmGetParameterMaximumValues")
     if not csmGetParameterMaximumValues:
         raise Exception("csmGetParameterMaximumValues not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterDefaultValues
-    csmGetParameterDefaultValues = <csmGetParameterDefaultValuesType> load_live2d_function(object, "csmGetParameterDefaultValues")
+    csmGetParameterDefaultValues = <csmGetParameterDefaultValuesType> SDL_LoadFunction(object, "csmGetParameterDefaultValues")
     if not csmGetParameterDefaultValues:
         raise Exception("csmGetParameterDefaultValues not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetParameterValues
-    csmGetParameterValues = <csmGetParameterValuesType> load_live2d_function(object, "csmGetParameterValues")
+    csmGetParameterValues = <csmGetParameterValuesType> SDL_LoadFunction(object, "csmGetParameterValues")
     if not csmGetParameterValues:
         raise Exception("csmGetParameterValues not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetPartCount
-    csmGetPartCount = <csmGetPartCountType> load_live2d_function(object, "csmGetPartCount")
+    csmGetPartCount = <csmGetPartCountType> SDL_LoadFunction(object, "csmGetPartCount")
     if not csmGetPartCount:
         raise Exception("csmGetPartCount not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetPartIds
-    csmGetPartIds = <csmGetPartIdsType> load_live2d_function(object, "csmGetPartIds")
+    csmGetPartIds = <csmGetPartIdsType> SDL_LoadFunction(object, "csmGetPartIds")
     if not csmGetPartIds:
         raise Exception("csmGetPartIds not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetPartOpacities
-    csmGetPartOpacities = <csmGetPartOpacitiesType> load_live2d_function(object, "csmGetPartOpacities")
+    csmGetPartOpacities = <csmGetPartOpacitiesType> SDL_LoadFunction(object, "csmGetPartOpacities")
     if not csmGetPartOpacities:
         raise Exception("csmGetPartOpacities not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetPartParentPartIndices
-    csmGetPartParentPartIndices = <csmGetPartParentPartIndicesType> load_live2d_function(object, "csmGetPartParentPartIndices")
+    csmGetPartParentPartIndices = <csmGetPartParentPartIndicesType> SDL_LoadFunction(object, "csmGetPartParentPartIndices")
     if not csmGetPartParentPartIndices:
         raise Exception("csmGetPartParentPartIndices not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableCount
-    csmGetDrawableCount = <csmGetDrawableCountType> load_live2d_function(object, "csmGetDrawableCount")
+    csmGetDrawableCount = <csmGetDrawableCountType> SDL_LoadFunction(object, "csmGetDrawableCount")
     if not csmGetDrawableCount:
         raise Exception("csmGetDrawableCount not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableIds
-    csmGetDrawableIds = <csmGetDrawableIdsType> load_live2d_function(object, "csmGetDrawableIds")
+    csmGetDrawableIds = <csmGetDrawableIdsType> SDL_LoadFunction(object, "csmGetDrawableIds")
     if not csmGetDrawableIds:
         raise Exception("csmGetDrawableIds not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableConstantFlags
-    csmGetDrawableConstantFlags = <csmGetDrawableConstantFlagsType> load_live2d_function(object, "csmGetDrawableConstantFlags")
+    csmGetDrawableConstantFlags = <csmGetDrawableConstantFlagsType> SDL_LoadFunction(object, "csmGetDrawableConstantFlags")
     if not csmGetDrawableConstantFlags:
         raise Exception("csmGetDrawableConstantFlags not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableDynamicFlags
-    csmGetDrawableDynamicFlags = <csmGetDrawableDynamicFlagsType> load_live2d_function(object, "csmGetDrawableDynamicFlags")
+    csmGetDrawableDynamicFlags = <csmGetDrawableDynamicFlagsType> SDL_LoadFunction(object, "csmGetDrawableDynamicFlags")
     if not csmGetDrawableDynamicFlags:
         raise Exception("csmGetDrawableDynamicFlags not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableTextureIndices
-    csmGetDrawableTextureIndices = <csmGetDrawableTextureIndicesType> load_live2d_function(object, "csmGetDrawableTextureIndices")
+    csmGetDrawableTextureIndices = <csmGetDrawableTextureIndicesType> SDL_LoadFunction(object, "csmGetDrawableTextureIndices")
     if not csmGetDrawableTextureIndices:
         raise Exception("csmGetDrawableTextureIndices not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableDrawOrders
-    csmGetDrawableDrawOrders = <csmGetDrawableDrawOrdersType> load_live2d_function(object, "csmGetDrawableDrawOrders")
+    csmGetDrawableDrawOrders = <csmGetDrawableDrawOrdersType> SDL_LoadFunction(object, "csmGetDrawableDrawOrders")
     if not csmGetDrawableDrawOrders:
         raise Exception("csmGetDrawableDrawOrders not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableRenderOrders
-    csmGetDrawableRenderOrders = <csmGetDrawableRenderOrdersType> load_live2d_function(object, "csmGetDrawableRenderOrders")
+    csmGetDrawableRenderOrders = <csmGetDrawableRenderOrdersType> SDL_LoadFunction(object, "csmGetDrawableRenderOrders")
     if not csmGetDrawableRenderOrders:
-        csmGetDrawableRenderOrders = <csmGetDrawableRenderOrdersType> load_live2d_function(object, "csmGetRenderOrders")
-    if not csmGetDrawableRenderOrders:
-        raise Exception("Neither csmGetDrawableRenderOrders nor csmGetRenderOrders was found in Live2D dll " + dll.decode() + ".")
+        raise Exception("csmGetDrawableRenderOrders not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableOpacities
-    csmGetDrawableOpacities = <csmGetDrawableOpacitiesType> load_live2d_function(object, "csmGetDrawableOpacities")
+    csmGetDrawableOpacities = <csmGetDrawableOpacitiesType> SDL_LoadFunction(object, "csmGetDrawableOpacities")
     if not csmGetDrawableOpacities:
         raise Exception("csmGetDrawableOpacities not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableMaskCounts
-    csmGetDrawableMaskCounts = <csmGetDrawableMaskCountsType> load_live2d_function(object, "csmGetDrawableMaskCounts")
+    csmGetDrawableMaskCounts = <csmGetDrawableMaskCountsType> SDL_LoadFunction(object, "csmGetDrawableMaskCounts")
     if not csmGetDrawableMaskCounts:
         raise Exception("csmGetDrawableMaskCounts not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableMasks
-    csmGetDrawableMasks = <csmGetDrawableMasksType> load_live2d_function(object, "csmGetDrawableMasks")
+    csmGetDrawableMasks = <csmGetDrawableMasksType> SDL_LoadFunction(object, "csmGetDrawableMasks")
     if not csmGetDrawableMasks:
         raise Exception("csmGetDrawableMasks not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableVertexCounts
-    csmGetDrawableVertexCounts = <csmGetDrawableVertexCountsType> load_live2d_function(object, "csmGetDrawableVertexCounts")
+    csmGetDrawableVertexCounts = <csmGetDrawableVertexCountsType> SDL_LoadFunction(object, "csmGetDrawableVertexCounts")
     if not csmGetDrawableVertexCounts:
         raise Exception("csmGetDrawableVertexCounts not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableVertexPositions
-    csmGetDrawableVertexPositions = <csmGetDrawableVertexPositionsType> load_live2d_function(object, "csmGetDrawableVertexPositions")
+    csmGetDrawableVertexPositions = <csmGetDrawableVertexPositionsType> SDL_LoadFunction(object, "csmGetDrawableVertexPositions")
     if not csmGetDrawableVertexPositions:
         raise Exception("csmGetDrawableVertexPositions not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableVertexUvs
-    csmGetDrawableVertexUvs = <csmGetDrawableVertexUvsType> load_live2d_function(object, "csmGetDrawableVertexUvs")
+    csmGetDrawableVertexUvs = <csmGetDrawableVertexUvsType> SDL_LoadFunction(object, "csmGetDrawableVertexUvs")
     if not csmGetDrawableVertexUvs:
         raise Exception("csmGetDrawableVertexUvs not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableIndexCounts
-    csmGetDrawableIndexCounts = <csmGetDrawableIndexCountsType> load_live2d_function(object, "csmGetDrawableIndexCounts")
+    csmGetDrawableIndexCounts = <csmGetDrawableIndexCountsType> SDL_LoadFunction(object, "csmGetDrawableIndexCounts")
     if not csmGetDrawableIndexCounts:
         raise Exception("csmGetDrawableIndexCounts not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableIndices
-    csmGetDrawableIndices = <csmGetDrawableIndicesType> load_live2d_function(object, "csmGetDrawableIndices")
+    csmGetDrawableIndices = <csmGetDrawableIndicesType> SDL_LoadFunction(object, "csmGetDrawableIndices")
     if not csmGetDrawableIndices:
         raise Exception("csmGetDrawableIndices not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableMultiplyColors
-    csmGetDrawableMultiplyColors = <csmGetDrawableMultiplyColorsType> load_live2d_function(object, "csmGetDrawableMultiplyColors")
+    csmGetDrawableMultiplyColors = <csmGetDrawableMultiplyColorsType> SDL_LoadFunction(object, "csmGetDrawableMultiplyColors")
     if not csmGetDrawableMultiplyColors:
         raise Exception("csmGetDrawableMultiplyColors not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmGetDrawableScreenColors
-    csmGetDrawableScreenColors = <csmGetDrawableScreenColorsType> load_live2d_function(object, "csmGetDrawableScreenColors")
+    csmGetDrawableScreenColors = <csmGetDrawableScreenColorsType> SDL_LoadFunction(object, "csmGetDrawableScreenColors")
     if not csmGetDrawableScreenColors:
         raise Exception("csmGetDrawableScreenColors not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
     global csmResetDrawableDynamicFlags
-    csmResetDrawableDynamicFlags = <csmResetDrawableDynamicFlagsType> load_live2d_function(object, "csmResetDrawableDynamicFlags")
+    csmResetDrawableDynamicFlags = <csmResetDrawableDynamicFlagsType> SDL_LoadFunction(object, "csmResetDrawableDynamicFlags")
     if not csmResetDrawableDynamicFlags:
         raise Exception("csmResetDrawableDynamicFlags not found in Live2D dll " + dll.decode() + ". (The dll could be an old version.)")
 

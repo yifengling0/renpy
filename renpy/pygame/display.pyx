@@ -275,6 +275,7 @@ cdef class Window:
             self.surface = None
 
         SDL_DestroyWindow(self.window)
+        self.window = NULL
 
     def resize(self, size, opengl=False, fullscreen=None, maximized=None):
         """
@@ -369,6 +370,7 @@ cdef class Window:
 
     def flip(self):
         cdef const char *err
+        cdef SDL_Window *_win
 
         if self.gl_context != NULL:
             with nogil:
@@ -386,8 +388,9 @@ cdef class Window:
             if self.surface.surface != self.window_surface:
                 self.proxy_window_surface()
 
+            _win = self.window
             with nogil:
-                SDL_UpdateWindowSurface(self.window)
+                SDL_UpdateWindowSurface(_win)
 
     def get_surface(self):
         return self.surface

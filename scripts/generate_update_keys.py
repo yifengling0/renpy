@@ -17,3 +17,4 @@ with open(args.public, "wb") as f:
 
 with open(args.private, "wb") as f:
     f.write(private.save_pkcs1())
+

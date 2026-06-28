@@ -1,4 +1,4 @@
-﻿# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+﻿# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -112,57 +112,6 @@ init -1500 python:
                 self.old_value = other.value
                 self.start_time = None
 
-    class CallableValue(BarValue, DictEquality):
-        """
-        A bar value that displays the result of a periodic call
-        to the `_callable` every `delay` seconds.
-
-        `_callable`
-            Callable object. It should return a number.
-
-        `range`
-            The range of the value.
-
-        `delay`
-            The time after which the bar will be updated as a result
-            of calling the `_callable` again
-            (set 0 for the fastest possible call).
-        """
-
-        def __init__(self, _callable, range=1.0, delay=0.0):
-
-            if not callable(_callable):
-                raise ValueError("The argument must be callable.")
-
-            self._callable = _callable
-            self.range = range
-            self.delay = delay
-
-            self.adjustment = None
-            self.st = None
-
-        def periodic(self, st):
-
-            if (self.st is None) or (self.delay <= 0.0):
-                redraw = 0.0
-            else:
-                redraw = self.delay - (st - self.st)
-
-            if redraw <= 0.0:
-                self.st = st
-                self.adjustment.change(self._callable())
-                return 0.0
-
-            return redraw
-
-        def get_adjustment(self):
-            self.adjustment = ui.adjustment(
-                value=self._callable(),
-                range=self.range,
-                adjustable=False
-            )
-            return self.adjustment
-
     class __GenericValue(BarValue, FieldEquality):
         # pickle defaults
         offset = 0
@@ -266,7 +215,7 @@ init -1500 python:
             try:
                 self.dict[self.key] = value
             except LookupError as e:
-                raise Exception("The {!r} {} does not exist".format(self.key, self.kind)) from e
+                raise Exception("The {!r} {} does not exist".format(self.key, self.kind)) # from e # PY3 only
 
     @renpy.pure
     class FieldValue(__GenericValue):
@@ -323,7 +272,7 @@ init -1500 python:
 
     @renpy.pure
     class ScreenVariableValue(__GenericValue):
-        r"""
+        """
         :doc: value
         :args: {args}
 
@@ -365,7 +314,7 @@ init -1500 python:
 
     # unpure
     class LocalVariableValue(DictValue):
-        r"""
+        """
         :doc: value
         :args: {args}
 
@@ -413,9 +362,6 @@ init -1500 python hide:
         `step`
             The amount to change the bar by. If None, defaults to 1/10th of
             the bar.
-        `force_step`
-            If True, the bar can only take discrete steps, with the steps given
-            by `step`. If False, the bar can take any value in the range.
         `action`
             If not None, an action to call when the {kind}'s value is changed.
         `min`
@@ -453,24 +399,10 @@ init -1500 python:
             The name of the mixer to adjust. This is usually one of
             "main", "music", "sfx", or "voice". See :ref:`volume`
             for more information.
-
-        `step`
-            The amount to change the bar by. If None, defaults to 1/10th of
-            the bar. For MixerValue, this is the amount of decibels to change the
-            volume by.
-
-        `force_step`
-            If True, the bar can only take discrete steps, with the steps given
-            by `step`. If False, the bar can take any value in the range.
         """
 
-        step = None
-        force_step = False
-
-        def __init__(self, mixer, step=None, force_step=False):
+        def __init__(self, mixer):
             self.mixer = mixer
-            self.step = step
-            self.force_step = force_step
 
         def get_volume(self):
             return _preferences.get_volume(self.mixer)
@@ -521,9 +453,7 @@ init -1500 python:
             return ui.adjustment(
                 range=range,
                 value=value,
-                changed=self.set_mixer,
-                step=self.step,
-                force_step=self.force_step)
+                changed=self.set_mixer)
 
         def get_style(self):
             return "slider", "vslider"

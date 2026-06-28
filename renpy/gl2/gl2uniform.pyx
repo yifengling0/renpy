@@ -22,6 +22,7 @@
 
 from renpy.display.matrix cimport Matrix
 from renpy.gl2.gl2texture cimport GLTexture
+from renpy.gl2.gl2draw cimport GL2DrawingContext
 from renpy.display.render cimport Render
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free

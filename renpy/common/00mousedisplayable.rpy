@@ -1,4 +1,4 @@
-﻿# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+﻿# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -29,8 +29,7 @@ init -1500 python:
         it to move across the screen when the player moves their mouse.
 
         `cursor`
-            A displayable that is used to draw the mouse. If this is None,
-            the hardware cursor is used.
+            A displayable that is used to draw the mouse.
 
         `x`, `y`
             The coordinates of the hotspot, relative to the upper left
@@ -39,20 +38,16 @@ init -1500 python:
 
         cursor = None
 
-        def __init__(self, cursor, x=0, y=0):
+        def __init__(self, cursor, x, y):
 
             super(MouseDisplayable, self).__init__()
 
-            if cursor:
-                self.cursors = { 'default': ( renpy.displayable(cursor), x, y) }
-            else:
-                self.cursors = { 'default': None }
-
+            self.cursors = { 'default': ( renpy.displayable(cursor), x, y) }
 
             self.last_cursor = "_default_"
             self.last_cursor_st = 0
 
-        def add(self, name, cursor, x=0, y=0):
+        def add(self, name, cursor, x, y):
             """
             :doc: mouse_displayable
 
@@ -60,45 +55,20 @@ init -1500 python:
             mouse is displayed. This returns the MouseDisplayable,
             so that calls to this method can be chained.
             """
-
-            if cursor is None:
-                self.cursors[name] = None
-                return
-
             self.cursors[name] = ( renpy.displayable(cursor), x, y )
             return self
 
-        def get_cursor_name(self):
-            """
-            Return the name of the cursor that will be used.
-            """
-
-            # Determine the name of the mouse to use.
-            for name in renpy.get_mouse_names():
-                if name in self.cursors:
-                    return name
-
-            return "default"
-
-        def _has_mouse_cursor(self):
-            """
-            Returns True if this displayable will draw the mouse cursor,
-            False if it won't.
-            """
-
-            name = self.get_cursor_name()
-            return self.cursors.get(name, None) is not None
-
         def render(self, width, height, st, at):
 
+            # Determine the name of the mouse to use.
+            name = renpy.get_mouse_name()
 
-            name = self.get_cursor_name()
+            # If it doesn't exist, use the default.
+            if (name not in self.cursors) or (name == "default"):
+                name = getattr(store, "default_mouse", "default")
 
-            # Render this displayable.
-            rv = renpy.Render(width, height)
-
-            if self.cursors[name] is None:
-                return rv
+            if name not in self.cursors:
+                name = "default"
 
             # Adjust st when the cursor changes.
             if (name != self.last_cursor) or (self.cursor is None):
@@ -107,6 +77,9 @@ init -1500 python:
                 self.cursor = self.cursors[name][0]._duplicate(None)
 
             st = st - self.last_cursor_st
+
+            # Render this displayable.
+            rv = renpy.Render(width, height)
 
             # If the user is on the screen,
             x, y = renpy.get_mouse_pos()
@@ -124,4 +97,4 @@ init -1500 python:
             return rv
 
         def visit(self):
-            return [ i[0] for i in self.cursors.values() if i ]
+            return [ i[0] for i in self.cursors.values() ]

@@ -1,4 +1,4 @@
-﻿# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+﻿# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -83,17 +83,12 @@ init -1500 python:
 
             return True
 
-        def show(self, locked, index, count, first):
+        def show(self, locked, index, count):
             """
             Shows this image when it's unlocked.
             """
 
-            if first:
-                transition = getattr(self.gallery, "enter_transition", self.gallery.transition)
-            else:
-                transition = getattr(self.gallery, "intra_transition", self.gallery.transition)
-
-            renpy.transition(transition)
+            renpy.transition(self.gallery.transition)
             ui.saybehavior()
 
             displayables = [ ]
@@ -177,25 +172,9 @@ init -1500 python:
         locking of images, providing an action that can show one or more images,
         and a providing method that creates buttons that use that action.
 
-        .. attribute:: enter_transition
-
-            The transition that is used when displaying the first image associated
-            with a gallery button.
-
-        .. attribute:: intra_transition
-
-            The transition that is used when displaying images associated with
-            gallery buttons, apart from the first.
-
-        .. attribute:: exit_transition
-
-            The transition that is used when returning from the last image associated
-            with a gallery button to the gallery screen.
-
         .. attribute:: transition
 
-            This is used in place of enter_transition, intra_transition, or exit_transition
-            if one or more of them has not been set.
+            The transition that is used when changing images.
 
         .. attribute:: locked_button
 
@@ -365,7 +344,7 @@ init -1500 python:
                 A string giving a Python expression.
             """
 
-            if not isinstance(expression, str):
+            if not isinstance(expression, basestring):
                 raise Exception("Gallery condition must be a string containing an expression.")
 
             self.unlockable.conditions.append(__GalleryArbitraryCondition(expression))
@@ -476,7 +455,7 @@ init -1500 python:
             :doc: gallery method
 
             Returns a text string giving the number of unlocked images and total number of images in the button
-            named `name`. If `name` is None, returns the same information for all buttons.
+            named `name`.
 
             `format`
                 A Python format string that's used to format the numbers. This has three values that
@@ -495,15 +474,7 @@ init -1500 python:
 
             all_prior = True
 
-            if name is not None:
-                images = self.buttons[name].images
-            else:
-                images = [ ]
-
-                for b in self.button_list:
-                    images.extend(b.images)
-
-            for i in images:
+            for i in self.buttons[name].images:
                 total += 1
                 if i.check_unlock(all_prior):
                     seen += 1
@@ -548,8 +519,6 @@ init -1500 python:
 
             self.slideshow = False
 
-            first = True
-
             # Loop, displaying the images.
             while True:
 
@@ -563,9 +532,7 @@ init -1500 python:
 
                 i = b.images[image]
 
-                result = i.show((button, image) not in unlocked_images, image, len(b.images), first)
-
-                first = False
+                result = i.show((button, image) not in unlocked_images, image, len(b.images))
 
                 # Default action for click.
 
@@ -605,7 +572,7 @@ init -1500 python:
                 button = new_button
                 image = new_image
 
-            renpy.transition(getattr(self, "exit_transition", self.transition))
+            renpy.transition(self.transition)
 
         def Return(self):
             """

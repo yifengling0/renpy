@@ -1,0 +1,1 @@
+# Stub for renpy.styledata.style_selected_idle_functions

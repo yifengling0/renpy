@@ -15,7 +15,7 @@ ENDINGS = [
     ".py",
     ".pyx",
     ".pxd",
-]
+    ]
 
 WHITELIST = """\
 renpy/vc_version.py
@@ -43,8 +43,8 @@ launcher/game/theme""".split()
 
 LICENSE = "Permission is hereby granted"
 
-
 def process_file(fn):
+
     for i in ENDINGS:
         if fn.endswith(i):
             break
@@ -60,6 +60,7 @@ def process_file(fn):
     first = True
 
     with open(fn, "r") as f:
+
         for l in f:
             if fn.endswith(".rpy") or fn.endswith(".rpym"):
                 if first:
@@ -72,7 +73,9 @@ def process_file(fn):
 
                 first = False
 
-            m = re.search(r"Copyright (\d{4})-%d Tom Rothamel" % datetime.datetime.now().year, l)
+            m = re.search(
+                r"Copyright (\d{4})-%d Tom Rothamel" % datetime.datetime.now().year,
+                l)
 
             if m:
                 has_copyright = True
@@ -87,13 +90,14 @@ def process_file(fn):
 
 
 def process(root):
+
     for dirname, _dirs, files in os.walk(root):
         for fn in files:
             fn = os.path.join(dirname, fn)
             process_file(fn)
 
-
 if __name__ == "__main__":
+
     os.chdir(pathlib.Path(__file__).absolute().parent.parent)
 
     print(os.getcwd())

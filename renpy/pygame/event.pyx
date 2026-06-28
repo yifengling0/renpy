@@ -452,6 +452,7 @@ def wait():
 
     cdef SDL_Event evt
     cdef int result
+    cdef SDL_Event *evt_ptr
 
     with lock:
         poll_sdl()
@@ -459,8 +460,9 @@ def wait():
         if event_queue:
             return event_queue.pop(0)
 
+    evt_ptr = &evt
     with nogil:
-        result = SDL_WaitEvent(&evt)
+        result = SDL_WaitEvent(evt_ptr)
 
     if result:
         return make_event(&evt)
@@ -523,12 +525,18 @@ def get_blocked(t):
     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
 
 def set_grab(on):
+    if main_window is None or main_window.window == NULL:
+        return
+
     SDL_SetWindowGrab(main_window.window, on)
 
     if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:
         SDL_SetRelativeMouseMode(on)
 
 def get_grab():
+    if main_window is None or main_window.window == NULL:
+        return False
+
     return SDL_GetWindowGrab(main_window.window)
 
 def set_mousewheel_buttons(flag):

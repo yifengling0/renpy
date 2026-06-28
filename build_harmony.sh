@@ -273,7 +273,7 @@ echo "[5/7] Setting build environment..."
 export CC="python $WIN_WRAPPER cc"
 export CXX="python $WIN_WRAPPER cxx"
 export LDSHARED="python $WIN_WRAPPER ldcc"
-export LDCXXSHARED="python $WIN_WRAPPER ldcxx"
+export LDCXXSHARED="$WIN_CLANGXX --target=$TARGET_TRIPLE --sysroot=$WIN_SYSROOT -D__MUSL__ -shared"
 
 export AR="$(cygpath -m "$OHOS_NDK/bin/llvm-ar.exe")"
 export RANLIB="$(cygpath -m "$OHOS_NDK/bin/llvm-ranlib.exe")"
@@ -307,8 +307,8 @@ export _PYTHON_HOST_PLATFORM="$HOST_PLATFORM"
 
 # Skip packages and modules without HarmonyOS libraries
 # Note: OpenSSL is now available (built in Python-3.12.12/harmony_deps)
-export RENPY_SKIP_PACKAGES="assimp"
-export RENPY_SKIP_MODULES="renpy.gl2.assimp renpy.tfd"
+export RENPY_SKIP_PACKAGES=""
+export RENPY_SKIP_MODULES="renpy.tfd"
 
 echo "  CC=$CC"
 echo "  LDSHARED=$LDSHARED"

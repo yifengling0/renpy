@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -20,6 +20,10 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # This file contains code to handle GUI-based error reporting.
+
+from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
+
 
 import os
 
@@ -56,6 +60,8 @@ def init_display():
     The minimum amount of code required to init the display.
     """
 
+    renpy.config.gl2 = getattr(renpy.game.persistent, "_gl2", True)
+
     # Ensure we have correctly-typed preferences.
     renpy.game.preferences.check()
 
@@ -64,7 +70,7 @@ def init_display():
 
     if not renpy.game.interface:
         renpy.display.core.Interface()
-        renpy.loader.index_files()
+        renpy.loader.index_archives()
         renpy.display.im.cache.init()
 
     renpy.game.interface.start()
@@ -80,7 +86,7 @@ def error_dump():
     renpy.dump.dump(True)
 
 
-def report_exception(traceback_exception: renpy.error.TracebackException) -> bool:
+def report_exception(short, full, traceback_fn):
     """
     Reports an exception to the user. Returns True if the exception should
     be raised by the normal reporting mechanisms. Otherwise, should raise
@@ -113,10 +119,9 @@ def report_exception(traceback_exception: renpy.error.TracebackException) -> boo
     rollback_action = None
     reload_action = None
 
-    renpy.store.te = traceback_exception
-
     try:
         if not renpy.game.context().init_phase:
+
             if renpy.config.rollback_enabled:
                 rollback_action = renpy.display.error.rollback_action
 
@@ -125,35 +130,41 @@ def report_exception(traceback_exception: renpy.error.TracebackException) -> boo
         else:
             reload_action = renpy.exports.utter_restart
 
-        # If next node is known, allow to advance to it.
-        if renpy.game.context().next_node is not None:
+        if renpy.game.context(-1).next_node is not None:
             ignore_action = renpy.ui.returns(False)
-
     except Exception:
         pass
 
-    renpy.game.invoke_in_new_context(
-        call_exception_screen,
-        "_exception",
-        traceback_exception=traceback_exception,
-        rollback_action=rollback_action,
-        reload_action=reload_action,
-        ignore_action=ignore_action,
-    )
+    try:
 
-    # Don't report images that failed to load.
-    renpy.display.im.ignored_images |= renpy.display.im.images_to_ignore
-    renpy.config.raise_image_exceptions = False
-    renpy.config.raise_image_load_exceptions = False
+        renpy.game.invoke_in_new_context(
+            call_exception_screen,
+            "_exception",
+            short=short, full=full,
+            rollback_action=rollback_action,
+            reload_action=reload_action,
+            ignore_action=ignore_action,
+            traceback_fn=traceback_fn,
+            )
 
-    # If creator overrides ignore action, run it.
-    if renpy.store._ignore_action is not None:
-        renpy.display.behavior.run(renpy.store._ignore_action)
+        renpy.display.im.ignored_images |= renpy.display.im.images_to_ignore
 
-    return False
+        if renpy.store._ignore_action is not None:
+            renpy.display.behavior.run(renpy.store._ignore_action)
+
+        renpy.config.raise_image_exceptions = False
+        renpy.config.raise_image_load_exceptions = False
+
+    except renpy.game.CONTROL_EXCEPTIONS:
+        raise
+
+    except Exception:
+        renpy.display.log.write("While handling exception:")
+        renpy.display.log.exception()
+        raise
 
 
-def report_parse_errors(errors: list[str], error_fn: str) -> bool:
+def report_parse_errors(errors, error_fn):
     """
     Reports an exception to the user. Returns True if the exception should
     be raised by the normal reporting mechanisms. Otherwise, should raise
@@ -165,7 +176,7 @@ def report_parse_errors(errors: list[str], error_fn: str) -> bool:
 
     error_dump()
 
-    if renpy.game.args.command != "run":
+    if renpy.game.args.command != "run": # @UndefinedVariable
         return True
 
     if "RENPY_SIMPLE_EXCEPTIONS" in os.environ:
@@ -183,13 +194,14 @@ def report_parse_errors(errors: list[str], error_fn: str) -> bool:
     reload_action = renpy.exports.utter_restart
 
     try:
+
         renpy.game.invoke_in_new_context(
             call_exception_screen,
             "_parse_errors",
             reload_action=reload_action,
             errors=errors,
             error_fn=error_fn,
-        )
+            )
 
     except renpy.game.CONTROL_EXCEPTIONS:
         raise
@@ -198,5 +210,3 @@ def report_parse_errors(errors: list[str], error_fn: str) -> bool:
         renpy.display.log.write("While handling exception:")
         renpy.display.log.exception()
         raise
-
-    return False

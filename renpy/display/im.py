@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -23,40 +23,41 @@
 # size-based caching and constructing images from operations (like
 # cropping and scaling).
 
+from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
-from typing import Any, Literal
+
 
 import math
 import zipfile
 import threading
 import time
 import io
-import os
+import os.path
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import pygame_sdl2
 import renpy
 
-type Surface = renpy.pygame.Surface
-
-
 # This is an entry in the image cache.
-class CacheEntry:
-    def __init__(self, what: "ImageBase", surf: Surface, bounds: tuple[int, int, int, int]):
+class CacheEntry(object):
+
+    def __init__(self, what, surf, bounds):
+
         # The object that is being cached (which needs to be
         # hashable and comparable).
         self.what = what
 
         # The pygame surface corresponding to the cached object. This may be
         # None if we've tossed the surface.
-        self.surf: Surface | None = surf
+        self.surf = surf
 
         # The sizes of surf.
         self.width, self.height = surf.get_size()
 
         # The texture corresponding to the visible area of the cached object.
         # This may be None if no texture has been loaded.
-        self.texture: Any | None = None
+        self.texture = None
 
         # The bounds of the texture within the width and height.
         self.bounds = bounds
@@ -64,30 +65,34 @@ class CacheEntry:
         # The time when this cache entry was last used.
         self.time = 0
 
-    def size(self) -> int:
+    def size(self):
         if renpy.config.cache_surfaces:
-            multiplier = 2.34  # 1 for the texture, 1 for the surface, .34 for mipmaps.
+            multiplier = 2.34 # 1 for the texture, 1 for the surface, .34 for mipmaps.
         else:
-            multiplier = 1.34  # 1 for the texture, .34 for mipmaps.
+            multiplier = 1.34 # 1 for the texture, .34 for mipmaps.
 
         return int(self.bounds[2] * self.bounds[3] * multiplier)
 
 
 # This is the singleton image cache.
-class Cache:
+
+
+class Cache(object):
+
     def __init__(self):
+
         # The current arbitrary time. (Increments by one for each
         # interaction.)
         self.time = 0
 
         # A map from Image object to CacheEntry.
-        self.cache: dict[ImageBase, CacheEntry] = {}
+        self.cache = { }
 
         # The size of all entries in the cache, in pixels.
-        self.cache_size: int = 0
+        self.cache_size = 0
 
         # A list of Image objects that we want to preload.
-        self.preloads: list[ImageBase] = []
+        self.preloads = [ ]
 
         # False if this is not the first preload in this tick.
         self.first_preload_in_tick = True
@@ -102,14 +107,10 @@ class Cache:
         self.keep_preloading = True
 
         # Images that we tried, and failed, to preload.
-        self.preload_blacklist: set[ImageBase] = set()
+        self.preload_blacklist = set()
 
         # The size of the cache, in pixels.
         self.cache_limit = 0
-
-        # True if we're in a preload pass, but outside of the preload thread. The code that calls the
-        # preload pass is responsible for setting this to True and False.
-        self.in_preload_pass: bool = False
 
         # The preload thread.
         if not renpy.emscripten:
@@ -119,12 +120,8 @@ class Cache:
         else:
             self.preload_thread = None
 
-        # Thread pool for parallel image decoding
-        self.decode_pool: ThreadPoolExecutor | None = None
-        self.decode_pool_workers: int = 0
-
         # Have we been added this tick?
-        self.added: set[ImageBase] = set()
+        self.added = set()
 
         # A list of (time, filename, preload) tuples. This is updated when
         # config.developer is True and an image is loaded. Preload is a
@@ -133,9 +130,9 @@ class Cache:
         # is first.
         #
         # This is only updated when config.developer is True.
-        self.load_log: list[tuple[float, str, bool]] = []
+        self.load_log = [ ]
 
-    def done(self) -> bool:
+    def done(self):
         """
         Returns true if the cache does not have any images to preload.
         """
@@ -143,7 +140,7 @@ class Cache:
         with self.preload_lock:
             return not self.preloads
 
-    def get_total_size(self) -> int:
+    def get_total_size(self):
         """
         Returns the total size of the surfaces and textures that make up the
         cache, in pixels.
@@ -151,7 +148,7 @@ class Cache:
 
         return self.cache_size
 
-    def get_current_size(self, generations: int) -> int:
+    def get_current_size(self, generations):
         """
         Returns the size of the most recent `generation` generations of
         the cache. (1 is the current, 2 is the current and one before).
@@ -171,13 +168,11 @@ class Cache:
         """
 
         if renpy.config.image_cache_size is not None:
-            self.cache_limit = (
-                2 * renpy.config.image_cache_size * renpy.config.screen_width * renpy.config.screen_height
-            )
+            self.cache_limit = 2 * renpy.config.image_cache_size * renpy.config.screen_width * renpy.config.screen_height
         else:
             self.cache_limit = int(renpy.config.image_cache_size_mb * 1024 * 1024 // 4)
 
-    def quit(self):
+    def quit(self): # @ReservedAssignment
         if not self.preload_thread:
             return
 
@@ -194,30 +189,19 @@ class Cache:
 
     # Clears out the cache.
     def clear(self):
+
         with self.lock:
-            for ce in list(self.cache.values()):
-                self.kill(ce)
 
-            self.preloads.clear()
+            self.preloads = [ ]
 
-            self.cache.clear()
+            self.cache = { }
             self.cache_size = 0
 
             self.first_preload_in_tick = True
 
             self.added.clear()
 
-    def clear_variable_size(self):
-        """
-        Clears out cache entries that are variable size.
-        """
-
-        with self.lock:
-            for ce in list(self.cache.values()):
-                if not ce.what.const_size:
-                    self.kill(ce)
-
-    def get_renders(self) -> list["renpy.display.render.Render"]:
+    def get_renders(self):
         """
         Get a list of Renders in the image cache, where ce.texture is a Render.
         """
@@ -225,14 +209,15 @@ class Cache:
         Render = renpy.display.render.Render
 
         with self.lock:
-            return [ce.texture for ce in self.cache.values() if isinstance(ce.texture, Render)]
+            return [ ce.texture for ce in self.cache.values() if isinstance(ce.texture, Render) ]
 
     # Increments time, and clears the list of images to be
     # preloaded.
     def tick(self):
+
         with self.lock:
             self.time += 1
-            self.preloads.clear()
+            self.preloads = [ ]
             self.first_preload_in_tick = True
             self.added.clear()
 
@@ -244,47 +229,47 @@ class Cache:
     # The preload thread can deal with this update, so we don't need
     # to lock things.
     def end_tick(self):
-        self.preloads.clear()
-
-    @staticmethod
-    def _make_render(ce: "CacheEntry") -> "renpy.display.render.Render":
-        bounds = ce.bounds[:2]
-
-        oversample = ce.what.get_oversample() or 0.001
-
-        if oversample != 1:
-            inv_oversample = 1.0 / oversample
-
-            rv = renpy.display.render.Render(ce.width * inv_oversample, ce.height * inv_oversample)
-            rv.forward = renpy.display.matrix.Matrix2D(oversample, 0, 0, oversample)
-            rv.reverse = renpy.display.matrix.Matrix2D(inv_oversample, 0, 0, inv_oversample)
-
-            bounds = tuple(round(el / oversample) for el in bounds)
-        else:
-            rv = renpy.display.render.Render(ce.width, ce.height)
-
-        rv.blit(ce.texture, bounds)
-
-        if ce.what.pixel_perfect:
-            rv.add_property("pixel_perfect", True)
-
-        if ce.bounds == (0, 0, ce.width, ce.height):
-            rv.cached_texture = ce.texture
-
-        return rv
+        self.preloads = [ ]
 
     # This returns the pygame surface corresponding to the provided
     # image. It also takes care of updating the age of images in the
     # cache to be current, and maintaining the size of the current
     # generation of images.
-    def get(self, image: "ImageBase", predict: bool = False, texture: bool = False, render: bool = False) -> Any:
+    def get(self, image, predict=False, texture=False, render=False):
+
+        def make_render(ce):
+            bounds = ce.bounds[:2]
+
+            oversample = image.get_oversample() or .001
+
+            if oversample != 1:
+                inv_oversample = 1.0 / oversample
+
+                rv = renpy.display.render.Render(ce.width * inv_oversample, ce.height * inv_oversample)
+                rv.forward = renpy.display.matrix.Matrix2D(oversample, 0, 0, oversample)
+                rv.reverse = renpy.display.matrix.Matrix2D(inv_oversample, 0, 0, inv_oversample)
+
+                bounds = tuple(round(el / oversample) for el in bounds)
+            else:
+                rv = renpy.display.render.Render(ce.width, ce.height)
+
+            rv.blit(ce.texture, bounds)
+
+            if image.pixel_perfect:
+                rv.add_property("pixel_perfect", True)
+
+            if ce.bounds == (0, 0, ce.width, ce.height):
+                rv.cached_texture = ce.texture
+
+            return rv
+
         if render:
             texture = True
 
         optimize_bounds = renpy.config.optimize_texture_bounds and image.optimize_bounds
 
         if not isinstance(image, ImageBase):
-            raise Exception(f"Expected an image of some sort, but got {image!r}.")
+            raise Exception("Expected an image of some sort, but got" + repr(image) + ".")
 
         if not image.cache:
             surf = image.load()
@@ -292,15 +277,19 @@ class Cache:
             return surf
 
         # First try to grab the image out of the cache without locking it.
-        if ce := self.cache.get(image):
+        ce = self.cache.get(image, None)
+
+        if ce is not None:
+
             ce.time = self.time
 
             if texture and (ce.texture is not None):
+
                 if predict:
                     return None
 
                 if render:
-                    return self._make_render(ce)
+                    return make_render(ce)
                 else:
                     return ce.texture
 
@@ -309,8 +298,9 @@ class Cache:
 
         # Otherwise, we load the image ourselves.
         if ce is None:
+
             if not predict:
-                with renpy.game.ExceptionInfo(f"While loading {image!r}:"):
+                with renpy.game.ExceptionInfo("While loading %r:", image):
                     surf = image.load()
             else:
                 surf = image.load()
@@ -321,8 +311,8 @@ class Cache:
                 bounds = tuple(surf.get_bounding_rect())
                 bounds = expand_bounds(bounds, size, renpy.config.expand_texture_bounds)
 
-                if (os := image.get_oversample()) > 1:
-                    bounds = ensure_bounds_divide_evenly(bounds, os)
+                if image.oversample > 1:
+                    bounds = ensure_bounds_divide_evenly(bounds, image.oversample)
 
                 w = bounds[2]
                 h = bounds[3]
@@ -332,40 +322,40 @@ class Cache:
             ce = CacheEntry(image, surf, bounds)
 
             with self.lock:
-                if old_ce := self.cache.get(image):
-                    self.cache_size -= old_ce.size()
+
+                old_ce = self.cache.get(image, None)
 
                 self.cache[image] = ce
                 self.cache_size += ce.size()
 
+                if old_ce is not None:
+                    self.cache_size -= old_ce.size()
+
             if renpy.config.debug_image_cache:
                 if predict:
-                    cache_filled = self.get_total_size() / self.cache_limit
-                    renpy.display.ic_log.write(f"Added {ce.what!r} ({cache_filled:.2%})")
+                    renpy.display.ic_log.write("Added %r (%.02f%%)", ce.what, 100.0 * self.get_total_size() / self.cache_limit)
                 else:
-                    renpy.display.ic_log.write(f"Total Miss {ce.what!r}")
+                    renpy.display.ic_log.write("Total Miss %r", ce.what)
 
             renpy.display.render.mutated_surface(ce.surf)
 
         # Move it into the current generation.
+
         ce.time = self.time
 
         # Load the texture.
+
         if texture:
+
             if ce.texture is None:
+
                 texsurf = ce.surf
 
                 if ce.bounds != (0, 0, ce.width, ce.height):
                     texsurf = ce.surf.subsurface(ce.bounds)
                     renpy.display.render.mutated_surface(texsurf)
 
-                if image.mipmap is not None:
-                    ce.texture = renpy.display.draw.load_texture(
-                        texsurf,
-                        properties={"mipmap": image.mipmap},  # type: ignore
-                    )
-                else:
-                    ce.texture = renpy.display.draw.load_texture(texsurf)
+                ce.texture = renpy.display.draw.load_texture(texsurf)
 
                 # This was loaded while predicting images for immediate use,
                 # so get it onto the GPU.
@@ -381,13 +371,14 @@ class Cache:
             rv = ce.surf
 
         if not renpy.config.cache_surfaces:
+
             if ce.surf is not None:
                 renpy.display.draw.mutated_surface(ce.surf)
 
             ce.surf = None
 
         if texture and render and not predict:
-            return self._make_render(ce)
+            return make_render(ce)
 
         if (ce.surf is None) and (ce.texture is None):
             self.kill(ce)
@@ -395,20 +386,21 @@ class Cache:
         return rv
 
     # This kills off a given cache entry.
-    def kill(self, ce: CacheEntry):
+    def kill(self, ce):
+
         # Let the texture cache know we're not needed.
         if ce.surf is not None:
             renpy.display.draw.mutated_surface(ce.surf)
 
         with self.lock:
-            if self.cache.get(ce.what) is ce:
+            if self.cache.get(ce.what, None) is ce:
                 del self.cache[ce.what]
                 self.cache_size -= ce.size()
 
         if renpy.config.debug_image_cache:
-            renpy.display.ic_log.write(f"Removed {ce.what!r}")
+            renpy.display.ic_log.write("Removed %r", ce.what)
 
-    def cleanout(self) -> bool:
+    def cleanout(self):
         """
         Cleans out the cache, if it's gotten too large. Returns True
         if the cache is smaller than the size limit, or False if it's
@@ -425,7 +417,8 @@ class Cache:
         with self.lock:
             cache_values = list(self.cache.values())
 
-        for ce in sorted(cache_values, key=lambda a: a.time):
+        for ce in sorted(cache_values, key=lambda a : a.time):
+
             if ce.time == self.time:
                 # If we're bigger than the limit, and there's nothing
                 # to remove, we should stop the preloading right away.
@@ -440,12 +433,12 @@ class Cache:
 
         return True
 
-    def flush_file(self, fn: str):
+    def flush_file(self, fn):
         """
         This flushes all cache entries that refer to `fn` from the cache.
         """
 
-        to_flush = []
+        to_flush = [ ]
 
         for ce in self.cache.values():
             if fn in ce.what.predict_files():
@@ -457,7 +450,7 @@ class Cache:
         if to_flush:
             renpy.display.render.free_memory()
 
-    def preload_texture(self, im: "ImageBase"):
+    def preload_texture(self, im):
         """
         Preloads `im` into the cache, and loads the corresponding texture
         into the GPU.
@@ -465,7 +458,7 @@ class Cache:
 
         self.get(im, predict=True, texture=True)
 
-    def get_texture(self, im: "ImageBase"):
+    def get_texture(self, im):
         """
         Gets `im` as a texture. Used when prediction is being used to load
         the actual image.
@@ -474,7 +467,8 @@ class Cache:
         self.get(im, texture=True)
 
     # Called to report that a given image would like to be preloaded.
-    def preload_image(self, im: "ImageBase"):
+    def preload_image(self, im):
+
         if not isinstance(im, ImageBase):
             return
 
@@ -493,11 +487,12 @@ class Cache:
             in_cache = False
 
         if not in_cache:
+
             with self.preload_lock:
                 self.preload_lock.notify()
 
         if in_cache and renpy.config.debug_image_cache:
-            renpy.display.ic_log.write(f"Kept {im!r}")
+            renpy.display.ic_log.write("Kept %r", im)
 
     def start_prediction(self):
         """
@@ -508,37 +503,10 @@ class Cache:
         with self.preload_lock:
             self.preload_lock.notify()
 
-    def get_decode_pool(self) -> ThreadPoolExecutor | None:
-        """
-        Returns the thread pool for parallel image decoding.
-        Creates it lazily if needed. Returns None if parallel decoding is disabled.
-        """
-
-        # Multithreading is not supported on Web
-        if renpy.emscripten:
-            return None
-
-        if self.decode_pool is not None:
-            return self.decode_pool
-
-        num_threads = renpy.config.preload_threads
-
-        # 0 means auto (use CPU count, always leaving at least 2 free, and at least 1 thread)
-        if num_threads == 0:
-            num_threads = min((os.cpu_count() - 2), renpy.config.preload_thread_autocap)
-            num_threads = max(1, num_threads)
-
-        # 1 means disabled
-        if num_threads <= 1:
-            return None
-
-        self.decode_pool = ThreadPoolExecutor(max_workers=num_threads, thread_name_prefix="decode")
-        self.decode_pool_workers = num_threads
-
-        return self.decode_pool
-
     def preload_thread_main(self):
+
         while self.keep_preloading:
+
             self.preload_lock.acquire()
             self.preload_lock.wait()
             self.preload_lock.release()
@@ -546,25 +514,20 @@ class Cache:
             self.preload_thread_pass()
 
     def preload_thread_pass(self):
-        renpy.gl2.assimp.preload()
-
-        pool = self.get_decode_pool()
-
-        if pool is None:
-            self._preload_thread_pass_serial() # Serial decoding
-        else:
-            self._preload_thread_pass_parallel(pool) # Parallel decoding
-
-    def _preload_thread_pass_serial(self):
-        """Serial preloading - processes images one at a time."""
 
         while self.preloads and self.keep_preloading:
+
+            # If the size of the current generation is bigger than the
+            # total cache size, stop preloading.
+
+            # If the cache is overfull, clean it out.
             if not self.cleanout():
+
                 if renpy.config.debug_image_cache:
                     for i in self.preloads:
-                        renpy.display.ic_log.write(f"Overfull {i!r}")
+                        renpy.display.ic_log.write("Overfull %r", i)
 
-                self.preloads.clear()
+                self.preloads = [ ]
 
                 return
 
@@ -581,50 +544,12 @@ class Cache:
 
         self.cleanout()
 
-    def _preload_thread_pass_parallel(self, pool: ThreadPoolExecutor):
-        """Parallel preloading - decodes multiple images concurrently."""
+    def add_load_log(self, filename):
 
-        while self.preloads and self.keep_preloading:
-            if not self.cleanout():
-                if renpy.config.debug_image_cache:
-                    for i in self.preloads:
-                        renpy.display.ic_log.write(f"Overfull {i!r}")
-
-                self.preloads.clear()
-
-                return
-
-            # Extract batch using slice
-            batch_size = min(len(self.preloads), self.decode_pool_workers * 2)
-            candidates = self.preloads[:batch_size]
-
-            del self.preloads[:batch_size]
-
-            batch = [img for img in candidates if img not in self.preload_blacklist]
-
-            if not batch:
-                continue
-
-            futures = {pool.submit(self.preload_texture, image): image for image in batch}
-
-            for future in as_completed(futures):
-                image = futures[future]
-
-                try:
-                    future.result()
-                except Exception:
-                    self.preload_blacklist.add(image)
-
-                if not self.keep_preloading:
-                    break
-
-        self.cleanout()
-
-    def add_load_log(self, filename: str):
         if not renpy.config.developer:
             return
 
-        preload = (threading.current_thread() is self.preload_thread) or (self.in_preload_pass)
+        preload = (threading.current_thread() is self.preload_thread)
 
         self.load_log.insert(0, (time.time(), filename, preload))
 
@@ -653,49 +578,37 @@ class ImageBase(renpy.display.displayable.Displayable):
     __version__ = 1
 
     optimize_bounds = False
-
-    oversample: int | None = None
-    "How much to oversample the image by. None if not set."
-
+    oversample = 1
     pixel_perfect = False
     obsolete = True
 
-    obsolete_list: list[tuple[str, int, str]] = []
-    mipmap: Literal["auto", True, False, None] = None
+    obsolete_list = [ ]
+
 
     # If the image failed to load, a placeholder used to report the error.
     fail = None
-
-    # True if the size of the im does not depend on anything other than the image manipulator,
-    # False otherwise.
-    const_size = False
 
     def after_upgrade(self, version):
         if version < 1:
             self.cache = True
 
     def __init__(self, *args, **properties):
-        flat_properties = tuple(j for i in properties.items() for j in i)
 
-        self.rle = properties.pop("rle", None)
-        self.cache = properties.pop("cache", True)
-        self.optimize_bounds = properties.pop("optimize_bounds", True)
-        self.oversample = properties.pop("oversample", None)
-        self.mipmap = properties.pop("mipmap", None)
+        self.rle = properties.pop('rle', None)
+        self.cache = properties.pop('cache', True)
+        self.optimize_bounds = properties.pop('optimize_bounds', True)
+        self.oversample = properties.pop('oversample', 1)
 
-        if self.oversample is not None and self.oversample <= 0:
+        if self.oversample <= 0:
             raise Exception("Image's oversample parameter must be greater than 0.")
 
-        properties.setdefault("style", "image")
+        properties.setdefault('style', 'image')
 
-        super().__init__(**properties)
-        self.identity = (type(self).__name__,) + args + flat_properties
+        super(ImageBase, self).__init__(**properties)
+        self.identity = (type(self).__name__,) + args
 
         if self.obsolete and renpy.game.context().init_phase:
-            frame = sys._getframe()
-            current_filename = frame.f_code.co_filename
-            while frame.f_code.co_filename == current_filename and frame.f_back:
-                frame = frame.f_back
+            frame = sys._getframe(2)
             filename = frame.f_code.co_filename
             line = frame.f_lineno
             classname = type(self).__name__
@@ -706,12 +619,13 @@ class ImageBase(renpy.display.displayable.Displayable):
         return hash(self.identity)
 
     def __eq__(self, other):
+
         if not isinstance(other, ImageBase):
             return False
 
         return self.identity == other.identity
 
-    def load(self) -> Surface:
+    def load(self): # type:() -> pygame_sdl2.Surface
         """
         This function is called by the image cache code to cause this
         image to be loaded. It's expected that children of this class
@@ -720,10 +634,9 @@ class ImageBase(renpy.display.displayable.Displayable):
 
         raise Exception("load method not implemented.")
 
-    def render(self, w, h, st, at) -> "renpy.display.render.Render":
+    def render(self, w, h, st, at):
         try:
-            d = self.get_oversampled_image()
-            return cache.get(d, render=True)
+            return cache.get(self, render=True)
         except Exception as e:
             if renpy.config.raise_image_load_exceptions:
                 raise
@@ -733,22 +646,22 @@ class ImageBase(renpy.display.displayable.Displayable):
 
     def get_placement(self):
         if self.fail is not None:
-            return self.fail.get_placement()
+            return self.fail.get_placement() # type: ignore
         else:
-            return super().get_placement()
+            return super(ImageBase, self).get_placement()
 
     def predict_one(self):
-        renpy.display.predict.image(self.get_oversampled_image())
+        renpy.display.predict.image(self)
 
-    def predict_files(self) -> list[str]:
+    def predict_files(self):
         """
         Returns a list of files that will be accessed when this image
         operation is performed.
         """
 
-        return []
+        return [ ]
 
-    def get_hash(self) -> int:
+    def get_hash(self): # type: () -> int
         """
         Returns a hash of the image that will change when the file on disk
         changes.
@@ -756,26 +669,16 @@ class ImageBase(renpy.display.displayable.Displayable):
 
         return 0
 
-    def get_oversample(self) -> int:
+    def get_oversample(self):
         """
         Returns the oversample value for this image.
         """
 
-        if self.oversample is None:
-            return 1
-        else:
-            return self.oversample
-
-    def get_oversampled_image(self) -> "ImageBase":
-        """
-        Returns another image that contains an image that is the oversampled version of this image.
-        """
-
-        return self
+        return self.oversample
 
 
-ignored_images: set[str] = set()
-images_to_ignore: set[str] = set()
+ignored_images = set()
+images_to_ignore = set()
 
 
 class Image(ImageBase):
@@ -788,7 +691,7 @@ class Image(ImageBase):
     is_svg = False
     dpi = 96
 
-    def __init__(self, filename: str, dpi: int = 96, **properties):
+    def __init__(self, filename, dpi=96, **properties):
         """
         @param filename: The filename that the image will be loaded from.
         """
@@ -800,50 +703,16 @@ class Image(ImageBase):
             for i in extras:
                 try:
                     oversample = float(i)
-                    properties.setdefault("oversample", oversample)
+                    properties.setdefault('oversample', oversample)
                 except Exception:
-                    raise Exception(f"Unknown image modifier {i!r} in {filename!r}.")
+                    raise Exception("Unknown image modifier %r in %r." % (i, filename))
 
-        super().__init__(filename, **properties)
+        super(Image, self).__init__(filename, **properties)
         self.filename = filename
         self.dpi = dpi
 
         self.is_svg = filename.lower().endswith(".svg")
         self.pixel_perfect = self.is_svg
-
-        self.const_size = not self.is_svg
-
-    def get_oversampled_image(self):
-        if renpy.config.automatic_oversampling is None:
-            return self
-
-        if self.is_svg or self.oversample is not None:
-            return self
-
-        if renpy.display.draw is None:
-            return self
-
-        draw_per_virt = renpy.display.draw.draw_per_virt  # type: ignore
-
-        if draw_per_virt <= 1.0:
-            return self
-
-        max_oversample = 2 ** int(math.ceil(math.log2(draw_per_virt)))
-        max_oversample = min(max_oversample, renpy.config.automatic_oversampling)
-
-        base, _, ext = self.filename.rpartition(".")
-        base, _, extras = base.partition("@")
-
-        if extras:
-            extras = "," + extras
-
-        for i in range(max_oversample, 1, -1):
-            filename = f"{base}@{i}{extras}.{ext}"
-
-            if renpy.loader.loadable(filename, directory="images"):
-                return Image(filename)
-
-        return self
 
     def _repr_info(self):
         return repr(self.filename)
@@ -852,28 +721,28 @@ class Image(ImageBase):
         return renpy.loader.get_hash(self.filename)
 
     def get_oversample(self):
-        oversample = self.oversample or 1
-
         if self.is_svg:
-            return oversample * renpy.display.draw.draw_per_virt  # type: ignore
+            return self.oversample * renpy.display.draw.draw_per_virt
         else:
-            return oversample
+            return self.oversample
 
     def load(self, unscaled=False):
+
         # Unscaled is no longer used.
 
         cache.add_load_log(self.filename)
 
         try:
+
             try:
                 filelike = renpy.loader.load(self.filename, directory="images")
                 filename = self.filename
                 force_size = None
             except renpy.webloader.DownloadNeeded as e:
-                renpy.webloader.enqueue(e.relpath, "image", self.filename)
+                renpy.webloader.enqueue(e.relpath, 'image', self.filename)
                 # temporary placeholder:
-                filelike = open(os.path.join("_placeholders", e.relpath), "rb")
-                filename = "use_png_format.png"
+                filelike = open(os.path.join('_placeholders', e.relpath), 'rb')
+                filename = 'use_png_format.png'
                 force_size = e.size
 
             with filelike as f:
@@ -886,14 +755,16 @@ class Image(ImageBase):
             if self.is_svg:
                 width, height = surf.get_size()
 
-                width = int(width * renpy.display.draw.draw_per_virt * self.dpi / 96)  # type: ignore
-                height = int(height * renpy.display.draw.draw_per_virt * self.dpi / 96)  # type: ignore
+                width = int(width * renpy.display.draw.draw_per_virt * self.dpi / 96)
+                height = int(height * renpy.display.draw.draw_per_virt * self.dpi / 96)
 
                 if filename != self.filename:
+
                     # This should only run for placeholder images.
                     surf = renpy.display.pgrender.transform_scale(surf, (width, height))
 
                 else:
+
                     filelike = renpy.loader.load(self.filename, directory="images")
 
                     with filelike as f:
@@ -902,6 +773,7 @@ class Image(ImageBase):
             return surf
 
         except Exception as e:
+
             if renpy.config.missing_image_callback:
                 im = renpy.config.missing_image_callback(self.filename)
                 if im is None:
@@ -910,6 +782,7 @@ class Image(ImageBase):
                 return im.load()
 
             else:
+
                 if self.filename not in ignored_images:
                     images_to_ignore.add(self.filename)
                     raise e
@@ -917,15 +790,16 @@ class Image(ImageBase):
                     return Image("_missing_image.png").load()
 
     def predict_files(self):
+
         if renpy.loader.loadable(self.filename, directory="images"):
-            return [self.filename]
+            return [ self.filename ]
         else:
             if renpy.config.missing_image_callback:
                 im = renpy.config.missing_image_callback(self.filename)
                 if im is not None:
                     return im.predict_files()
 
-            return [self.filename]
+            return [ self.filename ]
 
 
 class Data(ImageBase):
@@ -946,11 +820,10 @@ class Data(ImageBase):
 
     obsolete = False
 
-    def __init__(self, data: bytes, filename: str, **properties):
-        super().__init__(data, filename, **properties)
+    def __init__(self, data, filename, **properties):
+        super(Data, self).__init__(data, filename, **properties)
         self.data = data
         self.filename = filename
-        self.const_size = True
 
     def _repr_info(self):
         return repr(self.filename)
@@ -961,18 +834,18 @@ class Data(ImageBase):
 
 
 class ZipFileImage(ImageBase):
+
     obsolete = False
 
-    def __init__(self, zipfilename: str, filename: str, mtime=0, **properties):
-        super().__init__(zipfilename, filename, mtime, **properties)
+    def __init__(self, zipfilename, filename, mtime=0, **properties):
+        super(ZipFileImage, self).__init__(zipfilename, filename, mtime, **properties)
 
         self.zipfilename = zipfilename
         self.filename = filename
-        self.const_size = True
 
     def load(self):
         try:
-            with zipfile.ZipFile(self.zipfilename, "r") as zf:
+            with zipfile.ZipFile(self.zipfilename, 'r') as zf:
                 data = zf.read(self.filename)
                 sio = io.BytesIO(data)
                 rv = renpy.display.pgrender.load_image(sio, self.filename)
@@ -981,267 +854,9 @@ class ZipFileImage(ImageBase):
             return renpy.display.pgrender.surface((2, 2), True)
 
     def predict_files(self):
-        return []
+        return [ ]
 
 
-class Null(ImageBase):
-    """
-    :undocumented:
-
-    An image manipulator that returns a 1x1 surface. This can be used as a missing texture,
-    if needed.
-
-    `color`
-        The color of the surface.
-    """
-
-    obsolete = False
-    color = (0, 0, 0, 0)
-
-    def __init__(self, color=(0, 0, 0, 0), **properties):
-        super().__init__(**properties)
-
-        self.const_size = True
-
-        r, g, b, a = renpy.color.Color(color)
-        self.color: tuple[int, int, int, int] = (r, g, b, a)
-
-    def get_hash(self):
-        return 42
-
-    def load(self):
-        rv = renpy.display.pgrender.surface((1, 1), True)
-        rv.fill(self.color)
-        return rv
-
-    def predict_files(self):
-        return []
-
-
-class UnoptimizedTexture(ImageBase):
-    """
-    :undocumented:
-
-    This is used by unoptimized_texture to force a texture to load without
-    optimizing the bounds.
-    """
-
-    obsolete = False
-
-    def __init__(self, im, **properties):
-        im = image(im)
-        super().__init__(im.identity, optimize_bounds=False, **properties)
-        self.image = im
-
-        self.const_size = im.const_size
-
-    def _repr_info(self):
-        return repr(self.image)
-
-    def get_hash(self):
-        return self.image.get_hash()
-
-    def load(self):
-        return self.image.load()
-
-    def predict_files(self):
-        return self.image.predict_files()
-
-
-def image(arg, loose=False, **properties):
-    """
-    :doc: im_image
-    :name: Image
-    :args: (filename, *, optimize_bounds=True, oversample=1, dpi=96, mipmap=None, **properties)
-
-    Loads an image from a file. `filename` is a
-    string giving the name of the file.
-
-    `filename`
-        This should be an image filename, including the extension.
-
-    `optimize_bounds`
-        If true, only the portion of the image that
-        inside the bounding box of non-transparent pixels is loaded into
-        GPU memory. (The only reason to set this to False is when using an
-        image as input to a shader.)
-
-    `oversample`
-        If this is greater than 1, the image is considered to be oversampled,
-        with more pixels than its logical size would imply. For example, if
-        an image file is 2048x2048 and oversample is 2, then the image will
-        be treated as a 1024x1024 image for the purpose of layout.
-
-    `dpi`
-        The DPI of an SVG image. This defaults to 96, but that can be
-        increased to render the SVG larger, and decreased to render
-        it smaller.
-
-    `mipmap`
-        If this is "auto", then mipmaps are generated for the image only if the game is scaled down to less than
-        75% of its default size. If this is True, mipmaps are always generated. If this is False, mipmaps are never
-        generated. If this is None, then the default is taken from config.mipmap.
-    """
-
-    """
-    (Actually, the user documentation is a bit misleading, as
-     this tries for compatibility with several older forms of
-     image specification.)
-
-    If the loose argument is False, then this will report an error if an
-    arbitrary argument is given. If it's True, then the argument is passed
-    through unchanged.
-    """
-
-    if isinstance(arg, ImageBase):
-        return arg
-
-    elif isinstance(arg, str):
-        return Image(arg, **properties)
-
-    elif isinstance(arg, renpy.display.image.ImageReference):
-        arg.find_target()
-        return image(arg.target, loose=loose, **properties)
-
-    elif isinstance(arg, tuple):
-        params = []
-
-        for i in arg:
-            params.append((0, 0))
-            params.append(i)
-
-        return Composite(None, *params)
-
-    elif loose:
-        return arg
-
-    if isinstance(arg, renpy.display.displayable.Displayable):
-        raise Exception("Expected an image, but got a general displayable.")
-    else:
-        raise Exception("Could not construct image from argument.")
-
-
-def expand_bounds(
-    bounds: tuple[int, int, int, int],
-    size: tuple[int, int],
-    amount: int,
-) -> tuple[int, int, int, int]:
-    """
-    This expands the rectangle bounds by amount, while ensure it fits inside size.
-    """
-
-    x, y, w, h = bounds
-    sx, sy = size
-
-    x0 = max(0, x - amount)
-    y0 = max(0, y - amount)
-    x1 = min(sx, x + w + amount)
-    y1 = min(sy, y + h + amount)
-
-    return (x0, y0, x1 - x0, y1 - y0)
-
-
-def ensure_bounds_divide_evenly(bounds: tuple[int, int, int, int], n: int) -> tuple[int, int, int, int]:
-    """
-    This ensures that the bounds is divisible by n, by expanding the bounds
-    if necessary.
-    """
-
-    x, y, w, h = bounds
-
-    xmodulo = x % n
-    ymodulo = y % n
-
-    if xmodulo:
-        x -= xmodulo
-        w += xmodulo
-
-    if ymodulo:
-        y -= ymodulo
-        h += ymodulo
-
-    return (x, y, w, h)
-
-
-def load_image(im) -> "renpy.display.render.Render":
-    """
-    :name: renpy.load_image
-    :doc: udd_utility
-
-    Loads the image manipulator `im` using the image cache, and returns a render.
-    """
-
-    return cache.get(image(im), render=True)
-
-
-def load_surface(im) -> Surface:
-    """
-    :name: renpy.load_surface
-    :doc: udd_utility
-
-    Loads the image manipulator `im` using the image cache, and returns a pygame Surface.
-    """
-
-    return cache.get(image(im))
-
-
-def load_rgba(data: bytes, size: tuple[int, int]) -> Any:
-    """
-    :name: renpy.load_rgba
-    :doc: udd_utility
-
-    Loads the image data `bytes` into a texture of size `size`, and return it.
-
-    `data`
-        Should be a bytes object containing the image data in RGBA8888 order.
-    """
-
-    surf = renpy.display.pgrender.surface(size, True)
-    surf.from_data(data)
-    return renpy.display.draw.load_texture(surf)
-
-
-def unoptimized_texture(d):
-    """
-    :undocumented:
-
-    If `d` is an image manipulator, return an image manipulator that loads
-    the image without optimizing the bounds. Otherwise, return `d`.
-    """
-
-    if isinstance(d, ImageBase):
-        return UnoptimizedTexture(d, mipmap=True)
-    else:
-        return d
-
-
-def render_for_texture(d, width, height, st, at):
-    """
-    :undocumented:
-
-    Attempts to render `d` for the purpose of getting the underlying texture,
-    rather than a Render. A render may be returned if `d` is not an UnoptimizedTexture
-    returned by unoptimized_texture.
-    """
-
-    if isinstance(d, UnoptimizedTexture):
-        return renpy.display.im.cache.get(d, texture=True)
-    else:
-        return renpy.display.render.render(d, width, height, st, at)
-
-
-def reset_module():
-    """
-    :undocumented:
-    """
-
-    print("Resetting cache.")
-
-    global cache
-    cache = Cache()
-
-
-### Obsolete image manipulators and functions.
 class Composite(ImageBase):
     """
     :undocumented:
@@ -1270,19 +885,18 @@ class Composite(ImageBase):
     """
 
     def __init__(self, size, *args, **properties):
-        super().__init__(size, *args, **properties)
+
+        super(Composite, self).__init__(size, *args, **properties)
 
         if len(args) % 2 != 0:
             raise Exception("Composite requires an odd number of arguments.")
 
         self.size = size
         self.positions = args[0::2]
-        self.images = [image(i) for i in args[1::2]]
+        self.images = [ image(i) for i in args[1::2] ]
 
         # Only supports all the images having the same oversample factor
         self.oversample = self.images[0].get_oversample()
-
-        self.const_size = all(i.const_size for i in self.images)
 
     def get_hash(self):
         rv = 0
@@ -1293,23 +907,25 @@ class Composite(ImageBase):
         return rv
 
     def load(self):
+
         if self.size:
             size = self.size
         else:
             size = cache.get(self.images[0]).get_size()
 
         os = self.oversample
-        size = [s * os for s in size]
+        size = [s*os for s in size]
 
         rv = renpy.display.pgrender.surface(size, True)
 
         for pos, im in zip(self.positions, self.images):
-            rv.blit(cache.get(im), [p * os for p in pos])
+            rv.blit(cache.get(im), [p*os for p in pos])
 
         return rv
 
     def predict_files(self):
-        rv = []
+
+        rv = [ ]
 
         for i in self.images:
             rv.extend(i.predict_files())
@@ -1333,8 +949,9 @@ class Scale(ImageBase):
     """
 
     def __init__(self, im, width, height, bilinear=True, **properties):
+
         im = image(im)
-        super().__init__(im, width, height, bilinear, **properties)
+        super(Scale, self).__init__(im, width, height, bilinear, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1342,27 +959,24 @@ class Scale(ImageBase):
         self.height = int(height)
         self.bilinear = bilinear
 
-        self.const_size = True
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         child = cache.get(self.image)
         os = self.oversample
 
         if self.bilinear:
             try:
                 renpy.display.render.blit_lock.acquire()
-                size = (self.width * os, self.height * os)  # type: ignore
-                rv = renpy.display.scale.smoothscale(child, size)
+                rv = renpy.display.scale.smoothscale(child, (self.width*os, self.height*os))
             finally:
                 renpy.display.render.blit_lock.release()
         else:
             try:
                 renpy.display.render.blit_lock.acquire()
-                size = (self.width * os, self.height * os)  # type: ignore
-                rv = renpy.display.pgrender.transform_scale(child, size)
+                rv = renpy.display.pgrender.transform_scale(child, (self.width*os, self.height*os))
             finally:
                 renpy.display.render.blit_lock.release()
 
@@ -1393,11 +1007,12 @@ class FactorScale(ImageBase):
     """
 
     def __init__(self, im, width, height=None, bilinear=True, **properties):
+
         if height is None:
             height = width
 
         im = image(im)
-        super().__init__(im, width, height, bilinear, **properties)
+        super(FactorScale, self).__init__(im, width, height, bilinear, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1405,12 +1020,11 @@ class FactorScale(ImageBase):
         self.height = height
         self.bilinear = bilinear
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
         width, height = surf.get_size()
 
@@ -1455,23 +1069,23 @@ class Flip(ImageBase):
     """
 
     def __init__(self, im, horizontal=False, vertical=False, **properties):
+
         if not (horizontal or vertical):
             raise Exception("im.Flip must be called with a true value for horizontal or vertical.")
 
         im = image(im)
-        super().__init__(im, horizontal, vertical, **properties)
+        super(Flip, self).__init__(im, horizontal, vertical, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
         self.horizontal = horizontal
         self.vertical = vertical
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         child = cache.get(self.image)
 
         try:
@@ -1503,19 +1117,18 @@ class Rotozoom(ImageBase):
         """
 
         im = image(im)
-        super().__init__(im, angle, zoom, **properties)
+        super(Rotozoom, self).__init__(im, angle, zoom, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
         self.angle = angle
         self.zoom = zoom
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         child = cache.get(self.image)
 
         try:
@@ -1547,12 +1160,13 @@ class Crop(ImageBase):
     """
 
     def __init__(self, im, x, y=None, w=None, h=None, **properties):
+
         im = image(im)
 
         if y is None:
             (x, y, w, h) = x
 
-        super().__init__(im, x, y, w, h, **properties)
+        super(Crop, self).__init__(im, x, y, w, h, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1561,20 +1175,19 @@ class Crop(ImageBase):
         self.w = w
         self.h = h
 
-        self.const_size = True
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
         os = self.oversample
-        return cache.get(self.image).subsurface((self.x * os, self.y * os, self.w * os, self.h * os))  # type: ignore
+        return cache.get(self.image).subsurface((self.x*os, self.y*os,
+                                                 self.w*os, self.h*os))
 
     def predict_files(self):
         return self.image.predict_files()
 
 
-ramp_cache = {}
+ramp_cache = { }
 
 
 def ramp(start, end):
@@ -1586,14 +1199,14 @@ def ramp(start, end):
 
     rv = ramp_cache.get((start, end), None)
     if rv is None:
-        chars: list[int] = []
+
+        chars = [ ]
 
         for i in range(0, 256):
             i = i / 255.0
-            i = end * i + start * (1.0 - i)
-            chars.append(int(i))
+            chars.append(bchr(int(end * i + start * (1.0 - i))))
 
-        rv = bytes(chars)
+        rv = b"".join(chars)
         ramp_cache[start, end] = rv
 
     return rv
@@ -1610,10 +1223,12 @@ class Map(ImageBase):
     is used for the mapped pixel component.
     """
 
-    def __init__(self, im, rmap=identity, gmap=identity, bmap=identity, amap=identity, force_alpha=False, **properties):
+    def __init__(self, im, rmap=identity, gmap=identity, bmap=identity,
+                 amap=identity, force_alpha=False, **properties):
+
         im = image(im)
 
-        super().__init__(im, rmap, gmap, bmap, amap, force_alpha, **properties)
+        super(Map, self).__init__(im, rmap, gmap, bmap, amap, force_alpha, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1624,17 +1239,17 @@ class Map(ImageBase):
 
         self.force_alpha = force_alpha
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
 
         rv = renpy.display.pgrender.surface(surf.get_size(), True)
 
-        renpy.display.module.map(surf, rv, self.rmap, self.gmap, self.bmap, self.amap)
+        renpy.display.module.map(surf, rv,
+                                 self.rmap, self.gmap, self.bmap, self.amap)
 
         return rv
 
@@ -1653,12 +1268,13 @@ class Twocolor(ImageBase):
     """
 
     def __init__(self, im, white, black, force_alpha=False, **properties):
-        white = renpy.color.Color(white)
-        black = renpy.color.Color(black)
+
+        white = renpy.easy.color(white)
+        black = renpy.easy.color(black)
 
         im = image(im)
 
-        super().__init__(im, white, black, force_alpha, **properties)
+        super(Twocolor, self).__init__(im, white, black, force_alpha, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1671,11 +1287,13 @@ class Twocolor(ImageBase):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
 
         rv = renpy.display.pgrender.surface(surf.get_size(), True)
 
-        renpy.display.module.twomap(surf, rv, self.white, self.black)
+        renpy.display.module.twomap(surf, rv,
+                                    self.white, self.black)
 
         return rv
 
@@ -1690,10 +1308,12 @@ class Recolor(ImageBase):
     linearly between 0 and the supplied color.
     """
 
-    def __init__(self, im, rmul=255, gmul=255, bmul=255, amul=255, force_alpha=False, **properties):
+    def __init__(self, im, rmul=255, gmul=255, bmul=255,
+                 amul=255, force_alpha=False, **properties):
+
         im = image(im)
 
-        super().__init__(im, rmul, gmul, bmul, amul, force_alpha, **properties)
+        super(Recolor, self).__init__(im, rmul, gmul, bmul, amul, force_alpha, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
@@ -1704,17 +1324,17 @@ class Recolor(ImageBase):
 
         self.force_alpha = force_alpha
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
 
         rv = renpy.display.pgrender.surface(surf.get_size(), True)
 
-        renpy.display.module.linmap(surf, rv, self.rmul, self.gmul, self.bmul, self.amul)
+        renpy.display.module.linmap(surf, rv,
+                                    self.rmul, self.gmul, self.bmul, self.amul)
 
         return rv
 
@@ -1741,27 +1361,27 @@ class Blur(ImageBase):
     """
 
     def __init__(self, im, xrad, yrad=None, **properties):
+
         im = image(im)
 
-        super().__init__(im, xrad, yrad, **properties)
+        super(Blur, self).__init__(im, xrad, yrad, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
         self.rx = xrad
         self.ry = xrad if yrad is None else yrad
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
 
         ws = renpy.display.pgrender.surface(surf.get_size(), True)
         rv = renpy.display.pgrender.surface(surf.get_size(), True)
 
-        renpy.display.module.blur(surf, ws, rv, self.rx * self.oversample, self.ry * self.oversample)
+        renpy.display.module.blur(surf, ws, rv, self.rx*self.oversample, self.ry*self.oversample)
 
         return rv
 
@@ -1806,24 +1426,24 @@ class MatrixColor(ImageBase):
     """
 
     def __init__(self, im, matrix, **properties):
+
         im = image(im)
 
         if len(matrix) != 20 and len(matrix) != 25:
             raise Exception("ColorMatrix expects a 20 or 25 element matrix, got %d elements." % len(matrix))
 
         matrix = tuple(matrix)
-        super().__init__(im, matrix, **properties)
+        super(MatrixColor, self).__init__(im, matrix, **properties)
 
         self.image = im
         self.oversample = im.get_oversample()
         self.matrix = matrix
 
-        self.const_size = self.image.const_size
-
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         surf = cache.get(self.image)
 
         rv = renpy.display.pgrender.surface(surf.get_size(), True)
@@ -1857,6 +1477,7 @@ class matrix(tuple):
     """
 
     def __new__(cls, *args):
+
         if len(args) == 1:
             args = tuple(args[0])
 
@@ -1869,13 +1490,18 @@ class matrix(tuple):
         return tuple.__new__(cls, args)
 
     def mul(self, a, b):
+
         if not isinstance(a, matrix):
             a = matrix(a)
 
         if not isinstance(b, matrix):
+
+            if isinstance(b, renpy.easy.Color):
+                return NotImplemented
+
             b = matrix(b)
 
-        result = [0] * 25
+        result = [ 0 ] * 25
         for y in range(0, 5):
             for x in range(0, 5):
                 for i in range(0, 5):
@@ -1885,24 +1511,23 @@ class matrix(tuple):
 
     def scalar_mul(self, other):
         other = float(other)
-        return matrix([i * other for i in self])
+        return matrix([ i * other for i in self ])
 
     def vector_mul(self, o):
-        return (
-            o[0] * self[0] + o[1] * self[1] + o[2] * self[2] + o[3] * self[3] + self[4],
-            o[0] * self[5] + o[1] * self[6] + o[2] * self[7] + o[3] * self[8] + self[9],
-            o[0] * self[10] + o[1] * self[11] + o[2] * self[12] + o[3] * self[13] + self[14],
-            o[0] * self[15] + o[1] * self[16] + o[2] * self[17] + o[3] * self[18] + self[19],
-            1,
-        )
+
+        return (o[0] * self[0] + o[1] * self[1] + o[2] * self[2] + o[3] * self[3] + self[4],
+                o[0] * self[5] + o[1] * self[6] + o[2] * self[7] + o[3] * self[8] + self[9],
+                o[0] * self[10] + o[1] * self[11] + o[2] * self[12] + o[3] * self[13] + self[14],
+                o[0] * self[15] + o[1] * self[16] + o[2] * self[17] + o[3] * self[18] + self[19],
+                1)
 
     def __add__(self, other):
         if isinstance(other, (int, float)):
             other = float(other)
-            return matrix([i + other for i in self])
+            return matrix([ i + other for i in self ])
 
         other = matrix(other)
-        return matrix([i + j for i, j in zip(self, other)])
+        return matrix([ i + j for i, j in zip(self, other)])
 
     __radd__ = __add__
 
@@ -1913,35 +1538,24 @@ class matrix(tuple):
         return self * -1 + other
 
     def __mul__(self, other):
-        if isinstance(other, renpy.color.Color):
-            r, g, b, a, _ = self.vector_mul(other)
-            return renpy.color.Color((int(r), int(g), int(b), int(a)))
-
         if isinstance(other, (int, float)):
             return self.scalar_mul(other)
 
         return self.mul(self, other)
 
     def __rmul__(self, other):
-        if isinstance(other, renpy.color.Color):
-            r, g, b, a, _ = self.vector_mul(other)
-            return renpy.color.Color((int(r), int(g), int(b), int(a)))
-
         if isinstance(other, (int, float)):
             return self.scalar_mul(other)
 
         return self.mul(other, self)
 
     def __repr__(self):
-        return (
-            """\
+        return """\
 im.matrix(%f, %f, %f, %f, %f.
           %f, %f, %f, %f, %f,
           %f, %f, %f, %f, %f,
           %f, %f, %f, %f, %f,
-          %f, %f, %f, %f, %f)"""
-            % self
-        )
+          %f, %f, %f, %f, %f)""" % self
 
     @staticmethod
     def identity():
@@ -1957,7 +1571,10 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix(1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0)
+        return matrix(1, 0, 0, 0, 0,
+                      0, 1, 0, 0, 0,
+                      0, 0, 1, 0, 0,
+                      0, 0, 0, 1, 0)
 
     @staticmethod
     def saturation(level, desat=(0.2126, 0.7152, 0.0722)):
@@ -1988,31 +1605,13 @@ im.matrix(%f, %f, %f, %f, %f.
 
         r, g, b = desat
 
-        def I(a, b):  # noqa: E743
+        def I(a, b):
             return a + (b - a) * level
 
-        return matrix(
-            I(r, 1),
-            I(g, 0),
-            I(b, 0),
-            0,
-            0,
-            I(r, 0),
-            I(g, 1),
-            I(b, 0),
-            0,
-            0,
-            I(r, 0),
-            I(g, 0),
-            I(b, 1),
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-        )
+        return matrix(I(r, 1), I(g, 0), I(b, 0), 0, 0,
+                      I(r, 0), I(g, 1), I(b, 0), 0, 0,
+                      I(r, 0), I(g, 0), I(b, 1), 0, 0,
+                      0, 0, 0, 1, 0)
 
     @staticmethod
     def desaturate():
@@ -2049,7 +1648,10 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix(r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0)
+        return matrix(r, 0, 0, 0, 0,
+                      0, g, 0, 0, 0,
+                      0, 0, b, 0, 0,
+                      0, 0, 0, 1, 0)
 
     @staticmethod
     def invert():
@@ -2065,7 +1667,10 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix(-1, 0, 0, 0, 1, 0, -1, 0, 0, 1, 0, 0, -1, 0, 1, 0, 0, 0, 1, 0)
+        return matrix(-1, 0, 0, 0, 1,
+                      0, -1, 0, 0, 1,
+                      0, 0, -1, 0, 1,
+                      0, 0, 0, 1, 0)
 
     @staticmethod
     def brightness(b):
@@ -2085,7 +1690,10 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix(1, 0, 0, 0, b, 0, 1, 0, 0, b, 0, 0, 1, 0, b, 0, 0, 0, 1, 0)
+        return matrix(1, 0, 0, 0, b,
+                      0, 1, 0, 0, b,
+                      0, 0, 1, 0, b,
+                      0, 0, 0, 1, 0)
 
     @staticmethod
     def opacity(o):
@@ -2101,7 +1709,10 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix(1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, o, 0)
+        return matrix(1, 0, 0, 0, 0,
+                      0, 1, 0, 0, 0,
+                      0, 0, 1, 0, 0,
+                      0, 0, 0, o, 0)
 
     @staticmethod
     def contrast(c):
@@ -2118,7 +1729,7 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        return matrix.brightness(-0.5) * matrix.tint(c, c, c) * matrix.brightness(0.5)
+        return matrix.brightness(-.5) * matrix.tint(c, c, c) * matrix.brightness(.5)
 
     # from http://www.gskinner.com/blog/archives/2005/09/flash_8_source.html
     @staticmethod
@@ -2142,32 +1753,12 @@ im.matrix(%f, %f, %f, %f, %f.
         lumG = 0.715
         lumB = 0.072
         return matrix(
-            lumR + cosVal * (1 - lumR) + sinVal * (-lumR),
-            lumG + cosVal * (-lumG) + sinVal * (-lumG),
-            lumB + cosVal * (-lumB) + sinVal * (1 - lumB),
-            0,
-            0,
-            lumR + cosVal * (-lumR) + sinVal * (0.143),
-            lumG + cosVal * (1 - lumG) + sinVal * (0.140),
-            lumB + cosVal * (-lumB) + sinVal * (-0.283),
-            0,
-            0,
-            lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)),
-            lumG + cosVal * (-lumG) + sinVal * (lumG),
-            lumB + cosVal * (1 - lumB) + sinVal * (lumB),
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-        )
+            lumR + cosVal * (1 - lumR) + sinVal * (-lumR), lumG + cosVal * (-lumG) + sinVal * (-lumG), lumB + cosVal * (-lumB) + sinVal * (1 - lumB), 0, 0,
+            lumR + cosVal * (-lumR) + sinVal * (0.143), lumG + cosVal * (1 - lumG) + sinVal * (0.140), lumB + cosVal * (-lumB) + sinVal * (-0.283), 0, 0,
+            lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)), lumG + cosVal * (-lumG) + sinVal * (lumG), lumB + cosVal * (1 - lumB) + sinVal * (lumB), 0, 0,
+            0, 0, 0, 1, 0,
+            0, 0, 0, 0, 1
+            )
 
     @staticmethod
     def colorize(black_color, white_color):
@@ -2191,8 +1782,8 @@ im.matrix(%f, %f, %f, %f, %f.
             with the :tpref:`matrixcolor` transform property.
         """
 
-        (r0, g0, b0, _) = renpy.color.Color(black_color)
-        (r1, g1, b1, _) = renpy.color.Color(white_color)
+        (r0, g0, b0, _a0) = renpy.easy.color(black_color) # type: ignore
+        (r1, g1, b1, _a1) = renpy.easy.color(white_color) # type: ignore
 
         r0 /= 255.0
         g0 /= 255.0
@@ -2201,7 +1792,10 @@ im.matrix(%f, %f, %f, %f, %f.
         g1 /= 255.0
         b1 /= 255.0
 
-        return matrix((r1 - r0), 0, 0, 0, r0, 0, (g1 - g0), 0, 0, g0, 0, 0, (b1 - b0), 0, b0, 0, 0, 0, 1, 0)
+        return matrix((r1 - r0), 0, 0, 0, r0,
+                      0, (g1 - g0), 0, 0, g0,
+                      0, 0, (b1 - b0), 0, b0,
+                      0, 0, 0, 1, 0)
 
 
 def Grayscale(im, desat=(0.2126, 0.7152, 0.0722), **properties):
@@ -2220,7 +1814,7 @@ def Grayscale(im, desat=(0.2126, 0.7152, 0.0722), **properties):
     return MatrixColor(im, matrix.saturation(0.0, desat), **properties)
 
 
-def Sepia(im, tint=(1.0, 0.94, 0.76), desat=(0.2126, 0.7152, 0.0722), **properties):
+def Sepia(im, tint=(1.0, .94, .76), desat=(0.2126, 0.7152, 0.0722), **properties):
     """
     :doc: im_im
     :args: (im, **properties)
@@ -2242,7 +1836,7 @@ def Color(im, color):
     black and white is the supplied color.
     """
 
-    r, g, b, a = renpy.color.Color(color)
+    r, g, b, a = renpy.easy.color(color) # type: ignore
 
     return Recolor(im, r, g, b, a)
 
@@ -2276,19 +1870,19 @@ class Tile(ImageBase):
     """
 
     def __init__(self, im, size=None, **properties):
+
         im = image(im)
 
-        super().__init__(im, size, **properties)
+        super(Tile, self).__init__(im, size, **properties)
         self.image = im
         self.oversample = im.get_oversample()
         self.size = size
-
-        self.const_size = True
 
     def get_hash(self):
         return self.image.get_hash()
 
     def load(self):
+
         size = self.size
 
         if size is None:
@@ -2296,7 +1890,7 @@ class Tile(ImageBase):
 
         os = self.oversample
 
-        size = [round(v * os) for v in size]  # type: ignore
+        size = [round(v*os) for v in size]
 
         surf = cache.get(self.image)
 
@@ -2335,7 +1929,7 @@ class AlphaMask(ImageBase):
     """
 
     def __init__(self, base, mask, **properties):
-        super().__init__(base, mask, **properties)
+        super(AlphaMask, self).__init__(base, mask, **properties)
 
         self.base = image(base)
         self.mask = image(mask)
@@ -2343,12 +1937,11 @@ class AlphaMask(ImageBase):
         # The two images already need to be the same size, they now also need the same oversample.
         self.oversample = self.base.get_oversample()
 
-        self.const_size = self.base.const_size and self.mask.const_size
-
     def get_hash(self):
         return self.base.get_hash() + self.mask.get_hash()
 
     def load(self):
+
         basesurf = cache.get(self.base)
         masksurf = cache.get(self.mask)
 
@@ -2363,3 +1956,211 @@ class AlphaMask(ImageBase):
 
     def predict_files(self):
         return self.base.predict_files() + self.mask.predict_files()
+
+
+class UnoptimizedTexture(ImageBase):
+    """
+    :undocumented:
+
+    This is used by unoptimized_texture to force a texture to load without
+    optimizing the bounds.
+    """
+
+    obsolete = False
+
+    def __init__(self, im, **properties):
+        super(UnoptimizedTexture, self).__init__(im, optimize_bounds=False, **properties)
+        self.image = image(im)
+
+    def get_hash(self):
+        return self.image.get_hash()
+
+    def load(self):
+        return self.image.load()
+
+    def predict_files(self):
+        return self.image.predict_files()
+
+
+
+def image(arg, loose=False, **properties):
+    """
+    :doc: im_image
+    :name: Image
+    :args: (filename, *, optimize_bounds=True, oversample=1, dpi=96, **properties)
+
+    Loads an image from a file. `filename` is a
+    string giving the name of the file.
+
+    `filename`
+        This should be an image filename, including the extension.
+
+    `optimize_bounds`
+        If true, only the portion of the image that
+        inside the bounding box of non-transparent pixels is loaded into
+        GPU memory. (The only reason to set this to False is when using an
+        image as input to a shader.)
+
+    `oversample`
+        If this is greater than 1, the image is considered to be oversampled,
+        with more pixels than its logical size would imply. For example, if
+        an image file is 2048x2048 and oversample is 2, then the image will
+        be treated as a 1024x1024 image for the purpose of layout.
+
+    `dpi`
+        The DPI of an SVG image. This defaults to 96, but that can be
+        increased to render the SVG larger, and decreased to render
+        it smaller.
+    """
+
+    """
+    (Actually, the user documentation is a bit misleading, as
+     this tries for compatibility with several older forms of
+     image specification.)
+
+    If the loose argument is False, then this will report an error if an
+    arbitrary argument is given. If it's True, then the argument is passed
+    through unchanged.
+    """
+
+    if isinstance(arg, ImageBase):
+        return arg
+
+    elif isinstance(arg, basestring):
+        return Image(arg, **properties)
+
+    elif isinstance(arg, renpy.display.image.ImageReference):
+        arg.find_target()
+        return image(arg.target, loose=loose, **properties)
+
+    elif isinstance(arg, tuple):
+        params = [ ]
+
+        for i in arg:
+            params.append((0, 0))
+            params.append(i)
+
+        return Composite(None, *params)
+
+    elif loose:
+        return arg
+
+    if isinstance(arg, renpy.display.displayable.Displayable):
+        raise Exception("Expected an image, but got a general displayable.")
+    else:
+        raise Exception("Could not construct image from argument.")
+
+
+def expand_bounds(bounds, size, amount):
+    """
+    This expands the rectangle bounds by amount, while ensure it fits inside size.
+    """
+
+    x, y, w, h = bounds
+    sx, sy = size
+
+    x0 = max(0, x - amount)
+    y0 = max(0, y - amount)
+    x1 = min(sx, x + w + amount)
+    y1 = min(sy, y + h + amount)
+
+    return (x0, y0, x1 - x0, y1 - y0)
+
+
+def ensure_bounds_divide_evenly(bounds, n):
+    """
+    This ensures that the bounds is divisible by n, by expanding the bounds
+    if necessary.
+    """
+
+    x, y, w, h = bounds
+
+    xmodulo = x % n
+    ymodulo = y % n
+
+    if xmodulo:
+        x -= xmodulo
+        w += xmodulo
+
+    if ymodulo:
+        y -= ymodulo
+        h += ymodulo
+
+    return (x, y, w, h)
+
+
+def load_image(im):
+    """
+    :name: renpy.load_image
+    :doc: udd_utility
+
+    Loads the image manipulator `im` using the image cache, and returns a render.
+    """
+
+    return cache.get(image(im), render=True)
+
+
+def load_surface(im):
+    """
+    :name: renpy.load_surface
+    :doc: udd_utility
+
+    Loads the image manipulator `im` using the image cache, and returns a pygame Surface.
+    """
+
+    return cache.get(image(im))
+
+def load_rgba(data, size):
+    """
+    :name: renpy.load_rgba
+    :doc: udd_utility
+
+    Loads the image data `bytes` into a texture of size `size`, and return it.
+
+    `data`
+        Should be a bytes object containing the image data in RGBA8888 order.
+    """
+
+    surf = renpy.display.pgrender.surface(size, True)
+    surf.from_data(data)
+    return renpy.display.draw.load_texture(surf)
+
+
+def unoptimized_texture(d):
+    """
+    :undocumented:
+
+    If `d` is an image manipulator, return an image manipulator that loads
+    the image without optimizing the bounds. Otherwise, return `d`.
+    """
+
+    if isinstance(d, ImageBase):
+        return UnoptimizedTexture(d)
+    else:
+        return d
+
+
+def render_for_texture(d, width, height, st, at):
+    """
+    :undocumented:
+
+    Attempts to render `d` for the purpose of getting the underlying texture,
+    rather than a Render. A render may be returned if `d` is not an UnoptimizedTexture
+    returned by unoptimized_texture.
+    """
+
+    if isinstance(d, UnoptimizedTexture):
+        return renpy.display.im.cache.get(d, texture=True)
+    else:
+        return renpy.display.render.render(d, width, height, st, at)
+
+
+def reset_module():
+    """
+    :undocumented:
+    """
+
+    print("Resetting cache.")
+
+    global cache
+    cache = Cache()

@@ -1,4 +1,4 @@
-# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -22,7 +22,7 @@
 # This file contains support for state-machine controlled animations.
 
 from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
-from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode  # *
+from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
 
 import random
@@ -78,6 +78,7 @@ class State(object):
         return rv
 
     def motion_copy(self, child):
+
         if self.image is not None:
             child = self.image
 
@@ -153,21 +154,21 @@ class SMAnimation(renpy.display.displayable.Displayable):
         machine.
         """
 
-        if "delay" in properties:
-            self.delay = properties["delay"]
-            del properties["delay"]
+        if 'delay' in properties:
+            self.delay = properties['delay']
+            del properties['delay']
         else:
             self.delay = None
 
-        if "showold" in properties:
-            self.showold = properties["showold"]
-            del properties["showold"]
+        if 'showold' in properties:
+            self.showold = properties['showold']
+            del properties['showold']
         else:
             self.showold = False
 
-        if "anim_timebase" in properties:
-            self.anim_timebase = properties["anim_timebase"]
-            del properties["anim_timebase"]
+        if 'anim_timebase' in properties:
+            self.anim_timebase = properties['anim_timebase']
+            del properties['anim_timebase']
         else:
             self.anim_timebase = True
 
@@ -179,10 +180,10 @@ class SMAnimation(renpy.display.displayable.Displayable):
         self.initial = initial
 
         # A map from state name to State object.
-        self.states = {}
+        self.states = { }
 
         # A map from state name to list of Edge objects.
-        self.edges = {}
+        self.edges = { }
 
         for i in args:
             i.add(self)
@@ -201,7 +202,7 @@ class SMAnimation(renpy.display.displayable.Displayable):
         self.state = None
 
     def visit(self):
-        return [i.image for i in self.states.values()]
+        return [ i.image for i in self.states.values() ]
 
     def pick_edge(self, state):
         """
@@ -227,9 +228,8 @@ class SMAnimation(renpy.display.displayable.Displayable):
         """
 
         if self.edge.trans:
-            im = self.edge.trans(
-                old_widget=self.states[self.edge.old].get_image(), new_widget=self.states[self.edge.new].get_image()
-            )
+            im = self.edge.trans(old_widget=self.states[self.edge.old].get_image(),
+                                 new_widget=self.states[self.edge.new].get_image())
         elif self.showold:
             im = self.states[self.edge.old].get_image()
         else:
@@ -238,6 +238,7 @@ class SMAnimation(renpy.display.displayable.Displayable):
         self.edge_cache = im
 
     def get_placement(self):
+
         if self.edge_cache:
             return self.edge_cache.get_placement()
 
@@ -247,6 +248,7 @@ class SMAnimation(renpy.display.displayable.Displayable):
         return super(SMAnimation, self).get_placement()
 
     def render(self, width, height, st, at):
+
         if self.anim_timebase:
             t = at
         else:
@@ -266,9 +268,9 @@ class SMAnimation(renpy.display.displayable.Displayable):
         # with that.
 
         if not self.edge:
-            im = renpy.display.render.render(
-                self.states[self.state].get_image(), width, height, st - self.edge_start, at
-            )
+            im = renpy.display.render.render(self.states[self.state].get_image(),
+                                             width, height,
+                                             st - self.edge_start, at)
 
         # Otherwise, we have another edge.
 
@@ -298,7 +300,7 @@ class SMAnimation(renpy.display.displayable.Displayable):
         if child is None:
             child = new_widget
 
-        args = []
+        args = [ ]
 
         for state in self.states.values():
             args.append(state.motion_copy(child))
@@ -310,7 +312,7 @@ class SMAnimation(renpy.display.displayable.Displayable):
 
 
 def Animation(*args, **kwargs):
-    newargs = []
+    newargs = [ ]
 
     for i, a in enumerate(args):
         newargs.append(a)
@@ -348,16 +350,17 @@ class TransitionAnimation(renpy.display.displayable.Displayable):
         timebase. Otherwise, use the displayable timebase.
         """
 
-        properties.setdefault("style", "animation")
-        self.anim_timebase = properties.pop("anim_timebase", True)
+        properties.setdefault('style', 'animation')
+        self.anim_timebase = properties.pop('anim_timebase', True)
 
         super(TransitionAnimation, self).__init__(**properties)
 
-        images = []
-        delays = []
-        transitions = []
+        images = [ ]
+        delays = [ ]
+        transitions = [ ]
 
         for i, arg in enumerate(args):
+
             if i % 3 == 0:
                 images.append(renpy.easy.displayable(arg))
             elif i % 3 == 1:
@@ -366,16 +369,17 @@ class TransitionAnimation(renpy.display.displayable.Displayable):
                 transitions.append(arg)
 
         if len(images) > len(delays):
-            delays.append(365.25 * 86400.0)  # One year, give or take.
+            delays.append(365.25 * 86400.0) # One year, give or take.
         if len(images) > len(transitions):
             transitions.append(None)
 
         self.images = images
-        self.prev_images = [images[-1]] + images[:-1]
+        self.prev_images = [ images[-1] ] + images[:-1]
         self.delays = delays
-        self.transitions = [transitions[-1]] + transitions[:-1]
+        self.transitions = [ transitions[-1] ] + transitions[:-1]
 
     def render(self, width, height, st, at):
+
         if self.anim_timebase:
             orig_t = at
         else:
@@ -406,19 +410,9 @@ class TransitionAnimation(renpy.display.displayable.Displayable):
 
 
 class Blink(renpy.display.displayable.Displayable):
-    def __init__(
-        self,
-        image,
-        on=0.5,
-        off=0.5,
-        rise=0.5,
-        set=0.5,
-        high=1.0,
-        low=0.0,
-        offset=0.0,
-        anim_timebase=False,
-        **properties,
-    ):
+
+    def __init__(self, image, on=0.5, off=0.5, rise=0.5, set=0.5, # @ReservedAssignment
+                 high=1.0, low=0.0, offset=0.0, anim_timebase=False, **properties):
         """
         This takes as an argument an image or widget, and blinks that image
         by varying its alpha. The sequence of phases is
@@ -460,9 +454,10 @@ class Blink(renpy.display.displayable.Displayable):
         self.cycle = on + set + off + rise
 
     def visit(self):
-        return [self.image]
+        return [ self.image ]
 
     def render(self, height, width, st, at):
+
         delay = 0
 
         if self.anim_timebase:
@@ -555,14 +550,16 @@ def Filmstrip(image, framesize, gridsize, delay, frames=None, loop=True, **prope
     i = 0
 
     # Arguments to Animation
-    args = []
+    args = [ ]
 
     for r in range(0, rows):
         for c in range(0, cols):
+
             x = c * width
             y = r * height
 
-            args.append(renpy.display.transform.Transform(image, crop=(x, y, width, height)))
+            args.append(renpy.display.transform.Transform(
+                image, crop=(x, y, width, height)))
             args.append(delay)
 
             i += 1

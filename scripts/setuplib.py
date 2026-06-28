@@ -284,7 +284,7 @@ def cython(name, source=[], pyx=None, language="c", compile_args=[], define_macr
     else:
         fn = "/".join(split_name) + ".pyx"
 
-    for d in [".", "src"]:
+    for d in [".", "src", "module"]:
         prepended = os.path.join(d, fn)
         if os.path.exists(prepended):
             fn = prepended
@@ -336,7 +336,7 @@ def cython(name, source=[], pyx=None, language="c", compile_args=[], define_macr
     # print c_fn, "depends on", deps
 
     for dep_fn in deps:
-        for d in [module_dir, ".", "src", "src/pygame/include", gen]:
+        for d in [module_dir, module_dir + "/include", "module/include", ".", "src", "src/pygame/include", gen]:
             prepended = os.path.join(d, dep_fn)
             if os.path.exists(prepended):
                 dep_fn = prepended
@@ -392,7 +392,14 @@ def generate_cython(name, language, mod_coverage, split_name, fn, c_fn):
 
     includes = ["-Isrc", "-Isrc/pygame/include", f"-I{gen}", "-I."]
 
-    xargs = ["-X", "profile=False", "-X", "embedsignature=True", "-X", "embedsignature.format=python"]
+    xargs = ["-X", "profile=False", "-X", "embedsignature=True"]
+    # embedsignature.format only in Cython >= 3.1
+    try:
+        from Cython import __version__ as _cv
+        if tuple(map(int, _cv.split('.')[:2])) >= (3, 1):
+            xargs += ["-X", "embedsignature.format=python"]
+    except Exception:
+        pass
 
     cmd = [cython_command] + includes + annotate + lang_args + coverage_args + xargs + [fn, "-o", c_fn]
 

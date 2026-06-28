@@ -18,9 +18,15 @@ target_include = os.environ.get('HARMONY_PYTHON_INCLUDE', '')
 target_libdir = os.environ.get('HARMONY_PYTHON_LIBDIR', '')
 target_ldlibrary = os.environ.get('HARMONY_PYTHON_LDLIBRARY', 'libpython3.12.so')
 
-# Override EXT_SUFFIX: .cp312-mingw_x86_64_msvcrt_gnu.pyd → .cpython-312.so
-config_vars['EXT_SUFFIX'] = '.cpython-312.so'
-config_vars['SOABI'] = 'cpython-312'
+# Override EXT_SUFFIX: .cp312-mingw_x86_64_msvcrt_gnu.pyd → .cpython-39.so (or target version)
+# Derive from HARMONY_PYTHON_LDLIBRARY (e.g. "libpython3.9.so.1.0" → "39")
+_pyver = target_ldlibrary
+if _pyver.startswith('libpython'):
+    _pyver = _pyver[len('libpython'):]  # "3.9.so.1.0"
+_pyver = '.'.join(_pyver.split('.')[:2])  # "3.9"
+_pyver_short = _pyver.replace('.', '')  # "39"
+config_vars['EXT_SUFFIX'] = f'.cpython-{_pyver_short}.so'
+config_vars['SOABI'] = f'cpython-{_pyver_short}'
 config_vars['SHLIB_SUFFIX'] = '.so'
 
 # Override CCSHARED: empty on MinGW, but we need -fPIC for shared objects on Linux/OHOS
@@ -97,6 +103,33 @@ print(f"[harmony_setup] INCLUDEPY: {config_vars.get('INCLUDEPY', '')}")
 print(f"[harmony_setup] LIBDIR: {config_vars.get('LIBDIR', '')}")
 print(f"[harmony_setup] CC from env: {os.environ.get('CC', 'not set')}")
 print(f"[harmony_setup] LDSHARED from env: {os.environ.get('LDSHARED', 'not set')}")
+
+# =============================================================================
+# Patch build_ext.get_libraries to replace host Python lib with target
+# (prevents -lpython3.14 from leaking into cross-compile link commands)
+# =============================================================================
+_host_python_lib = f"python{sys.version_info.major}.{sys.version_info.minor}"
+# Derive target lib name from HARMONY_PYTHON_LDLIBRARY (e.g. "libpython3.9.so.1.0" → "python3.9")
+_tmp = target_ldlibrary
+if _tmp.startswith('lib'):
+    _tmp = _tmp[3:]
+_target_python_lib = '.'.join(_tmp.split('.')[:2])  # "python3.9" or "python3.12"
+
+def _patch_build_ext():
+    try:
+        from distutils.command.build_ext import build_ext as _be
+    except ImportError:
+        try:
+            from setuptools._distutils.command.build_ext import build_ext as _be
+        except ImportError:
+            return
+    _orig = _be.get_libraries
+    def _patched(self, ext):
+        libs = _orig(self, ext)
+        return [_target_python_lib if l == _host_python_lib else l for l in libs]
+    _be.get_libraries = _patched
+
+_patch_build_ext()
 
 # Now execute the original setup.py
 sys.argv[0] = 'setup.py'
