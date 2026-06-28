@@ -34,6 +34,8 @@ import future
 BASE = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(BASE)
 
+ohos = os.environ.get("RENPY_OHOS") == "1"
+
 # Create the gen directory if it doesn't exist.
 try:
     os.makedirs("gen")
@@ -63,7 +65,7 @@ setuplib.extra_compile_args = [ "-Wno-unused-function" ]
 setuplib.extra_link_args = [ ]
 
 # Detect win32.
-if platform.win32_ver()[0]:
+if platform.win32_ver()[0] and not ohos:
     windows = True
     setuplib.extra_compile_args.append("-fno-strict-aliasing")
     tfd_libs = [ "comdlg32", "ole32" ]
@@ -120,7 +122,7 @@ cython(
 
 cython("_renpybidi", [ "renpybidicore.c" ], [ "fribidi" ])
 
-if not (android or ios or emscripten):
+if not (android or ios or emscripten) and not ohos:
     cython("_renpytfd", [ "tinyfiledialogs/tinyfiledialogs.c" ], libs=tfd_libs)
 
 # Sound.
