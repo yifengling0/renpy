@@ -264,6 +264,12 @@ def choose_variants():
         renpy.config.variants.insert(0, 'harmonyos') # type: ignore
         renpy.config.variants.insert(0, 'touch') # type: ignore
 
+        # Keep the tablet/medium UI bucket on HarmonyOS.
+        # Many PC-oriented games only ship default and small layouts, and
+        # the small/phone path tends to break UI composition on tall phones.
+        renpy.config.variants.insert(0, 'tablet') # type: ignore
+        renpy.config.variants.insert(0, 'medium') # type: ignore
+
         import math
         import renpy.pygame as pygame
 
@@ -275,13 +281,6 @@ def choose_variants():
             dpi = 160
         diag = math.hypot(info.current_w, info.current_h) / dpi
         print("HarmonyOS screen diagonal is", diag, "inches.")
-
-        if diag >= 6:
-            renpy.config.variants.insert(0, 'tablet') # type: ignore
-            renpy.config.variants.insert(0, 'medium') # type: ignore
-        else:
-            renpy.config.variants.insert(0, 'phone') # type: ignore
-            renpy.config.variants.insert(0, 'small') # type: ignore
 
     elif renpy.emscripten:
         import emscripten # type: ignore
@@ -543,6 +542,13 @@ def main():
         renpy.persistent.update()
         game.preferences = game.persistent._preferences
         log_clock("Loading persistent")
+
+        # Persistent data copied from PC may contain a small window size
+        # (for example 800x600), which would incorrectly shrink the Harmony
+        # SDL surface on the next launch.
+        if renpy.harmonyos:
+            game.preferences.fullscreen = True
+            game.preferences.physical_size = None
 
         # Clear the list of seen statements in this game.
         game.seen_session = { }

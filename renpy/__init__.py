@@ -265,6 +265,7 @@ name_blacklist = {
     "renpy.exports.sdl_dll",
     "renpy.sl2.slast.serial",
     "renpy.gl2.gl2draw.default_position",
+    "renpy.loader.meta_backup",
     }
 
 class Backup(_object):
@@ -296,7 +297,30 @@ class Backup(_object):
             self.backup_module(m)
 
         # A pickled version of self.objects.
-        self.objects_pickle = pickle.dumps(self.objects, highest=True)
+        while True:
+            try:
+                self.objects_pickle = pickle.dumps(self.objects, highest=True)
+                break
+            except Exception as _e:
+                culprit_ids = [ ]
+
+                for _oid, _ov in list(self.objects.items()):
+                    try:
+                        pickle.dumps(_ov, highest=True)
+                    except Exception:
+                        culprit_ids.append(_oid)
+
+                if not culprit_ids:
+                    print("backup: could not isolate unpicklable object, storing empty backup. Error:", _e)
+                    self.objects_pickle = pickle.dumps({ }, highest=True)
+                    break
+
+                for _oid in culprit_ids:
+                    print("backup: removing transitively-unpicklable object id=%x val=%r" % (_oid, self.objects[_oid]))
+                    del self.objects[_oid]
+
+                    for _vk in [ k for k, v in self.variables.items() if v == _oid ]:
+                        del self.variables[_vk]
 
         self.objects = { }
 
@@ -343,7 +367,12 @@ class Backup(_object):
                 pickle.dumps(v, highest=True)
             except Exception:
                 print("Cannot pickle", name + "." + k, "=", repr(v))
-                print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                try:
+                    print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                except Exception as _re:
+                    print("Reduce Ex also failed:", _re)
+                del self.variables[mod, k]
+                del self.objects[idv]
 
     def restore(self):
         """

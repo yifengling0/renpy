@@ -141,13 +141,31 @@ def path_to_saves(gamedir, save_directory=None): # type: (str, str|None) -> str
 
     if renpy.harmonyos:
         basedir = os.path.dirname(gamedir)
-        game_saves = os.path.join(basedir, "saves")
+        portable_saves = os.path.join(gamedir, "saves")
+        game_saves = os.environ.get("RENPY_PATH_TO_SAVES", "") or os.path.join(basedir, "saves")
 
         private = os.environ.get("ANDROID_PRIVATE", "")
         if private:
             sandbox_saves = os.path.join(os.path.dirname(private.rstrip("/\\")), "saves")
         else:
-            sandbox_saves = os.path.join(gamedir, "saves")
+            sandbox_saves = portable_saves
+
+        def has_portable_data(d):
+            if not os.path.isdir(d):
+                return False
+
+            try:
+                for name in os.listdir(d):
+                    if name == "persistent" or name == "navigation.json" or name.endswith(".save") or name.startswith("auto-"):
+                        return True
+            except Exception:
+                pass
+
+            return False
+
+        if has_portable_data(portable_saves) and test_writable(portable_saves):
+            print("HarmonyOS: Using portable game saves:", portable_saves)
+            return portable_saves
 
         if not os.path.exists(game_saves):
             try:
@@ -157,7 +175,7 @@ def path_to_saves(gamedir, save_directory=None): # type: (str, str|None) -> str
 
         if os.path.isdir(game_saves) and test_writable(game_saves):
             base = game_saves
-            print("HarmonyOS: Using persistent game directory for saves:", base)
+            print("HarmonyOS: Using shared game-root saves:", base)
         else:
             base = sandbox_saves
             if not os.path.exists(base):
