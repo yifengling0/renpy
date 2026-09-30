@@ -79,6 +79,55 @@ init -1600 python:
 
         renpy.change_language(language)
 
+        try:
+            _translator = renpy.game.script.translator
+            _known_languages = sorted([ i for i in renpy.known_languages() if i is not None ])
+            _translator_languages = sorted([ i for i in getattr(_translator, "languages", set()) if i is not None ])
+            _language_counts = { }
+            for _identifier, _lang in getattr(_translator, "language_translates", { }):
+                _language_counts[_lang] = _language_counts.get(_lang, 0) + 1
+            _string_counts = { }
+            for _lang, _string_translator in getattr(_translator, "strings", { }).items():
+                _string_counts[_lang] = len(getattr(_string_translator, "translations", { }))
+            _portable_saves = os.path.join(config.gamedir, "saves")
+            _shared_saves = os.path.join(os.path.dirname(config.gamedir), "saves")
+            _env_saves = os.environ.get("RENPY_PATH_TO_SAVES", "")
+            try:
+                _resolved_saves = renpy.__main__.path_to_saves(config.gamedir, None)
+            except Exception:
+                _resolved_saves = None
+            _tl_root = os.path.join(config.gamedir, "tl")
+            _tl_dirs = [ ]
+            if os.path.isdir(_tl_root):
+                _tl_dirs = sorted([ i for i in os.listdir(_tl_root) if os.path.isdir(os.path.join(_tl_root, i)) ])
+            print("[RenpyTranslationDiag] requested=%r config=%r pref=%r current=%r" % (
+                language,
+                config.language,
+                _preferences.language,
+                renpy.game.preferences.language,
+            ))
+            print("[RenpyTranslationDiag] saves resolved=%r env=%r portable=%r portable_persistent=%r shared=%r shared_persistent=%r" % (
+                _resolved_saves,
+                _env_saves,
+                _portable_saves,
+                os.path.exists(os.path.join(_portable_saves, "persistent")),
+                _shared_saves,
+                os.path.exists(os.path.join(_shared_saves, "persistent")),
+            ))
+            print("[RenpyTranslationDiag] tl_dirs=%r known=%r translator_languages=%r loadable_common=%r/%r default=%d language=%d lang_counts=%r string_counts=%r" % (
+                _tl_dirs,
+                _known_languages,
+                _translator_languages,
+                renpy.exports.loadable("tl/None/common.rpym"),
+                renpy.exports.loadable("tl/None/common.rpymc"),
+                len(getattr(_translator, "default_translates", { })),
+                len(getattr(_translator, "language_translates", { })),
+                _language_counts,
+                _string_counts,
+            ))
+        except Exception as _translation_diag_error:
+            print("[RenpyTranslationDiag] failed: %r" % (_translation_diag_error,))
+
 # This fixes up the context, if necessary, then calls the real
 # after_load.
 label _after_load:

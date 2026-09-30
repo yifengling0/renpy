@@ -237,6 +237,25 @@ def choose_variants():
             renpy.config.variants.insert(0, 'phone')
             renpy.config.variants.insert(0, 'small')
 
+    elif renpy.harmonyos:
+        renpy.config.variants.insert(0, 'mobile')
+        renpy.config.variants.insert(0, 'harmonyos')
+        renpy.config.variants.insert(0, 'touch')
+        renpy.config.variants.insert(0, 'tablet')
+        renpy.config.variants.insert(0, 'medium')
+
+        import math
+        import pygame_sdl2 as pygame
+
+        pygame.display.init()
+
+        info = renpy.display.get_info()
+        dpi = int(os.environ.get("RENPY_DPI", "160"))
+        if dpi <= 0:
+            dpi = 160
+        diag = math.hypot(info.current_w, info.current_h) / dpi
+        print("HarmonyOS screen diagonal is", diag, "inches.")
+
     elif renpy.emscripten:
         import emscripten
         import re
@@ -528,6 +547,10 @@ def main():
         renpy.persistent.update()
         game.preferences = game.persistent._preferences
         log_clock("Loading persistent")
+
+        if renpy.harmonyos:
+            game.preferences.fullscreen = True
+            game.preferences.physical_size = None
 
         # Clear the list of seen statements in this game.
         game.seen_session = { }

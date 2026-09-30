@@ -726,9 +726,14 @@ static void decode_audio(MediaState *ms) {
 			}
 
             converted_frame->sample_rate = audio_sample_rate;
+#if (LIBAVUTIL_VERSION_MAJOR < 59)
             converted_frame->channel_layout = AV_CH_LAYOUT_STEREO;
+#else
+            converted_frame->ch_layout = (AVChannelLayout) AV_CHANNEL_LAYOUT_STEREO;
+#endif
             converted_frame->format = AV_SAMPLE_FMT_S16;
 
+#if (LIBAVUTIL_VERSION_MAJOR < 59)
 			if (!ms->audio_decode_frame->channel_layout) {
 				ms->audio_decode_frame->channel_layout = av_get_default_channel_layout(ms->audio_decode_frame->channels);
 
@@ -747,6 +752,26 @@ static void decode_audio(MediaState *ms) {
 				    swr_set_matrix(ms->swr, stereo_matrix, 1);
 				}
 			}
+#else
+			if (ms->audio_decode_frame->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC) {
+				av_channel_layout_default(&ms->audio_decode_frame->ch_layout, ms->audio_decode_frame->ch_layout.nb_channels);
+
+				if (audio_equal_mono && (ms->audio_decode_frame->ch_layout.nb_channels == 1)) {
+				    swr_alloc_set_opts2(
+                        &ms->swr,
+                        &converted_frame->ch_layout,
+                        converted_frame->format,
+                        converted_frame->sample_rate,
+                        &ms->audio_decode_frame->ch_layout,
+                        ms->audio_decode_frame->format,
+                        ms->audio_decode_frame->sample_rate,
+                        0,
+                        NULL);
+
+				    swr_set_matrix(ms->swr, stereo_matrix, 1);
+				}
+			}
+#endif
 
 			if(swr_convert_frame(ms->swr, converted_frame, ms->audio_decode_frame)) {
 				av_frame_free(&converted_frame);

@@ -80,25 +80,60 @@ def path_to_saves(gamedir, save_directory=None):
         return rv
 
     if getattr(renpy, "harmonyos", False):
-        base = os.environ.get("RENPY_PATH_TO_SAVES", "")
+        basedir = os.path.dirname(gamedir)
+        portable_saves = os.path.join(gamedir, "saves")
+        shared_saves = os.environ.get("RENPY_PATH_TO_SAVES", "") or os.path.join(basedir, "saves")
 
-        if not base:
-            base = os.path.join(os.path.dirname(gamedir), "saves")
+        def has_portable_data(d):
+            if not os.path.isdir(d):
+                return False
+
+            try:
+                for name in os.listdir(d):
+                    if name == "persistent" or name == "navigation.json" or name.endswith(".save") or name.startswith("auto-"):
+                        return True
+            except:
+                pass
+
+            return False
+
+        if has_portable_data(portable_saves) and test_writable(portable_saves):
+            print("HarmonyOS: Using portable game saves:", portable_saves)
+            return portable_saves
+
+        private = os.environ.get("ANDROID_PRIVATE", "")
+        if private:
+            sandbox_saves = os.path.join(os.path.dirname(private.rstrip("/\\")), "saves")
+        else:
+            sandbox_saves = portable_saves
 
         try:
-            if not os.path.isdir(base):
-                os.makedirs(base)
+            if not os.path.isdir(shared_saves):
+                os.makedirs(shared_saves)
         except:
             pass
 
-        if test_writable(base):
-            if not save_directory:
-                return base
+        if test_writable(shared_saves):
+            base = shared_saves
+            print("HarmonyOS: Using shared game-root saves:", base)
+        else:
+            base = sandbox_saves
+            try:
+                if not os.path.isdir(base):
+                    os.makedirs(base)
+            except:
+                pass
+            print("HarmonyOS: Game directory not writable, using sandbox:", base)
 
-            if isinstance(save_directory, bytes):
-                save_directory = save_directory.decode("utf-8")
+        if not save_directory:
+            return base
 
-            return os.path.join(base, save_directory)
+        if isinstance(save_directory, bytes):
+            save_directory = save_directory.decode("utf-8")
+
+        rv = os.path.join(base, save_directory)
+        print("HarmonyOS: path_to_saves returning:", rv)
+        return rv
 
     if renpy.ios:
         from pyobjus import autoclass

@@ -99,35 +99,14 @@ echo "  Python 2.7 build: $PY27_BUILD"
 echo "  Host Python:      $HOST_PYTHON"
 echo "  OHOS SDK:         $OHOS_SDK_ROOT"
 
-PYGAME_SDL2_BUILD_SCRIPT="$PYGAME_SDL2_ROOT/build_harmony_27.sh"
-PYGAME_SDL2_BUILD_OUT="$PYGAME_SDL2_ROOT/build-harmony-$ARCH"
-if [ ! -f "$PYGAME_SDL2_BUILD_SCRIPT" ]; then
-    echo "ERROR: pygame_sdl2 build script not found at $PYGAME_SDL2_BUILD_SCRIPT"
-    exit 1
-fi
-
-if [ "${FORCE_PYGAME_SDL2_REBUILD:-0}" = "1" ] || \
-   [ ! -f "$PYGAME_SDL2_ROOT/gen/pygame_sdl2.display_api.h" ] || \
-   [ ! -f "$PYGAME_SDL2_BUILD_OUT/lib.pygame_sdl2.error.cpython-27-aarch64-linux-ohos.so" ]; then
-    echo "  Building pygame_sdl2 py27/OHOS runtime modules..."
-    bash "$PYGAME_SDL2_BUILD_SCRIPT" "$ARCH"
-else
-    echo "  Reusing pygame_sdl2 build: $PYGAME_SDL2_BUILD_OUT"
-fi
-
 if [ ! -f "$PYGAME_SDL2_ROOT/src/pygame_sdl2/pygame_sdl2.h" ]; then
     echo "ERROR: pygame_sdl2.h not found at $PYGAME_SDL2_ROOT/src/pygame_sdl2"
     exit 1
 fi
 
-PYGAME_SDL2_GEN_DIR="$PYGAME_SDL2_ROOT/gen"
-if [ ! -f "$PYGAME_SDL2_GEN_DIR/pygame_sdl2.display_api.h" ]; then
-    PYGAME_SDL2_GEN_DIR="$PYGAME_SDL2_ROOT/gen3"
-fi
-
 mkdir -p "$HOST_DEPS_INCLUDE_ROOT/pygame_sdl2"
 cp -f "$PYGAME_SDL2_ROOT/src/pygame_sdl2/pygame_sdl2.h" "$HOST_DEPS_INCLUDE_ROOT/pygame_sdl2/"
-for api_header in "$PYGAME_SDL2_GEN_DIR"/pygame_sdl2.*_api.h; do
+for api_header in "$PYGAME_SDL2_ROOT"/gen3/pygame_sdl2.*_api.h; do
     if [ -f "$api_header" ]; then
         cp -f "$api_header" "$HOST_DEPS_INCLUDE_ROOT/pygame_sdl2/"
     fi
@@ -138,7 +117,6 @@ if [ ! -f "$HOST_DEPS_INCLUDE_ROOT/pygame_sdl2/pygame_sdl2.display_api.h" ]; the
     exit 1
 fi
 
-echo "  pygame_sdl2 API source: $PYGAME_SDL2_GEN_DIR"
 echo "  Host include shim: $HOST_DEPS_INCLUDE_ROOT"
 
 # =============================================================================

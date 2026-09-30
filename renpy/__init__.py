@@ -259,6 +259,7 @@ name_blacklist = {
     "renpy.webloader.queue_lock",
     "renpy.persistent.save_MP_instances",
     "renpy.exports.sdl_dll",
+    "renpy.loader.meta_backup",
     }
 
 
@@ -294,7 +295,30 @@ class Backup(object):
             self.backup_module(m)
 
         # A pickled version of self.objects.
-        self.objects_pickle = pickle.dumps(self.objects, pickle.HIGHEST_PROTOCOL)
+        while True:
+            try:
+                self.objects_pickle = pickle.dumps(self.objects, pickle.HIGHEST_PROTOCOL)
+                break
+            except Exception as _e:
+                culprit_ids = [ ]
+
+                for _oid, _ov in list(self.objects.items()):
+                    try:
+                        pickle.dumps(_ov, pickle.HIGHEST_PROTOCOL)
+                    except Exception:
+                        culprit_ids.append(_oid)
+
+                if not culprit_ids:
+                    print("backup: could not isolate unpicklable object, storing empty backup. Error:", _e)
+                    self.objects_pickle = pickle.dumps({ }, pickle.HIGHEST_PROTOCOL)
+                    break
+
+                for _oid in culprit_ids:
+                    print("backup: removing transitively-unpicklable object id=%x val=%r" % (_oid, self.objects[_oid]))
+                    del self.objects[_oid]
+
+                    for _vk in [ k for k, v in self.variables.items() if v == _oid ]:
+                        del self.variables[_vk]
 
         self.objects = None
 
@@ -339,9 +363,14 @@ class Backup(object):
 
             try:
                 pickle.dumps(v, pickle.HIGHEST_PROTOCOL)
-            except:
+            except Exception:
                 print("Cannot pickle", name + "." + k, "=", repr(v))
-                print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.HIGHEST_PROTOCOL)))
+                try:
+                    print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.HIGHEST_PROTOCOL)))
+                except Exception as _re:
+                    print("Reduce Ex also failed:", _re)
+                del self.variables[mod, k]
+                del self.objects[idv]
 
     def restore(self):
         """
