@@ -64,6 +64,7 @@ else:
 
 # A string at the start of each rpycv2 file.
 RPYC2_HEADER = b"RENPY RPC2"
+LIULI_PLUS_HEADER = b"liuli plus "
 
 
 # The name of the obsolete and new bytecode cache files.
@@ -653,6 +654,17 @@ class Script(object):
         header_data = f.read(1024)
 
         # header = f.read(len(RPYC2_HEADER))
+
+        # Liuli Plus-wrapped rpyc path. These files prepend a small header
+        # before a gzip stream containing the normal pickled Ren'Py script.
+        if header_data[:len(LIULI_PLUS_HEADER)] == LIULI_PLUS_HEADER:
+            if slot != 1:
+                return None
+
+            f.seek(len(LIULI_PLUS_HEADER) + 9 * 4)
+            data = f.read()
+
+            return zlib.decompress(data, 16 + zlib.MAX_WBITS)
 
         # Legacy path.
         if header_data[:len(RPYC2_HEADER)] != RPYC2_HEADER:

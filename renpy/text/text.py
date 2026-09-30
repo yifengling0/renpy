@@ -863,7 +863,10 @@ class Layout(object):
 
             # Figure out the line height, line spacing, and the y coordinate of each
             # glyph.
-            l, y = textsupport.place_vertical(par_glyphs, y, self.scale_int(style.line_spacing), self.scale_int(style.line_leading), self.scale_int(style.ruby_line_leading))
+            line_spacing = self.scale_int(style.line_spacing) or 0
+            line_leading = self.scale_int(style.line_leading) or 0
+            ruby_line_leading = self.scale_int(style.ruby_line_leading) or 0
+            l, y = textsupport.place_vertical(par_glyphs, int(y), int(line_spacing), int(line_leading), int(ruby_line_leading))
             lines.extend(l)
 
             # Figure out the indent of the next paragraph.
@@ -1100,7 +1103,7 @@ class Layout(object):
         if isinstance(n, renpy.display.core.absolute):
             return int(n)
 
-        return round(n * self.oversample)
+        return int(round(n * self.oversample))
 
     def scale_outline(self, n):
         if n is None:

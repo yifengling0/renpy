@@ -119,6 +119,7 @@ linux = False
 android = False
 ios = False
 emscripten = False
+harmonyos = False
 
 # Should we enable experimental features and debugging?
 experimental = "RENPY_EXPERIMENTAL" in os.environ
@@ -162,9 +163,14 @@ def get_windows_version():
         return (10, 0)
 
 
+_renpy_platform = os.environ.get("RENPY_PLATFORM", "")
+
 if platform.win32_ver()[0]:
     windows = get_windows_version()
-elif os.environ.get("RENPY_PLATFORM", "").startswith("ios"):
+elif _renpy_platform == "harmonyos":
+    harmonyos = True
+    linux = True
+elif _renpy_platform.startswith("ios"):
     ios = True
 elif platform.mac_ver()[0]:
     macintosh = True
@@ -178,7 +184,7 @@ else:
 arch = os.environ.get("RENPY_PLATFORM", "unknown-unknown-unknown").rpartition("-")[2]
 
 # A flag that's true if we're on a smartphone or tablet-like platform.
-mobile = android or ios or emscripten
+mobile = android or ios or emscripten or harmonyos
 
 # A flag that's set to true if the game directory is bundled inside a mac app.
 macapp = False
@@ -254,6 +260,7 @@ name_blacklist = {
     "renpy.exports.sdl_dll",
     "renpy.sl2.slast.serial",
     "renpy.gl2.gl2draw.default_position",
+    "renpy.loader.meta_backup",
     }
 
 class Backup(_object):
@@ -285,7 +292,30 @@ class Backup(_object):
             self.backup_module(m)
 
         # A pickled version of self.objects.
-        self.objects_pickle = pickle.dumps(self.objects, highest=True)
+        while True:
+            try:
+                self.objects_pickle = pickle.dumps(self.objects, highest=True)
+                break
+            except Exception as _e:
+                culprit_ids = [ ]
+
+                for _oid, _ov in list(self.objects.items()):
+                    try:
+                        pickle.dumps(_ov, highest=True)
+                    except Exception:
+                        culprit_ids.append(_oid)
+
+                if not culprit_ids:
+                    print("backup: could not isolate unpicklable object, storing empty backup. Error:", _e)
+                    self.objects_pickle = pickle.dumps({ }, highest=True)
+                    break
+
+                for _oid in culprit_ids:
+                    print("backup: removing transitively-unpicklable object id=%x val=%r" % (_oid, self.objects[_oid]))
+                    del self.objects[_oid]
+
+                    for _vk in [ k for k, v in self.variables.items() if v == _oid ]:
+                        del self.variables[_vk]
 
         self.objects = { }
 
@@ -332,7 +362,12 @@ class Backup(_object):
                 pickle.dumps(v, highest=True)
             except Exception:
                 print("Cannot pickle", name + "." + k, "=", repr(v))
-                print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                try:
+                    print("Reduce Ex is:", repr(v.__reduce_ex__(pickle.PROTOCOL)))
+                except Exception as _re:
+                    print("Reduce Ex also failed:", _re)
+                del self.variables[mod, k]
+                del self.objects[idv]
 
     def restore(self):
         """
