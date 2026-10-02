@@ -21,7 +21,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from renpy.uguu.gl cimport *
-from renpy.gl2.gl2draw cimport GL2DrawingContext
 from renpy.gl2.gl2model cimport GL2Model
 
 cdef class Getter:
@@ -32,7 +31,7 @@ cdef class Getter:
     cdef str uniform_name
     "The name of the uniform."
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model)
+    cdef object get(self, object context, GL2Model model)
 
 
 cdef class Setter:
@@ -53,4 +52,4 @@ cdef class Setter:
     cdef Getter getter
     "The getter that's used to get the data for this uniform."
 
-    cdef object set(self, GL2DrawingContext context, value)
+    cdef object set(self, object context, value)

@@ -959,9 +959,9 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "stringsource",
-  "tmp/gen3\\styleclass.pxi",
-  "renpy\\style.pxd",
-  "renpy\\styledata\\styleclass.pyx",
+  "tmp/gen3/styleclass.pxi",
+  "renpy/style.pxd",
+  "renpy/styledata/styleclass.pyx",
   "type.pxd",
 };
 

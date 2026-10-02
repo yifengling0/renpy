@@ -121,6 +121,23 @@ def main():
     cython("renpy.pygame.draw", packages="sdl2")
     cython("renpy.pygame.scrap", packages="sdl2")
 
+        # --- vp: 补回历史模块清单（HAP py39 基线需要；源码均在） ---
+    cython("renpy.text.textsupport")
+    cython("renpy.text.texwrap")
+    cython("renpy.text.ftfont", [ "src/ftsupport.c", "src/ttgsubtable.c" ], packages="freetype2 harfbuzz")
+    cython("renpy.text.hbfont", [ "src/ftsupport.c" ], packages="freetype2 harfbuzz")
+    cython("renpy.text.bidi", [ "src/renpybidicore.c" ], packages="fribidi")
+
+    cython("renpy.gl.gldraw", packages="sdl2")
+    cython("renpy.gl.gltexture", packages="sdl2")
+    cython("renpy.gl.glenviron_shader", packages="sdl2")
+    cython("renpy.gl.glrtt_copy", packages="sdl2")
+    cython("renpy.gl.glrtt_fbo", packages="sdl2")
+
+    cython("renpy.pygame.error", packages="sdl2")
+    cython("renpy.pygame.color", packages="sdl2")
+    cython("renpy.pygame.controller", packages="sdl2")
+
     generate_all_cython()
     find_unnecessary_gen()
 

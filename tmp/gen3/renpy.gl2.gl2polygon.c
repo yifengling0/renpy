@@ -958,9 +958,9 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\gl2\\gl2polygon.pyx",
+  "renpy/gl2/gl2polygon.pyx",
   "stringsource",
-  "renpy\\display\\matrix.pxd",
+  "renpy/display/matrix.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -1557,7 +1557,7 @@ static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_gl2_gl2polygon[] = "renpy.gl2.gl2polygon";
 static const char __pyx_k_multiply_matrix_inplace[] = "multiply_matrix_inplace";
-static const char __pyx_k_renpy_gl2_gl2polygon_pyx[] = "renpy\\gl2\\gl2polygon.pyx";
+static const char __pyx_k_renpy_gl2_gl2polygon_pyx[] = "renpy/gl2/gl2polygon.pyx";
 static const char __pyx_k_self_point_cannot_be_converted_t[] = "self.point cannot be converted to a Python object for pickling";
 static PyObject *__pyx_kp_s_;
 static PyObject *__pyx_kp_s_3f_3f;

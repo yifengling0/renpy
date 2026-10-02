@@ -11,7 +11,7 @@
 #else
 #define CYTHON_ABI "0_29_37"
 #define CYTHON_HEX_VERSION 0x001D25F0
-#define CYTHON_FUTURE_DIVISION 1
+#define CYTHON_FUTURE_DIVISION 0
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -962,11 +962,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\pygame\\display.pyx",
+  "renpy/pygame/display.pyx",
   "stringsource",
-  "renpy\\pygame\\display.pxd",
-  "renpy\\pygame\\surface.pxd",
-  "renpy\\pygame\\rect.pxd",
+  "renpy/pygame/display.pxd",
+  "renpy/pygame/surface.pxd",
+  "renpy/pygame/rect.pxd",
 };
 /* NoFastGil.proto */
 #define __Pyx_PyGILState_Ensure PyGILState_Ensure
@@ -1156,10 +1156,6 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
 
-/* unicode_tailmatch.proto */
-static int __Pyx_PyUnicode_Tailmatch(
-    PyObject* s, PyObject* substr, Py_ssize_t start, Py_ssize_t end, int direction);
-
 /* PyCFunctionFastCall.proto */
 #if CYTHON_FAST_PYCCALL
 static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
@@ -1213,6 +1209,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
 /* PyObjectCallOneArg.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
+/* PyObjectCall2Args.proto */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
+
 /* PyDictVersioning.proto */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
 #define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
@@ -1259,9 +1258,6 @@ static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_ve
 #define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
 static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 #endif
-
-/* PyObjectCall2Args.proto */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
 
 /* PySequenceContains.proto */
 static CYTHON_INLINE int __Pyx_PySequence_ContainsTF(PyObject* item, PyObject* seq, int eq) {
@@ -1358,6 +1354,13 @@ static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int eq
 
 /* UnicodeEquals.proto */
 static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
+
+/* StrEquals.proto */
+#if PY_MAJOR_VERSION >= 3
+#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
+#else
+#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
+#endif
 
 /* GetTopmostException.proto */
 #if CYTHON_USE_EXC_INFO_STACK
@@ -1698,7 +1701,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libc.stddef' */
 
-/* Module declarations from 'sdl2' */
+/* Module declarations from 'renpy.pygame.sdl2' */
 
 /* Module declarations from 'renpy.pygame.surface' */
 static PyTypeObject *__pyx_ptype_5renpy_6pygame_7surface_Surface = 0;
@@ -1837,6 +1840,7 @@ static const char __pyx_k_list_modes[] = "list_modes";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_rectangles[] = "rectangles";
 static const char __pyx_k_resolution[] = "resolution";
+static const char __pyx_k_startswith[] = "startswith";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_Info___init[] = "Info.__init__";
 static const char __pyx_k_Info___repr[] = "Info.__repr__";
@@ -1884,21 +1888,21 @@ static const char __pyx_k_proxy_window_surface[] = "proxy_window_surface";
 static const char __pyx_k_renpy_pygame_display[] = "renpy.pygame.display";
 static const char __pyx_k_renpy_pygame_AVOID_GL[] = "renpy.pygame_AVOID_GL";
 static const char __pyx_k_get_num_video_displays[] = "get_num_video_displays";
-static const char __pyx_k_renpy_pygame_display_pyx[] = "renpy\\pygame\\display.pyx";
+static const char __pyx_k_renpy_pygame_display_pyx[] = "renpy/pygame/display.pyx";
 static const char __pyx_k_Couldn_t_allocate_rectangles[] = "Couldn't allocate rectangles.";
 static const char __pyx_k_self_gl_context_self_window_self[] = "self.gl_context,self.window,self.window_surface cannot be converted to a Python object for pickling";
-static PyObject *__pyx_kp_u_0;
-static PyObject *__pyx_kp_u_Couldn_t_allocate_rectangles;
+static PyObject *__pyx_kp_s_0;
+static PyObject *__pyx_kp_s_Couldn_t_allocate_rectangles;
 static PyObject *__pyx_n_s_GL_SWAP_CONTROL;
 static PyObject *__pyx_n_s_ImportError;
 static PyObject *__pyx_n_s_Info;
 static PyObject *__pyx_n_s_Info___init;
 static PyObject *__pyx_n_s_Info___repr;
-static PyObject *__pyx_kp_u_Info_r;
+static PyObject *__pyx_kp_s_Info_r;
 static PyObject *__pyx_n_s_MemoryError;
-static PyObject *__pyx_n_u_PYGAME_IOS;
+static PyObject *__pyx_n_s_PYGAME_IOS;
 static PyObject *__pyx_n_s_RESIZE_FLAGS;
-static PyObject *__pyx_n_u_SDL_VIDEODRIVER;
+static PyObject *__pyx_n_s_SDL_VIDEODRIVER;
 static PyObject *__pyx_n_s_SRCALPHA;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_Window;
@@ -1931,7 +1935,7 @@ static PyObject *__pyx_n_s_display;
 static PyObject *__pyx_n_s_dm;
 static PyObject *__pyx_n_s_doc;
 static PyObject *__pyx_n_s_driver;
-static PyObject *__pyx_n_u_dummy;
+static PyObject *__pyx_n_s_dummy;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_environ;
 static PyObject *__pyx_n_s_error;
@@ -1998,7 +2002,7 @@ static PyObject *__pyx_n_s_priority;
 static PyObject *__pyx_n_s_proxy_window_surface;
 static PyObject *__pyx_n_s_pygame;
 static PyObject *__pyx_n_s_pygame_hints;
-static PyObject *__pyx_kp_u_pygame_window;
+static PyObject *__pyx_kp_s_pygame_window;
 static PyObject *__pyx_n_s_pyx_capi;
 static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_qualname;
@@ -2014,9 +2018,8 @@ static PyObject *__pyx_n_s_refresh_rate;
 static PyObject *__pyx_n_s_register_init;
 static PyObject *__pyx_n_s_register_quit;
 static PyObject *__pyx_n_s_renpy;
-static PyObject *__pyx_n_s_renpy_pygame;
-static PyObject *__pyx_kp_u_renpy_pygame;
-static PyObject *__pyx_kp_u_renpy_pygame_AVOID_GL;
+static PyObject *__pyx_kp_s_renpy_pygame;
+static PyObject *__pyx_kp_s_renpy_pygame_AVOID_GL;
 static PyObject *__pyx_n_s_renpy_pygame_display;
 static PyObject *__pyx_kp_s_renpy_pygame_display_pyx;
 static PyObject *__pyx_n_s_renpy_pygame_error;
@@ -2040,6 +2043,7 @@ static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
 static PyObject *__pyx_n_s_shifts;
 static PyObject *__pyx_n_s_size;
+static PyObject *__pyx_n_s_startswith;
 static PyObject *__pyx_n_s_state;
 static PyObject *__pyx_n_s_surface;
 static PyObject *__pyx_n_s_t;
@@ -2047,7 +2051,7 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_title;
 static PyObject *__pyx_n_s_toggle_fullscreen;
 static PyObject *__pyx_n_s_update;
-static PyObject *__pyx_kp_u_utf_8;
+static PyObject *__pyx_kp_s_utf_8;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_video_mem;
 static PyObject *__pyx_n_s_warnings;
@@ -2210,7 +2214,8 @@ static PyObject *__pyx_codeobj__70;
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_1hint(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_1hint = {"hint", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_1hint, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_hint[] = "hint(hint, value, priority=1)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_1hint = {"hint", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_1hint, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_hint};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_1hint(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_hint = 0;
   PyObject *__pyx_v_value = 0;
@@ -2292,9 +2297,9 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  int __pyx_t_2;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
+  int __pyx_t_4;
   int __pyx_t_5;
   char const *__pyx_t_6;
   char const *__pyx_t_7;
@@ -2313,11 +2318,29 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  *         _pygame_hints[str(hint)] = str(value)
  *         return
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_startswith); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_kp_s_renpy_pygame) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_kp_s_renpy_pygame);
+  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyUnicode_Tailmatch(__pyx_t_1, __pyx_kp_u_renpy_pygame, 0, PY_SSIZE_T_MAX, -1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if ((__pyx_t_2 != 0)) {
+  if (__pyx_t_4) {
 
     /* "renpy/pygame/display.pyx":44
  * 
@@ -2326,15 +2349,15 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  *         return
  * 
  */
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_pygame_hints); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(PyObject_SetItem(__pyx_t_3, __pyx_t_4, __pyx_t_1) < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    if (unlikely(PyObject_SetItem(__pyx_t_3, __pyx_t_2, __pyx_t_1) < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "renpy/pygame/display.pyx":45
@@ -2364,8 +2387,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  *         hint = hint.encode("utf-8")
  * 
  */
-  __pyx_t_2 = PyBytes_Check(__pyx_v_hint); 
-  __pyx_t_5 = ((!(__pyx_t_2 != 0)) != 0);
+  __pyx_t_4 = PyBytes_Check(__pyx_v_hint); 
+  __pyx_t_5 = ((!(__pyx_t_4 != 0)) != 0);
   if (__pyx_t_5) {
 
     /* "renpy/pygame/display.pyx":48
@@ -2375,23 +2398,23 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  * 
  *     if not isinstance(value, bytes):
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_hint, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_hint, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_3 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
       if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
         __Pyx_INCREF(__pyx_t_3);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_4, function);
+        __Pyx_DECREF_SET(__pyx_t_2, function);
       }
     }
-    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_3, __pyx_kp_u_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_u_utf_8);
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_kp_s_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_kp_s_utf_8);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF_SET(__pyx_v_hint, __pyx_t_1);
     __pyx_t_1 = 0;
 
@@ -2412,8 +2435,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  * 
  */
   __pyx_t_5 = PyBytes_Check(__pyx_v_value); 
-  __pyx_t_2 = ((!(__pyx_t_5 != 0)) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_4 = ((!(__pyx_t_5 != 0)) != 0);
+  if (__pyx_t_4) {
 
     /* "renpy/pygame/display.pyx":51
  * 
@@ -2422,23 +2445,23 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
  * 
  *     SDL_SetHintWithPriority(hint, value, priority)
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_value, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_value, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_3 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
       if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
         __Pyx_INCREF(__pyx_t_3);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_4, function);
+        __Pyx_DECREF_SET(__pyx_t_2, function);
       }
     }
-    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_3, __pyx_kp_u_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_u_utf_8);
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_kp_s_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_kp_s_utf_8);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_1);
     __pyx_t_1 = 0;
 
@@ -2476,8 +2499,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("renpy.pygame.display.hint", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2498,7 +2521,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_hint(CYTHON_UNUSED PyObject *_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_3_get_hint(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_3_get_hint = {"_get_hint", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_3_get_hint, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_2_get_hint[] = "_get_hint(hint, default)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_3_get_hint = {"_get_hint", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_3_get_hint, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_2_get_hint};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_3_get_hint(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_hint = 0;
   PyObject *__pyx_v_default = 0;
@@ -2581,7 +2605,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_2_get_hint(CYTHON_UNUSED PyObj
  * 
  *     if hint in _pygame_hints:
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_hint); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_hint, __pyx_t_1);
   __pyx_t_1 = 0;
@@ -2715,7 +2739,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_2_get_hint(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_5sdl_main_init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_5sdl_main_init = {"sdl_main_init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_5sdl_main_init, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_4sdl_main_init[] = "sdl_main_init()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_5sdl_main_init = {"sdl_main_init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_5sdl_main_init, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_4sdl_main_init};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_5sdl_main_init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2870,7 +2895,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_4sdl_main_init(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_7init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_7init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_7init, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_6init[] = "init()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_7init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_7init, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6init};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_7init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3077,7 +3103,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6init(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_9quit(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_9quit = {"quit", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_9quit, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_8quit[] = "quit()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_9quit = {"quit", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_9quit, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_8quit};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_9quit(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3209,7 +3236,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_8quit(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_11get_init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_11get_init = {"get_init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_11get_init, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_10get_init[] = "get_init()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_11get_init = {"get_init", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_11get_init, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_10get_init};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_11get_init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3461,7 +3489,7 @@ static int __pyx_pf_5renpy_6pygame_7display_6Window___init__(struct __pyx_obj_5r
         __Pyx_DECREF_SET(__pyx_t_4, function);
       }
     }
-    __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_u_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_u_utf_8);
+    __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_s_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_s_utf_8);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -3528,12 +3556,12 @@ static int __pyx_pf_5renpy_6pygame_7display_6Window___init__(struct __pyx_obj_5r
       __Pyx_DECREF_SET(__pyx_t_4, function);
     }
   }
-  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_n_u_SDL_VIDEODRIVER) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_n_u_SDL_VIDEODRIVER);
+  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_n_s_SDL_VIDEODRIVER) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_n_s_SDL_VIDEODRIVER);
   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_t_3, __pyx_n_u_dummy, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_t_3, __pyx_n_s_dummy, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = __pyx_t_1;
   __pyx_L5_bool_binop_done:;
@@ -4423,7 +4451,7 @@ static int __pyx_pf_5renpy_6pygame_7display_6Window___init__(struct __pyx_obj_5r
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_3create_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_6Window_2create_surface[] = "\n        Creates the surface associated with this window.\n        ";
+static char __pyx_doc_5renpy_6pygame_7display_6Window_2create_surface[] = "Window.create_surface(self)\n\n        Creates the surface associated with this window.\n        ";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_3create_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -4685,7 +4713,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_2create_surface(struct
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_5destroy(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_6Window_4destroy[] = "\n        This should be called before the window is deleted.\n        ";
+static char __pyx_doc_5renpy_6pygame_7display_6Window_4destroy[] = "Window.destroy(self)\n\n        This should be called before the window is deleted.\n        ";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_5destroy(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -4827,7 +4855,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_4destroy(struct __pyx_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_7resize(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_6Window_6resize[] = "\n        Resizes the window to `size`, which must be a width, height tuple. If opengl\n        is true, adds an OpenGL context, if it's missing. Otherwise, removes the\n        opengl context if present.\n        ";
+static char __pyx_doc_5renpy_6pygame_7display_6Window_6resize[] = "Window.resize(self, size, opengl=False, fullscreen=None, maximized=None)\n\n        Resizes the window to `size`, which must be a width, height tuple. If opengl\n        is true, adds an OpenGL context, if it's missing. Otherwise, removes the\n        opengl context if present.\n        ";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_7resize(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_size = 0;
   PyObject *__pyx_v_opengl = 0;
@@ -5560,7 +5588,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_6resize(struct __pyx_o
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_9recreate_gl_context(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_6Window_8recreate_gl_context[] = "\n        Check to see if the GL context was lost, and re-create it if it was.\n        ";
+static char __pyx_doc_5renpy_6pygame_7display_6Window_8recreate_gl_context[] = "Window.recreate_gl_context(self, always=False)\n\n        Check to see if the GL context was lost, and re-create it if it was.\n        ";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_9recreate_gl_context(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_always = 0;
   int __pyx_lineno = 0;
@@ -5790,6 +5818,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_8recreate_gl_context(s
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_11get_window_flags(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_10get_window_flags[] = "Window.get_window_flags(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_11get_window_flags(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -5921,6 +5950,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_10get_window_flags(str
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_13proxy_window_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_12proxy_window_surface[] = "Window.proxy_window_surface(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_13proxy_window_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -5971,6 +6001,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_12proxy_window_surface
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_15flip(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_14flip[] = "Window.flip(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_15flip(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -6266,6 +6297,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_14flip(struct __pyx_ob
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_17get_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_16get_surface[] = "Window.get_surface(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_17get_surface(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -6319,6 +6351,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_16get_surface(struct _
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_19update(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_18update[] = "Window.update(self, rectangles=None)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_19update(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_rectangles = 0;
   int __pyx_lineno = 0;
@@ -6802,6 +6835,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_18update(struct __pyx_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_21get_wm_info(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_20get_wm_info[] = "Window.get_wm_info(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_21get_wm_info(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -6865,6 +6899,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_20get_wm_info(CYTHON_U
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_23get_active(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_22get_active[] = "Window.get_active(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_23get_active(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -6952,6 +6987,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_22get_active(struct __
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_25iconify(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_24iconify[] = "Window.iconify(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_25iconify(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -7014,6 +7050,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_24iconify(struct __pyx
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_27toggle_fullscreen(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_26toggle_fullscreen[] = "Window.toggle_fullscreen(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_27toggle_fullscreen(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -7197,6 +7234,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_26toggle_fullscreen(st
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_29set_gamma(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_28set_gamma[] = "Window.set_gamma(self, red, green=None, blue=None)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_29set_gamma(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_red = 0;
   PyObject *__pyx_v_green = 0;
@@ -7455,6 +7493,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_28set_gamma(struct __p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_31set_gamma_ramp(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_30set_gamma_ramp[] = "Window.set_gamma_ramp(self, red, green, blue)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_31set_gamma_ramp(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_red = 0;
   PyObject *__pyx_v_green = 0;
@@ -7666,6 +7705,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_30set_gamma_ramp(struc
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_33set_icon(PyObject *__pyx_v_self, PyObject *__pyx_v_surface); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_32set_icon[] = "Window.set_icon(self, Surface surface)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_33set_icon(PyObject *__pyx_v_self, PyObject *__pyx_v_surface) {
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -7724,6 +7764,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_32set_icon(struct __py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_35set_caption(PyObject *__pyx_v_self, PyObject *__pyx_v_title); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_34set_caption[] = "Window.set_caption(self, title)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_35set_caption(PyObject *__pyx_v_self, PyObject *__pyx_v_title) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -7780,7 +7821,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_34set_caption(struct _
         __Pyx_DECREF_SET(__pyx_t_4, function);
       }
     }
-    __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_u_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_u_utf_8);
+    __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_s_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_s_utf_8);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 495, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -7841,6 +7882,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_34set_caption(struct _
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_37get_drawable_size(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_36get_drawable_size[] = "Window.get_drawable_size(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_37get_drawable_size(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -7929,6 +7971,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_36get_drawable_size(st
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_39get_size(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_38get_size[] = "Window.get_size(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_39get_size(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8017,6 +8060,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_38get_size(struct __py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_41restore(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_40restore[] = "Window.restore(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_41restore(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8067,6 +8111,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_40restore(struct __pyx
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_43maximize(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_42maximize[] = "Window.maximize(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_43maximize(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8117,6 +8162,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_42maximize(struct __py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_45minimize(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_44minimize[] = "Window.minimize(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_45minimize(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8167,7 +8213,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_44minimize(struct __py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_47get_sdl_window_pointer(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_6Window_46get_sdl_window_pointer[] = "\n        Returns the pointer to the SDL_Window corresponding to this window.\n        ";
+static char __pyx_doc_5renpy_6pygame_7display_6Window_46get_sdl_window_pointer[] = "Window.get_sdl_window_pointer(self)\n\n        Returns the pointer to the SDL_Window corresponding to this window.\n        ";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_47get_sdl_window_pointer(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8199,7 +8245,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_46get_sdl_window_point
  *         return ctypes.c_void_p(<unsigned long> self.window)
  * 
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_ctypes, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 526, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_ctypes, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 526, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_ctypes = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8269,6 +8315,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_46get_sdl_window_point
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_49get_position(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_48get_position[] = "Window.get_position(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_49get_position(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8357,6 +8404,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_48get_position(struct 
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_51set_position(PyObject *__pyx_v_self, PyObject *__pyx_v_pos); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_50set_position[] = "Window.set_position(self, pos)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_51set_position(PyObject *__pyx_v_self, PyObject *__pyx_v_pos) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8533,6 +8581,7 @@ static int __pyx_pf_5renpy_6pygame_7display_6Window_7surface_4__del__(struct __p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_53__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_52__reduce_cython__[] = "Window.__reduce_cython__(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_53__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8590,6 +8639,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_52__reduce_cython__(CY
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_55__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static char __pyx_doc_5renpy_6pygame_7display_6Window_54__setstate_cython__[] = "Window.__setstate_cython__(self, __pyx_state)";
 static PyObject *__pyx_pw_5renpy_6pygame_7display_6Window_55__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8648,7 +8698,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_6Window_54__setstate_cython__(
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_13set_mode(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_13set_mode = {"set_mode", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_13set_mode, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_12set_mode[] = "set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_13set_mode = {"set_mode", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_13set_mode, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_12set_mode};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_13set_mode(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_resolution = 0;
   PyObject *__pyx_v_flags = 0;
@@ -9067,7 +9118,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_12set_mode(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_15destroy(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_15destroy = {"destroy", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_15destroy, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_14destroy[] = "destroy()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_15destroy = {"destroy", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_15destroy, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_14destroy};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_15destroy(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -9183,7 +9235,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_14destroy(CYTHON_UNUSED PyObje
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_17get_surface(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_17get_surface = {"get_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_17get_surface, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_16get_surface[] = "get_surface()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_17get_surface = {"get_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_17get_surface, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_16get_surface};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_17get_surface(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -9299,7 +9352,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_16get_surface(CYTHON_UNUSED Py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_19get_window(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_18get_window[] = "\n    Returns the Window created by set_mode, or None if no such window\n    exists.\n    ";
+static char __pyx_doc_5renpy_6pygame_7display_18get_window[] = "get_window()\n\n    Returns the Window created by set_mode, or None if no such window\n    exists.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_19get_window = {"get_window", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_19get_window, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_18get_window};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_19get_window(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -9354,7 +9407,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_18get_window(CYTHON_UNUSED PyO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_21flip(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_21flip = {"flip", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_21flip, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_20flip[] = "flip()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_21flip = {"flip", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_21flip, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_20flip};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_21flip(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -9456,7 +9510,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_20flip(CYTHON_UNUSED PyObject 
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_23update(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_23update = {"update", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_23update, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_22update[] = "update(rectangles=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_23update = {"update", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_23update, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_22update};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_23update(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_rectangles = 0;
   int __pyx_lineno = 0;
@@ -9604,7 +9659,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_22update(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_25get_driver(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_25get_driver = {"get_driver", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_25get_driver, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_24get_driver[] = "get_driver()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_25get_driver = {"get_driver", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_25get_driver, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_24get_driver};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_25get_driver(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -9730,7 +9786,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_24get_driver(CYTHON_UNUSED PyO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_4Info_1__init__(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_4Info_1__init__ = {"__init__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_4Info_1__init__, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_4Info___init__[] = "Info.__init__(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_4Info_1__init__ = {"__init__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_4Info_1__init__, METH_O, __pyx_doc_5renpy_6pygame_7display_4Info___init__};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_4Info_1__init__(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10389,7 +10446,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_4Info___init__(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_4Info_3__repr__(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_4Info_3__repr__ = {"__repr__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_4Info_3__repr__, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_4Info_2__repr__[] = "Info.__repr__(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_4Info_3__repr__ = {"__repr__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_4Info_3__repr__, METH_O, __pyx_doc_5renpy_6pygame_7display_4Info_2__repr__};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_4Info_3__repr__(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10421,7 +10479,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_4Info_2__repr__(CYTHON_UNUSED 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u_Info_r, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 674, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_Info_r, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 674, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_dict); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 674, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -10477,7 +10535,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_4Info_2__repr__(CYTHON_UNUSED 
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_27get_wm_info(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_27get_wm_info = {"get_wm_info", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_27get_wm_info, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_26get_wm_info[] = "get_wm_info()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_27get_wm_info = {"get_wm_info", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_27get_wm_info, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_26get_wm_info};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_27get_wm_info(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10594,7 +10653,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_26get_wm_info(CYTHON_UNUSED Py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_29get_num_video_displays(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_28get_num_video_displays[] = "\n    Returns the number of video displays connected to the system.\n    ";
+static char __pyx_doc_5renpy_6pygame_7display_28get_num_video_displays[] = "get_num_video_displays()\n\n    Returns the number of video displays connected to the system.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_29get_num_video_displays = {"get_num_video_displays", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_29get_num_video_displays, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_28get_num_video_displays};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_29get_num_video_displays(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -10721,7 +10780,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_28get_num_video_displays(CYTHO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_31list_modes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_30list_modes[] = "\n    Returns a list of possible display modes for the display `display`.\n\n    `depth` and `flags` are ignored.\n    ";
+static char __pyx_doc_5renpy_6pygame_7display_30list_modes[] = "list_modes(depth=0, flags=0, display=0)\n\n    Returns a list of possible display modes for the display `display`.\n\n    `depth` and `flags` are ignored.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_31list_modes = {"list_modes", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_31list_modes, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_30list_modes};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_31list_modes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED PyObject *__pyx_v_depth = 0;
@@ -11023,7 +11082,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_30list_modes(CYTHON_UNUSED PyO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_33mode_ok(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_32mode_ok[] = "\n    Returns true if size is in the result of list_modes().\n    ";
+static char __pyx_doc_5renpy_6pygame_7display_32mode_ok[] = "mode_ok(size, flags=0, depth=0)\n\n    Returns true if size is in the result of list_modes().\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_33mode_ok = {"mode_ok", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_33mode_ok, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_32mode_ok};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_33mode_ok(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_size = 0;
@@ -11185,7 +11244,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_32mode_ok(CYTHON_UNUSED PyObje
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_35gl_reset_attributes(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_35gl_reset_attributes = {"gl_reset_attributes", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_35gl_reset_attributes, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_34gl_reset_attributes[] = "gl_reset_attributes()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_35gl_reset_attributes = {"gl_reset_attributes", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_35gl_reset_attributes, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_34gl_reset_attributes};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_35gl_reset_attributes(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -11236,7 +11296,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_34gl_reset_attributes(CYTHON_U
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_37gl_set_attribute(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_37gl_set_attribute = {"gl_set_attribute", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_37gl_set_attribute, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_36gl_set_attribute[] = "gl_set_attribute(flag, value)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_37gl_set_attribute = {"gl_set_attribute", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_37gl_set_attribute, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_36gl_set_attribute};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_37gl_set_attribute(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_flag = 0;
   PyObject *__pyx_v_value = 0;
@@ -11505,7 +11566,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_36gl_set_attribute(CYTHON_UNUS
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_39gl_get_attribute(PyObject *__pyx_self, PyObject *__pyx_v_flag); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_39gl_get_attribute = {"gl_get_attribute", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_39gl_get_attribute, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_38gl_get_attribute[] = "gl_get_attribute(flag)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_39gl_get_attribute = {"gl_get_attribute", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_39gl_get_attribute, METH_O, __pyx_doc_5renpy_6pygame_7display_38gl_get_attribute};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_39gl_get_attribute(PyObject *__pyx_self, PyObject *__pyx_v_flag) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -11662,7 +11724,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_38gl_get_attribute(CYTHON_UNUS
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_41gl_load_library(PyObject *__pyx_self, PyObject *__pyx_v_path); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_41gl_load_library = {"gl_load_library", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_41gl_load_library, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_40gl_load_library[] = "gl_load_library(path)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_41gl_load_library = {"gl_load_library", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_41gl_load_library, METH_O, __pyx_doc_5renpy_6pygame_7display_40gl_load_library};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_41gl_load_library(PyObject *__pyx_self, PyObject *__pyx_v_path) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -11840,7 +11903,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_40gl_load_library(CYTHON_UNUSE
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_43gl_unload_library(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_43gl_unload_library = {"gl_unload_library", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_43gl_unload_library, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_42gl_unload_library[] = "gl_unload_library()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_43gl_unload_library = {"gl_unload_library", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_43gl_unload_library, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_42gl_unload_library};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_43gl_unload_library(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -11891,7 +11955,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_42gl_unload_library(CYTHON_UNU
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_45get_active(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_45get_active = {"get_active", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_45get_active, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_44get_active[] = "get_active()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_45get_active = {"get_active", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_45get_active, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_44get_active};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_45get_active(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -12006,7 +12071,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_44get_active(CYTHON_UNUSED PyO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_47iconify(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_47iconify = {"iconify", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_47iconify, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_46iconify[] = "iconify()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_47iconify = {"iconify", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_47iconify, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_46iconify};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_47iconify(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -12121,7 +12187,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_46iconify(CYTHON_UNUSED PyObje
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_49toggle_fullscreen(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_49toggle_fullscreen = {"toggle_fullscreen", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_49toggle_fullscreen, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_48toggle_fullscreen[] = "toggle_fullscreen()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_49toggle_fullscreen = {"toggle_fullscreen", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_49toggle_fullscreen, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_48toggle_fullscreen};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_49toggle_fullscreen(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -12236,7 +12303,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_48toggle_fullscreen(CYTHON_UNU
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_51set_gamma(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_51set_gamma = {"set_gamma", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_51set_gamma, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_50set_gamma[] = "set_gamma(red, green=None, blue=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_51set_gamma = {"set_gamma", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_51set_gamma, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_50set_gamma};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_51set_gamma(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_red = 0;
   PyObject *__pyx_v_green = 0;
@@ -12455,7 +12523,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_50set_gamma(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_53set_gamma_ramp(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_53set_gamma_ramp = {"set_gamma_ramp", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_53set_gamma_ramp, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_52set_gamma_ramp[] = "set_gamma_ramp(red, green, blue)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_53set_gamma_ramp = {"set_gamma_ramp", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_53set_gamma_ramp, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_52set_gamma_ramp};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_53set_gamma_ramp(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_red = 0;
   PyObject *__pyx_v_green = 0;
@@ -12668,7 +12737,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_52set_gamma_ramp(CYTHON_UNUSED
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_55set_icon(PyObject *__pyx_self, PyObject *__pyx_v_surface); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_55set_icon = {"set_icon", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_55set_icon, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_54set_icon[] = "set_icon(surface)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_55set_icon = {"set_icon", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_55set_icon, METH_O, __pyx_doc_5renpy_6pygame_7display_54set_icon};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_55set_icon(PyObject *__pyx_self, PyObject *__pyx_v_surface) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -12804,7 +12874,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_54set_icon(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_57set_caption(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_57set_caption = {"set_caption", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_57set_caption, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_56set_caption[] = "set_caption(title, icontitle=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_57set_caption = {"set_caption", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_57set_caption, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_56set_caption};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_57set_caption(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_title = 0;
   CYTHON_UNUSED PyObject *__pyx_v_icontitle = 0;
@@ -12975,7 +13046,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_56set_caption(CYTHON_UNUSED Py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_59get_caption(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_59get_caption = {"get_caption", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_59get_caption, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_58get_caption[] = "get_caption()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_59get_caption = {"get_caption", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_59get_caption, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_58get_caption};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_59get_caption(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13039,7 +13111,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_58get_caption(CYTHON_UNUSED Py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_61get_drawable_size(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_61get_drawable_size = {"get_drawable_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_61get_drawable_size, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_60get_drawable_size[] = "get_drawable_size()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_61get_drawable_size = {"get_drawable_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_61get_drawable_size, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_60get_drawable_size};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_61get_drawable_size(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13153,7 +13226,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_60get_drawable_size(CYTHON_UNU
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_63get_size(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_63get_size = {"get_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_63get_size, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_62get_size[] = "get_size()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_63get_size = {"get_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_63get_size, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_62get_size};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_63get_size(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13267,7 +13341,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_62get_size(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_65get_position(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_65get_position = {"get_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_65get_position, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_64get_position[] = "get_position()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_65get_position = {"get_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_65get_position, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_64get_position};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_65get_position(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13381,7 +13456,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_64get_position(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_67set_position(PyObject *__pyx_self, PyObject *__pyx_v_pos); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_67set_position = {"set_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_67set_position, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_66set_position[] = "set_position(pos)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_67set_position = {"set_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_67set_position, METH_O, __pyx_doc_5renpy_6pygame_7display_66set_position};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_67set_position(PyObject *__pyx_self, PyObject *__pyx_v_pos) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13496,7 +13572,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_66set_position(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_69get_num_video_displays(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_69get_num_video_displays = {"get_num_video_displays", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_69get_num_video_displays, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_68get_num_video_displays[] = "get_num_video_displays()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_69get_num_video_displays = {"get_num_video_displays", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_69get_num_video_displays, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_68get_num_video_displays};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_69get_num_video_displays(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13622,7 +13699,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_68get_num_video_displays(CYTHO
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_71get_display_bounds(PyObject *__pyx_self, PyObject *__pyx_v_index); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_71get_display_bounds = {"get_display_bounds", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_71get_display_bounds, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_7display_70get_display_bounds[] = "get_display_bounds(index)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_71get_display_bounds = {"get_display_bounds", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_71get_display_bounds, METH_O, __pyx_doc_5renpy_6pygame_7display_70get_display_bounds};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_71get_display_bounds(PyObject *__pyx_self, PyObject *__pyx_v_index) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -13727,7 +13805,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_70get_display_bounds(CYTHON_UN
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_73set_screensaver(PyObject *__pyx_self, PyObject *__pyx_v_state); /*proto*/
-static char __pyx_doc_5renpy_6pygame_7display_72set_screensaver[] = "\n    Sets the screenslaver to `state`.\n    ";
+static char __pyx_doc_5renpy_6pygame_7display_72set_screensaver[] = "set_screensaver(state)\n\n    Sets the screenslaver to `state`.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_73set_screensaver = {"set_screensaver", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_73set_screensaver, METH_O, __pyx_doc_5renpy_6pygame_7display_72set_screensaver};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_73set_screensaver(PyObject *__pyx_self, PyObject *__pyx_v_state) {
   PyObject *__pyx_r = 0;
@@ -13820,7 +13898,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_7display_72set_screensaver(CYTHON_UNUSE
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_7display_75get_platform(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_75get_platform = {"get_platform", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_75get_platform, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_7display_74get_platform[] = "get_platform()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_7display_75get_platform = {"get_platform", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_75get_platform, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_74get_platform};
 static PyObject *__pyx_pw_5renpy_6pygame_7display_75get_platform(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -14039,34 +14118,34 @@ static PyMethodDef __pyx_methods_5renpy_6pygame_7display_Window[] = {
   {"destroy", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_5destroy, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_4destroy},
   {"resize", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_7resize, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_6Window_6resize},
   {"recreate_gl_context", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_9recreate_gl_context, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_6Window_8recreate_gl_context},
-  {"get_window_flags", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_11get_window_flags, METH_NOARGS, 0},
-  {"proxy_window_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_13proxy_window_surface, METH_NOARGS, 0},
-  {"flip", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_15flip, METH_NOARGS, 0},
-  {"get_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_17get_surface, METH_NOARGS, 0},
-  {"update", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_19update, METH_VARARGS|METH_KEYWORDS, 0},
-  {"get_wm_info", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_21get_wm_info, METH_NOARGS, 0},
-  {"get_active", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_23get_active, METH_NOARGS, 0},
-  {"iconify", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_25iconify, METH_NOARGS, 0},
-  {"toggle_fullscreen", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_27toggle_fullscreen, METH_NOARGS, 0},
-  {"set_gamma", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_29set_gamma, METH_VARARGS|METH_KEYWORDS, 0},
-  {"set_gamma_ramp", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_31set_gamma_ramp, METH_VARARGS|METH_KEYWORDS, 0},
-  {"set_icon", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_33set_icon, METH_O, 0},
-  {"set_caption", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_35set_caption, METH_O, 0},
-  {"get_drawable_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_37get_drawable_size, METH_NOARGS, 0},
-  {"get_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_39get_size, METH_NOARGS, 0},
-  {"restore", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_41restore, METH_NOARGS, 0},
-  {"maximize", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_43maximize, METH_NOARGS, 0},
-  {"minimize", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_45minimize, METH_NOARGS, 0},
+  {"get_window_flags", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_11get_window_flags, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_10get_window_flags},
+  {"proxy_window_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_13proxy_window_surface, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_12proxy_window_surface},
+  {"flip", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_15flip, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_14flip},
+  {"get_surface", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_17get_surface, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_16get_surface},
+  {"update", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_19update, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_6Window_18update},
+  {"get_wm_info", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_21get_wm_info, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_20get_wm_info},
+  {"get_active", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_23get_active, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_22get_active},
+  {"iconify", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_25iconify, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_24iconify},
+  {"toggle_fullscreen", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_27toggle_fullscreen, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_26toggle_fullscreen},
+  {"set_gamma", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_29set_gamma, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_6Window_28set_gamma},
+  {"set_gamma_ramp", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_7display_6Window_31set_gamma_ramp, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_7display_6Window_30set_gamma_ramp},
+  {"set_icon", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_33set_icon, METH_O, __pyx_doc_5renpy_6pygame_7display_6Window_32set_icon},
+  {"set_caption", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_35set_caption, METH_O, __pyx_doc_5renpy_6pygame_7display_6Window_34set_caption},
+  {"get_drawable_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_37get_drawable_size, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_36get_drawable_size},
+  {"get_size", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_39get_size, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_38get_size},
+  {"restore", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_41restore, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_40restore},
+  {"maximize", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_43maximize, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_42maximize},
+  {"minimize", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_45minimize, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_44minimize},
   {"get_sdl_window_pointer", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_47get_sdl_window_pointer, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_46get_sdl_window_pointer},
-  {"get_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_49get_position, METH_NOARGS, 0},
-  {"set_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_51set_position, METH_O, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_53__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_55__setstate_cython__, METH_O, 0},
+  {"get_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_49get_position, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_48get_position},
+  {"set_position", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_51set_position, METH_O, __pyx_doc_5renpy_6pygame_7display_6Window_50set_position},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_53__reduce_cython__, METH_NOARGS, __pyx_doc_5renpy_6pygame_7display_6Window_52__reduce_cython__},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_7display_6Window_55__setstate_cython__, METH_O, __pyx_doc_5renpy_6pygame_7display_6Window_54__setstate_cython__},
   {0, 0, 0, 0}
 };
 
 static struct PyGetSetDef __pyx_getsets_5renpy_6pygame_7display_Window[] = {
-  {(char *)"surface", __pyx_getprop_5renpy_6pygame_7display_6Window_surface, __pyx_setprop_5renpy_6pygame_7display_6Window_surface, (char *)0, 0},
+  {(char *)"surface", __pyx_getprop_5renpy_6pygame_7display_6Window_surface, __pyx_setprop_5renpy_6pygame_7display_6Window_surface, (char *)"surface: renpy.pygame.surface.Surface", 0},
   {0, 0, 0, 0, 0}
 };
 
@@ -14101,7 +14180,7 @@ static PyTypeObject __pyx_type_5renpy_6pygame_7display_Window = {
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
-  0, /*tp_doc*/
+  "Window(title, resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED), Surface shape=None)", /*tp_doc*/
   __pyx_tp_traverse_5renpy_6pygame_7display_Window, /*tp_traverse*/
   __pyx_tp_clear_5renpy_6pygame_7display_Window, /*tp_clear*/
   0, /*tp_richcompare*/
@@ -14188,18 +14267,18 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_u_0, __pyx_k_0, sizeof(__pyx_k_0), 0, 1, 0, 0},
-  {&__pyx_kp_u_Couldn_t_allocate_rectangles, __pyx_k_Couldn_t_allocate_rectangles, sizeof(__pyx_k_Couldn_t_allocate_rectangles), 0, 1, 0, 0},
+  {&__pyx_kp_s_0, __pyx_k_0, sizeof(__pyx_k_0), 0, 0, 1, 0},
+  {&__pyx_kp_s_Couldn_t_allocate_rectangles, __pyx_k_Couldn_t_allocate_rectangles, sizeof(__pyx_k_Couldn_t_allocate_rectangles), 0, 0, 1, 0},
   {&__pyx_n_s_GL_SWAP_CONTROL, __pyx_k_GL_SWAP_CONTROL, sizeof(__pyx_k_GL_SWAP_CONTROL), 0, 0, 1, 1},
   {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
   {&__pyx_n_s_Info, __pyx_k_Info, sizeof(__pyx_k_Info), 0, 0, 1, 1},
   {&__pyx_n_s_Info___init, __pyx_k_Info___init, sizeof(__pyx_k_Info___init), 0, 0, 1, 1},
   {&__pyx_n_s_Info___repr, __pyx_k_Info___repr, sizeof(__pyx_k_Info___repr), 0, 0, 1, 1},
-  {&__pyx_kp_u_Info_r, __pyx_k_Info_r, sizeof(__pyx_k_Info_r), 0, 1, 0, 0},
+  {&__pyx_kp_s_Info_r, __pyx_k_Info_r, sizeof(__pyx_k_Info_r), 0, 0, 1, 0},
   {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
-  {&__pyx_n_u_PYGAME_IOS, __pyx_k_PYGAME_IOS, sizeof(__pyx_k_PYGAME_IOS), 0, 1, 0, 1},
+  {&__pyx_n_s_PYGAME_IOS, __pyx_k_PYGAME_IOS, sizeof(__pyx_k_PYGAME_IOS), 0, 0, 1, 1},
   {&__pyx_n_s_RESIZE_FLAGS, __pyx_k_RESIZE_FLAGS, sizeof(__pyx_k_RESIZE_FLAGS), 0, 0, 1, 1},
-  {&__pyx_n_u_SDL_VIDEODRIVER, __pyx_k_SDL_VIDEODRIVER, sizeof(__pyx_k_SDL_VIDEODRIVER), 0, 1, 0, 1},
+  {&__pyx_n_s_SDL_VIDEODRIVER, __pyx_k_SDL_VIDEODRIVER, sizeof(__pyx_k_SDL_VIDEODRIVER), 0, 0, 1, 1},
   {&__pyx_n_s_SRCALPHA, __pyx_k_SRCALPHA, sizeof(__pyx_k_SRCALPHA), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_n_s_Window, __pyx_k_Window, sizeof(__pyx_k_Window), 0, 0, 1, 1},
@@ -14232,7 +14311,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_dm, __pyx_k_dm, sizeof(__pyx_k_dm), 0, 0, 1, 1},
   {&__pyx_n_s_doc, __pyx_k_doc, sizeof(__pyx_k_doc), 0, 0, 1, 1},
   {&__pyx_n_s_driver, __pyx_k_driver, sizeof(__pyx_k_driver), 0, 0, 1, 1},
-  {&__pyx_n_u_dummy, __pyx_k_dummy, sizeof(__pyx_k_dummy), 0, 1, 0, 1},
+  {&__pyx_n_s_dummy, __pyx_k_dummy, sizeof(__pyx_k_dummy), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_environ, __pyx_k_environ, sizeof(__pyx_k_environ), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
@@ -14299,7 +14378,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_proxy_window_surface, __pyx_k_proxy_window_surface, sizeof(__pyx_k_proxy_window_surface), 0, 0, 1, 1},
   {&__pyx_n_s_pygame, __pyx_k_pygame, sizeof(__pyx_k_pygame), 0, 0, 1, 1},
   {&__pyx_n_s_pygame_hints, __pyx_k_pygame_hints, sizeof(__pyx_k_pygame_hints), 0, 0, 1, 1},
-  {&__pyx_kp_u_pygame_window, __pyx_k_pygame_window, sizeof(__pyx_k_pygame_window), 0, 1, 0, 0},
+  {&__pyx_kp_s_pygame_window, __pyx_k_pygame_window, sizeof(__pyx_k_pygame_window), 0, 0, 1, 0},
   {&__pyx_n_s_pyx_capi, __pyx_k_pyx_capi, sizeof(__pyx_k_pyx_capi), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_qualname, __pyx_k_qualname, sizeof(__pyx_k_qualname), 0, 0, 1, 1},
@@ -14315,9 +14394,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_register_init, __pyx_k_register_init, sizeof(__pyx_k_register_init), 0, 0, 1, 1},
   {&__pyx_n_s_register_quit, __pyx_k_register_quit, sizeof(__pyx_k_register_quit), 0, 0, 1, 1},
   {&__pyx_n_s_renpy, __pyx_k_renpy, sizeof(__pyx_k_renpy), 0, 0, 1, 1},
-  {&__pyx_n_s_renpy_pygame, __pyx_k_renpy_pygame, sizeof(__pyx_k_renpy_pygame), 0, 0, 1, 1},
-  {&__pyx_kp_u_renpy_pygame, __pyx_k_renpy_pygame, sizeof(__pyx_k_renpy_pygame), 0, 1, 0, 0},
-  {&__pyx_kp_u_renpy_pygame_AVOID_GL, __pyx_k_renpy_pygame_AVOID_GL, sizeof(__pyx_k_renpy_pygame_AVOID_GL), 0, 1, 0, 0},
+  {&__pyx_kp_s_renpy_pygame, __pyx_k_renpy_pygame, sizeof(__pyx_k_renpy_pygame), 0, 0, 1, 0},
+  {&__pyx_kp_s_renpy_pygame_AVOID_GL, __pyx_k_renpy_pygame_AVOID_GL, sizeof(__pyx_k_renpy_pygame_AVOID_GL), 0, 0, 1, 0},
   {&__pyx_n_s_renpy_pygame_display, __pyx_k_renpy_pygame_display, sizeof(__pyx_k_renpy_pygame_display), 0, 0, 1, 1},
   {&__pyx_kp_s_renpy_pygame_display_pyx, __pyx_k_renpy_pygame_display_pyx, sizeof(__pyx_k_renpy_pygame_display_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_renpy_pygame_error, __pyx_k_renpy_pygame_error, sizeof(__pyx_k_renpy_pygame_error), 0, 0, 1, 1},
@@ -14341,6 +14419,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
   {&__pyx_n_s_shifts, __pyx_k_shifts, sizeof(__pyx_k_shifts), 0, 0, 1, 1},
   {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
+  {&__pyx_n_s_startswith, __pyx_k_startswith, sizeof(__pyx_k_startswith), 0, 0, 1, 1},
   {&__pyx_n_s_state, __pyx_k_state, sizeof(__pyx_k_state), 0, 0, 1, 1},
   {&__pyx_n_s_surface, __pyx_k_surface, sizeof(__pyx_k_surface), 0, 0, 1, 1},
   {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
@@ -14348,7 +14427,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_title, __pyx_k_title, sizeof(__pyx_k_title), 0, 0, 1, 1},
   {&__pyx_n_s_toggle_fullscreen, __pyx_k_toggle_fullscreen, sizeof(__pyx_k_toggle_fullscreen), 0, 0, 1, 1},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
-  {&__pyx_kp_u_utf_8, __pyx_k_utf_8, sizeof(__pyx_k_utf_8), 0, 1, 0, 0},
+  {&__pyx_kp_s_utf_8, __pyx_k_utf_8, sizeof(__pyx_k_utf_8), 0, 0, 1, 0},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_video_mem, __pyx_k_video_mem, sizeof(__pyx_k_video_mem), 0, 0, 1, 1},
   {&__pyx_n_s_warnings, __pyx_k_warnings, sizeof(__pyx_k_warnings), 0, 0, 1, 1},
@@ -14388,7 +14467,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *             gl_flag = 0
  *         else:
  */
-  __pyx_tuple__3 = PyTuple_Pack(2, __pyx_kp_u_renpy_pygame_AVOID_GL, __pyx_kp_u_0); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(2, __pyx_kp_s_renpy_pygame_AVOID_GL, __pyx_kp_s_0); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
@@ -14410,7 +14489,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         try:
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Couldn_t_allocate_rectangles); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 415, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_Couldn_t_allocate_rectangles); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 415, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
@@ -15231,7 +15310,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_register_quit);
   __Pyx_GIVEREF(__pyx_n_s_register_quit);
   PyList_SET_ITEM(__pyx_t_1, 1, __pyx_n_s_register_quit);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_kp_s_renpy_pygame, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_register_init); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
@@ -15259,7 +15338,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_GL_SWAP_CONTROL);
   __Pyx_GIVEREF(__pyx_n_s_GL_SWAP_CONTROL);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_GL_SWAP_CONTROL);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renpy_pygame_locals, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renpy_pygame_locals, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_SRCALPHA); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
@@ -15284,7 +15363,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_error);
   __Pyx_GIVEREF(__pyx_n_s_error);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame_error, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame_error, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 27, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_error); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
@@ -15300,7 +15379,7 @@ if (!__Pyx_RefNanny) {
  * 
  * import warnings
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_kp_s_renpy_pygame, 0, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_renpy, __pyx_t_2) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -15312,7 +15391,7 @@ if (!__Pyx_RefNanny) {
  * import os
  * 
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_warnings, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_warnings, 0, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_warnings, __pyx_t_2) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -15324,7 +15403,7 @@ if (!__Pyx_RefNanny) {
  * 
  * # True if we are on ios.
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_os, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_os, 0, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_os, __pyx_t_2) < 0) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -15341,7 +15420,7 @@ if (!__Pyx_RefNanny) {
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_environ); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_n_u_PYGAME_IOS, __pyx_t_1, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_n_s_PYGAME_IOS, __pyx_t_1, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -15529,7 +15608,7 @@ if (!__Pyx_RefNanny) {
  * except ImportError:
  *     androidembed = None
  */
-      __pyx_t_1 = __Pyx_Import(__pyx_n_s_androidembed, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L2_error)
+      __pyx_t_1 = __Pyx_Import(__pyx_n_s_androidembed, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L2_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (PyDict_SetItem(__pyx_d, __pyx_n_s_androidembed, __pyx_t_1) < 0) __PYX_ERR(0, 126, __pyx_L2_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -15641,7 +15720,7 @@ if (!__Pyx_RefNanny) {
  * 
  * # The default gl_swap_control
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_title, __pyx_kp_u_pygame_window) < 0) __PYX_ERR(0, 544, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_title, __pyx_kp_s_pygame_window) < 0) __PYX_ERR(0, 544, __pyx_L1_error)
 
   /* "renpy/pygame/display.pyx":547
  * 
@@ -15794,7 +15873,7 @@ if (!__Pyx_RefNanny) {
  * 
  *     def __init__(self):
  */
-  __pyx_t_1 = __Pyx_Py3ClassCreate(__pyx_t_4, __pyx_n_s_Info, __pyx_tuple__27, __pyx_t_2, NULL, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 607, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Py3ClassCreate(__pyx_t_4, __pyx_n_s_Info, __pyx_tuple__27, __pyx_t_2, NULL, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_Info, __pyx_t_1) < 0) __PYX_ERR(0, 607, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -16325,35 +16404,6 @@ bad:
     return -1;
 }
 
-/* unicode_tailmatch */
-static int __Pyx_PyUnicode_TailmatchTuple(PyObject* s, PyObject* substrings,
-                                          Py_ssize_t start, Py_ssize_t end, int direction) {
-    Py_ssize_t i, count = PyTuple_GET_SIZE(substrings);
-    for (i = 0; i < count; i++) {
-        Py_ssize_t result;
-#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        result = PyUnicode_Tailmatch(s, PyTuple_GET_ITEM(substrings, i),
-                                     start, end, direction);
-#else
-        PyObject* sub = PySequence_ITEM(substrings, i);
-        if (unlikely(!sub)) return -1;
-        result = PyUnicode_Tailmatch(s, sub, start, end, direction);
-        Py_DECREF(sub);
-#endif
-        if (result) {
-            return (int) result;
-        }
-    }
-    return 0;
-}
-static int __Pyx_PyUnicode_Tailmatch(PyObject* s, PyObject* substr,
-                                     Py_ssize_t start, Py_ssize_t end, int direction) {
-    if (unlikely(PyTuple_Check(substr))) {
-        return __Pyx_PyUnicode_TailmatchTuple(s, substr, start, end, direction);
-    }
-    return (int) PyUnicode_Tailmatch(s, substr, start, end, direction);
-}
-
 /* PyCFunctionFastCall */
 #if CYTHON_FAST_PYCCALL
 static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
@@ -16576,6 +16626,35 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
+/* PyObjectCall2Args */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
+    PyObject *args, *result = NULL;
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyFunction_FastCall(function, args, 2);
+    }
+    #endif
+    #if CYTHON_FAST_PYCCALL
+    if (__Pyx_PyFastCFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyCFunction_FastCall(function, args, 2);
+    }
+    #endif
+    args = PyTuple_New(2);
+    if (unlikely(!args)) goto done;
+    Py_INCREF(arg1);
+    PyTuple_SET_ITEM(args, 0, arg1);
+    Py_INCREF(arg2);
+    PyTuple_SET_ITEM(args, 1, arg2);
+    Py_INCREF(function);
+    result = __Pyx_PyObject_Call(function, args, NULL);
+    Py_DECREF(args);
+    Py_DECREF(function);
+done:
+    return result;
+}
+
 /* PyDictVersioning */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
 static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
@@ -16635,35 +16714,6 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
     PyErr_Clear();
 #endif
     return __Pyx_GetBuiltinName(name);
-}
-
-/* PyObjectCall2Args */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
-    PyObject *args, *result = NULL;
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyFunction_FastCall(function, args, 2);
-    }
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyCFunction_FastCall(function, args, 2);
-    }
-    #endif
-    args = PyTuple_New(2);
-    if (unlikely(!args)) goto done;
-    Py_INCREF(arg1);
-    PyTuple_SET_ITEM(args, 0, arg1);
-    Py_INCREF(arg2);
-    PyTuple_SET_ITEM(args, 1, arg2);
-    Py_INCREF(function);
-    result = __Pyx_PyObject_Call(function, args, NULL);
-    Py_DECREF(args);
-    Py_DECREF(function);
-done:
-    return result;
 }
 
 /* GetItemInt */

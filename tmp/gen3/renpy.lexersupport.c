@@ -956,7 +956,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\lexersupport.pyx",
+  "renpy/lexersupport.pyx",
 };
 
 /*--- Type declarations ---*/
@@ -1207,7 +1207,7 @@ static const char __pyx_k_start[] = "start";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_match_logical_word[] = "match_logical_word";
 static const char __pyx_k_renpy_lexersupport[] = "renpy.lexersupport";
-static const char __pyx_k_renpy_lexersupport_pyx[] = "renpy\\lexersupport.pyx";
+static const char __pyx_k_renpy_lexersupport_pyx[] = "renpy/lexersupport.pyx";
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_len_s;

@@ -11,7 +11,7 @@
 #else
 #define CYTHON_ABI "0_29_37"
 #define CYTHON_HEX_VERSION 0x001D25F0
-#define CYTHON_FUTURE_DIVISION 1
+#define CYTHON_FUTURE_DIVISION 0
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -962,9 +962,9 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "stringsource",
-  "renpy\\pygame\\mouse.pyx",
-  "renpy\\pygame\\surface.pxd",
-  "renpy\\pygame\\display.pxd",
+  "renpy/pygame/mouse.pyx",
+  "renpy/pygame/surface.pxd",
+  "renpy/pygame/display.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -1362,7 +1362,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libc.stddef' */
 
-/* Module declarations from 'sdl2' */
+/* Module declarations from 'renpy.pygame.sdl2' */
 
 /* Module declarations from 'renpy.pygame.surface' */
 static PyTypeObject *__pyx_ptype_5renpy_6pygame_7surface_Surface = 0;
@@ -1416,7 +1416,7 @@ static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_pygame_mouse[] = "renpy.pygame.mouse";
-static const char __pyx_k_renpy_pygame_mouse_pyx[] = "renpy\\pygame\\mouse.pyx";
+static const char __pyx_k_renpy_pygame_mouse_pyx[] = "renpy/pygame/mouse.pyx";
 static const char __pyx_k_self_cursor_cannot_be_converted[] = "self.cursor cannot be converted to a Python object for pickling";
 static PyObject *__pyx_n_s_ColorCursor;
 static PyObject *__pyx_n_s_TypeError;
@@ -1506,7 +1506,8 @@ static PyObject *__pyx_codeobj__19;
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_1init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_1init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_1init, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_init[] = "init()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_1init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_1init, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_init};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_1init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -1565,7 +1566,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_init(CYTHON_UNUSED PyObject *__p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_3quit(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_3quit = {"quit", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_3quit, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_2quit[] = "quit()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_3quit = {"quit", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_3quit, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_2quit};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_3quit(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -1624,7 +1626,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_2quit(CYTHON_UNUSED PyObject *__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_5reset(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_5reset = {"reset", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_5reset, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_4reset[] = "reset()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_5reset = {"reset", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_5reset, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_4reset};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_5reset(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -1692,7 +1695,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_4reset(CYTHON_UNUSED PyObject *_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_7get_pressed(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_7get_pressed = {"get_pressed", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_7get_pressed, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_6get_pressed[] = "get_pressed()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_7get_pressed = {"get_pressed", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_7get_pressed, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_6get_pressed};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_7get_pressed(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -1826,7 +1830,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_6get_pressed(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_9get_pos(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_9get_pos = {"get_pos", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_9get_pos, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_8get_pos[] = "get_pos()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_9get_pos = {"get_pos", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_9get_pos, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_8get_pos};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_9get_pos(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -1915,7 +1920,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_8get_pos(CYTHON_UNUSED PyObject 
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11get_rel(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_11get_rel = {"get_rel", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11get_rel, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_10get_rel[] = "get_rel()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_11get_rel = {"get_rel", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11get_rel, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_10get_rel};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11get_rel(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2004,7 +2010,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_10get_rel(CYTHON_UNUSED PyObject
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_13set_pos(PyObject *__pyx_self, PyObject *__pyx_v_pos); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_13set_pos = {"set_pos", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_13set_pos, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_12set_pos[] = "set_pos(pos)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_13set_pos = {"set_pos", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_13set_pos, METH_O, __pyx_doc_5renpy_6pygame_5mouse_12set_pos};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_13set_pos(PyObject *__pyx_self, PyObject *__pyx_v_pos) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2134,7 +2141,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_12set_pos(CYTHON_UNUSED PyObject
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_15set_visible(PyObject *__pyx_self, PyObject *__pyx_v_visible); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_15set_visible = {"set_visible", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_15set_visible, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_14set_visible[] = "set_visible(visible)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_15set_visible = {"set_visible", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_15set_visible, METH_O, __pyx_doc_5renpy_6pygame_5mouse_14set_visible};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_15set_visible(PyObject *__pyx_self, PyObject *__pyx_v_visible) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2236,7 +2244,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_14set_visible(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_17get_focused(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_17get_focused = {"get_focused", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_17get_focused, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_16get_focused[] = "get_focused()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_17get_focused = {"get_focused", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_17get_focused, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_16get_focused};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_17get_focused(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2300,7 +2309,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_16get_focused(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_19set_cursor(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_19set_cursor = {"set_cursor", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5mouse_19set_cursor, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_18set_cursor[] = "set_cursor(size, hotspot, xormasks, andmasks)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_19set_cursor = {"set_cursor", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5mouse_19set_cursor, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5mouse_18set_cursor};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_19set_cursor(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED PyObject *__pyx_v_size = 0;
   CYTHON_UNUSED PyObject *__pyx_v_hotspot = 0;
@@ -2407,7 +2417,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_18set_cursor(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_21get_cursor(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_21get_cursor = {"get_cursor", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_21get_cursor, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5mouse_20get_cursor[] = "get_cursor()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5mouse_21get_cursor = {"get_cursor", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_21get_cursor, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_20get_cursor};
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_21get_cursor(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2632,6 +2643,7 @@ static void __pyx_pf_5renpy_6pygame_5mouse_11ColorCursor_2__dealloc__(struct __p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_5activate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_4activate[] = "ColorCursor.activate(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_5activate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2721,6 +2733,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_11ColorCursor_4activate(struct _
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_7__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_6__reduce_cython__[] = "ColorCursor.__reduce_cython__(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_7__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2778,6 +2791,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5mouse_11ColorCursor_6__reduce_cython__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_9__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static char __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_8__setstate_cython__[] = "ColorCursor.__setstate_cython__(self, __pyx_state)";
 static PyObject *__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_9__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2855,9 +2869,9 @@ static void __pyx_tp_dealloc_5renpy_6pygame_5mouse_ColorCursor(PyObject *o) {
 }
 
 static PyMethodDef __pyx_methods_5renpy_6pygame_5mouse_ColorCursor[] = {
-  {"activate", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_5activate, METH_NOARGS, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_7__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_9__setstate_cython__, METH_O, 0},
+  {"activate", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_5activate, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_4activate},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_7__reduce_cython__, METH_NOARGS, __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_6__reduce_cython__},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_5mouse_11ColorCursor_9__setstate_cython__, METH_O, __pyx_doc_5renpy_6pygame_5mouse_11ColorCursor_8__setstate_cython__},
   {0, 0, 0, 0}
 };
 
@@ -2892,7 +2906,7 @@ static PyTypeObject __pyx_type_5renpy_6pygame_5mouse_ColorCursor = {
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  0, /*tp_doc*/
+  "ColorCursor(Surface surface, x, y)", /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/

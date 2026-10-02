@@ -963,7 +963,7 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "stringsource",
-  "renpy\\uguu\\uguu.pyx",
+  "renpy/uguu/uguu.pyx",
 };
 
 /*--- Type declarations ---*/
@@ -4342,7 +4342,7 @@ static const char __pyx_k_glGetVertexAttribfv[] = "glGetVertexAttribfv";
 static const char __pyx_k_glGetVertexAttribiv[] = "glGetVertexAttribiv";
 static const char __pyx_k_glStencilOpSeparate[] = "glStencilOpSeparate";
 static const char __pyx_k_glVertexAttribI4uiv[] = "glVertexAttribI4uiv";
-static const char __pyx_k_renpy_uguu_uguu_pyx[] = "renpy\\uguu\\uguu.pyx";
+static const char __pyx_k_renpy_uguu_uguu_pyx[] = "renpy/uguu/uguu.pyx";
 static const char __pyx_k_GL_ACTIVE_ATTRIBUTES[] = "GL_ACTIVE_ATTRIBUTES";
 static const char __pyx_k_GL_BUFFER_MAP_LENGTH[] = "GL_BUFFER_MAP_LENGTH";
 static const char __pyx_k_GL_BUFFER_MAP_OFFSET[] = "GL_BUFFER_MAP_OFFSET";

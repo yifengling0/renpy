@@ -46,51 +46,51 @@ cdef class Setter:
         self.location = location
         self.getter = getter
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         raise NotImplementedError()
 
 cdef class FloatSetter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform1f(self.location, value)
 
 
 cdef class Vec2Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform2f(self.location, value[0], value[1])
 
 
 cdef class Vec3Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform3f(self.location, value[0], value[1], value[2])
 
 
 cdef class Vec4Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform4f(self.location, value[0], value[1], value[2], value[3])
 
 
 cdef class IntSetter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform1i(self.location, value)
 
 
 cdef class IVec2Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
 
         glUniform2i(self.location, value[0], value[1])
 
 cdef class IVec3Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform3i(self.location, value[0], value[1], value[2])
 
 
 cdef class IVec4Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniform4i(self.location, value[0], value[1], value[2], value[3])
 
 
 cdef class Mat2Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef Matrix m = value
         cdef GLfloat[4] values = [
             m.xdx, m.ydx,
@@ -101,7 +101,7 @@ cdef class Mat2Setter(Setter):
 
 
 cdef class Mat3Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef Matrix m = value
         cdef GLfloat[9] values = [
             m.xdx, m.ydx, m.zdx,
@@ -113,7 +113,7 @@ cdef class Mat3Setter(Setter):
 
 
 cdef class Mat4Setter(Setter):
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         glUniformMatrix4fv(self.location, 1, GL_FALSE, (<Matrix> value).m)
 
 NON_ARRAY_SETTERS = {
@@ -210,7 +210,7 @@ cdef class ArraySetter(Setter):
 
 cdef class FloatArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLfloat *values = to_float_array(value, self.length)
         glUniform1fv(self.location, self.length, values)
         PyMem_Free(values)
@@ -218,7 +218,7 @@ cdef class FloatArraySetter(ArraySetter):
 
 cdef class Vec2ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLfloat *values = to_float_array(value, self.length * 2)
         glUniform2fv(self.location, self.length, values)
         PyMem_Free(values)
@@ -226,7 +226,7 @@ cdef class Vec2ArraySetter(ArraySetter):
 
 cdef class Vec3ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLfloat *values = to_float_array(value, self.length * 3)
         glUniform3fv(self.location, self.length, values)
         PyMem_Free(values)
@@ -234,7 +234,7 @@ cdef class Vec3ArraySetter(ArraySetter):
 
 cdef class Vec4ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLfloat *values = to_float_array(value, self.length * 4)
         glUniform4fv(self.location, self.length, values)
         PyMem_Free(values)
@@ -242,7 +242,7 @@ cdef class Vec4ArraySetter(ArraySetter):
 
 cdef class IntArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLint *values = to_int_array(value, self.length)
         glUniform1iv(self.location, self.length, values)
         PyMem_Free(values)
@@ -250,7 +250,7 @@ cdef class IntArraySetter(ArraySetter):
 
 cdef class IVec2ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLint *values = to_int_array(value, self.length * 2)
         glUniform2iv(self.location, self.length, values)
         PyMem_Free(values)
@@ -258,7 +258,7 @@ cdef class IVec2ArraySetter(ArraySetter):
 
 cdef class IVec3ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLint *values = to_int_array(value, self.length * 3)
         glUniform3iv(self.location, self.length, values)
         PyMem_Free(values)
@@ -266,7 +266,7 @@ cdef class IVec3ArraySetter(ArraySetter):
 
 cdef class IVec4ArraySetter(ArraySetter):
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
         cdef GLint *values = to_int_array(value, self.length * 4)
         glUniform4iv(self.location, self.length, values)
         PyMem_Free(values)
@@ -314,7 +314,7 @@ cdef class Sampler2DSetter(Setter):
         self.sampler = sampler
         self.texture_wrap_key = "texture_wrap_" + uniform_name
 
-    cdef object set(self, GL2DrawingContext context, value):
+    cdef object set(self, object context, value):
 
         glActiveTexture(GL_TEXTURE0 + self.sampler)
         glUniform1i(self.location, self.sampler)
@@ -388,7 +388,7 @@ cdef class Getter:
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         raise NotImplementedError()
 
 
@@ -397,29 +397,29 @@ cdef class ContextGetter(Getter):
     def __repr__(self):
         return f"ContextGetter({self.uniform_name})"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.uniforms[self.uniform_name]
 
 
 cdef class ProjectionGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.projection_matrix
 
 
 cdef class ViewGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.view_matrix
 
 
 cdef class ModelGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.model_matrix
 
 
 cdef class ProjectionViewGetter(Getter):
     cdef Matrix matrix
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.projectionview_matrix
 
 
@@ -430,46 +430,46 @@ cdef class TransformMatrixGetter(Getter):
         Getter.__init__(self, uniform_name)
         self.matrix = Matrix(None)
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         self.matrix.ctake(context.projectionview_matrix)
         self.matrix.inplace_multiply(context.model_matrix)
         return self.matrix
 
 
 cdef class ModelSizeGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return (model.width, model.height)
 
 
 cdef class LODBiasGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return context.uniforms.get(self.uniform_name, float(renpy.config.gl_lod_bias))
 
 
 cdef class TimeGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return (renpy.display.interface.frame_time - renpy.display.interface.init_time) % 86400
 
 
 cdef class RandomGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return (random.random(), random.random(), random.random(), random.random())
 
 
 cdef class ViewportGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         cdef GLfloat[4] viewport
         glGetFloatv(GL_VIEWPORT, viewport)
         return viewport
 
 
 cdef class DrawableSizeGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return renpy.display.draw.drawable_viewport[2:]
 
 
 cdef class VirtualSizeGetter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return renpy.display.draw.virtual_size
 
 
@@ -488,7 +488,7 @@ cdef class PremultiplyGetter(Getter):
     def __repr__(self):
         return f"PremultiplyGetter({self.getter!r})"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         value = self.getter.get(context, model)
 
         if type(value) is tuple and len(value) == 4:
@@ -510,7 +510,7 @@ cdef class InverseGetter(Getter):
     def __repr__(self):
         return f"InverseGetter({self.getter!r})"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         value = self.getter.get(context, model)
 
         if type(value) is Matrix:
@@ -534,7 +534,7 @@ cdef class TransposeGetter(Getter):
     def __repr__(self):
         return f"TransposeGetter({self.getter!r})"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         value = self.getter.get(context, model)
 
         if type(value) is Matrix:
@@ -558,7 +558,7 @@ cdef class InverseTransposeGetter(Getter):
     def __repr__(self):
         return f"InverseTransposeGetter({self.getter!r})"
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         value = self.getter.get(context, model)
 
         if type(value) is Matrix:
@@ -570,38 +570,38 @@ cdef class InverseTransposeGetter(Getter):
             raise TypeError("InverseTransposeGetter only works with Matrix values.")
 
 cdef class Tex0Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return model.get_texture(0)
 
 cdef class Tex1Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return model.get_texture(1)
 
 cdef class Tex2Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return model.get_texture(2)
 
 cdef class Tex3Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         return model.get_texture(3)
 
 cdef class Res0Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         tex = model.get_texture(0)
         return (tex.texture_width, tex.texture_height)
 
 cdef class Res1Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         tex = model.get_texture(1)
         return (tex.texture_width, tex.texture_height)
 
 cdef class Res2Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         tex = model.get_texture(2)
         return (tex.texture_width, tex.texture_height)
 
 cdef class Res3Getter(Getter):
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         tex = model.get_texture(3)
         return (tex.texture_width, tex.texture_height)
 
@@ -610,7 +610,7 @@ cdef class ResGetter(Getter):
         Getter.__init__(self, uniform_name)
         self.getter = getter
 
-    cdef object get(self, GL2DrawingContext context, GL2Model model):
+    cdef object get(self, object context, GL2Model model):
         value = self.getter.get(context, model)
 
         if type(value) is Render:

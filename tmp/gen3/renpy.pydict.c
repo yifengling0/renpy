@@ -960,7 +960,7 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "stringsource",
-  "renpy\\pydict.pyx",
+  "renpy/pydict.pyx",
   "type.pxd",
 };
 
@@ -1323,7 +1323,7 @@ static const char __pyx_k_find_changes[] = "find_changes";
 static const char __pyx_k_renpy_pydict[] = "renpy.pydict";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
-static const char __pyx_k_renpy_pydict_pyx[] = "renpy\\pydict.pyx";
+static const char __pyx_k_renpy_pydict_pyx[] = "renpy/pydict.pyx";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_self_items_cannot_be_converted_t[] = "self.items cannot be converted to a Python object for pickling";
 static PyObject *__pyx_n_s_DictItems;

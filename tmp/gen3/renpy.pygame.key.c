@@ -11,7 +11,7 @@
 #else
 #define CYTHON_ABI "0_29_37"
 #define CYTHON_HEX_VERSION 0x001D25F0
-#define CYTHON_FUTURE_DIVISION 1
+#define CYTHON_FUTURE_DIVISION 0
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -962,11 +962,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\pygame\\key.pyx",
+  "renpy/pygame/key.pyx",
   "stringsource",
-  "renpy\\pygame\\surface.pxd",
-  "renpy\\pygame\\display.pxd",
-  "renpy\\pygame\\rect.pxd",
+  "renpy/pygame/surface.pxd",
+  "renpy/pygame/display.pxd",
+  "renpy/pygame/rect.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -1460,7 +1460,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libc.stddef' */
 
-/* Module declarations from 'sdl2' */
+/* Module declarations from 'renpy.pygame.sdl2' */
 
 /* Module declarations from 'libc.stdlib' */
 
@@ -1524,13 +1524,13 @@ static const char __pyx_k_start_text_input[] = "start_text_input";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_pygame_error[] = "renpy.pygame.error";
 static const char __pyx_k_set_text_input_rect[] = "set_text_input_rect";
-static const char __pyx_k_renpy_pygame_key_pyx[] = "renpy\\pygame\\key.pyx";
+static const char __pyx_k_renpy_pygame_key_pyx[] = "renpy/pygame/key.pyx";
 static const char __pyx_k_is_screen_keyboard_shown[] = "is_screen_keyboard_shown";
 static const char __pyx_k_has_screen_keyboard_support[] = "has_screen_keyboard_support";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static PyObject *__pyx_n_s_IndexError;
 static PyObject *__pyx_n_s_KeyboardState;
-static PyObject *__pyx_kp_u_Out_of_range;
+static PyObject *__pyx_kp_s_Out_of_range;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_delay;
@@ -2027,6 +2027,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_13KeyboardState_6__getitem__(struc
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13KeyboardState_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_5renpy_6pygame_3key_13KeyboardState_8__reduce_cython__[] = "KeyboardState.__reduce_cython__(self)";
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13KeyboardState_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2084,6 +2085,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_13KeyboardState_8__reduce_cython__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13KeyboardState_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static char __pyx_doc_5renpy_6pygame_3key_13KeyboardState_10__setstate_cython__[] = "KeyboardState.__setstate_cython__(self, __pyx_state)";
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13KeyboardState_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2142,7 +2144,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_13KeyboardState_10__setstate_cytho
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_1get_focused(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_1get_focused = {"get_focused", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_1get_focused, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_get_focused[] = "get_focused()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_1get_focused = {"get_focused", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_1get_focused, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_get_focused};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_1get_focused(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2206,7 +2209,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_get_focused(CYTHON_UNUSED PyObject
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_3get_pressed(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_3key_2get_pressed[] = " No longer returns a tuple. Use the returned object to check for\n        individual keys, but don't loop through it. ";
+static char __pyx_doc_5renpy_6pygame_3key_2get_pressed[] = "get_pressed()\n No longer returns a tuple. Use the returned object to check for\n        individual keys, but don't loop through it. ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_3get_pressed = {"get_pressed", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_3get_pressed, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_2get_pressed};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_3get_pressed(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -2271,7 +2274,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_2get_pressed(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_5get_mods(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_5get_mods = {"get_mods", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_5get_mods, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_4get_mods[] = "get_mods()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_5get_mods = {"get_mods", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_5get_mods, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_4get_mods};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_5get_mods(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2335,7 +2339,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_4get_mods(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_7set_mods(PyObject *__pyx_self, PyObject *__pyx_v_state); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_7set_mods = {"set_mods", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_7set_mods, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_3key_6set_mods[] = "set_mods(state)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_7set_mods = {"set_mods", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_7set_mods, METH_O, __pyx_doc_5renpy_6pygame_3key_6set_mods};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_7set_mods(PyObject *__pyx_self, PyObject *__pyx_v_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2396,7 +2401,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_6set_mods(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_9set_repeat(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_9set_repeat = {"set_repeat", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_3key_9set_repeat, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_8set_repeat[] = "set_repeat(delay=0, interval=0)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_9set_repeat = {"set_repeat", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_3key_9set_repeat, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_3key_8set_repeat};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_9set_repeat(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED PyObject *__pyx_v_delay = 0;
   CYTHON_UNUSED PyObject *__pyx_v_interval = 0;
@@ -2489,7 +2495,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_8set_repeat(CYTHON_UNUSED PyObject
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_11get_repeat(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_11get_repeat = {"get_repeat", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_11get_repeat, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_10get_repeat[] = "get_repeat()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_11get_repeat = {"get_repeat", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_11get_repeat, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_10get_repeat};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_11get_repeat(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2543,7 +2550,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_10get_repeat(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13name(PyObject *__pyx_self, PyObject *__pyx_v_key); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_13name = {"name", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13name, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_3key_12name[] = "name(key)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_13name = {"name", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13name, METH_O, __pyx_doc_5renpy_6pygame_3key_12name};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_13name(PyObject *__pyx_self, PyObject *__pyx_v_key) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2609,7 +2617,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_12name(CYTHON_UNUSED PyObject *__p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_15start_text_input(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_15start_text_input = {"start_text_input", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_15start_text_input, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_14start_text_input[] = "start_text_input()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_15start_text_input = {"start_text_input", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_15start_text_input, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_14start_text_input};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_15start_text_input(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2717,7 +2726,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_14start_text_input(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_17stop_text_input(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_17stop_text_input = {"stop_text_input", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_17stop_text_input, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_16stop_text_input[] = "stop_text_input()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_17stop_text_input = {"stop_text_input", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_17stop_text_input, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_16stop_text_input};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_17stop_text_input(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2825,7 +2835,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_16stop_text_input(CYTHON_UNUSED Py
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_19set_text_input_rect(PyObject *__pyx_self, PyObject *__pyx_v_rect); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_19set_text_input_rect = {"set_text_input_rect", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_19set_text_input_rect, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_3key_18set_text_input_rect[] = "set_text_input_rect(rect)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_19set_text_input_rect = {"set_text_input_rect", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_19set_text_input_rect, METH_O, __pyx_doc_5renpy_6pygame_3key_18set_text_input_rect};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_19set_text_input_rect(PyObject *__pyx_self, PyObject *__pyx_v_rect) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2930,7 +2941,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_18set_text_input_rect(CYTHON_UNUSE
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_21has_screen_keyboard_support(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_21has_screen_keyboard_support = {"has_screen_keyboard_support", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_21has_screen_keyboard_support, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_20has_screen_keyboard_support[] = "has_screen_keyboard_support()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_21has_screen_keyboard_support = {"has_screen_keyboard_support", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_21has_screen_keyboard_support, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_20has_screen_keyboard_support};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_21has_screen_keyboard_support(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2994,7 +3006,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_3key_20has_screen_keyboard_support(CYTH
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_3key_23is_screen_keyboard_shown(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_23is_screen_keyboard_shown = {"is_screen_keyboard_shown", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_3key_23is_screen_keyboard_shown, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_3key_22is_screen_keyboard_shown[] = "is_screen_keyboard_shown(Window window=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_3key_23is_screen_keyboard_shown = {"is_screen_keyboard_shown", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_3key_23is_screen_keyboard_shown, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_3key_22is_screen_keyboard_shown};
 static PyObject *__pyx_pw_5renpy_6pygame_3key_23is_screen_keyboard_shown(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_5renpy_6pygame_7display_Window *__pyx_v_window = 0;
   int __pyx_lineno = 0;
@@ -3173,8 +3186,8 @@ static PyObject *__pyx_sq_item_5renpy_6pygame_3key_KeyboardState(PyObject *o, Py
 }
 
 static PyMethodDef __pyx_methods_5renpy_6pygame_3key_KeyboardState[] = {
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13KeyboardState_9__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13KeyboardState_11__setstate_cython__, METH_O, 0},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13KeyboardState_9__reduce_cython__, METH_NOARGS, __pyx_doc_5renpy_6pygame_3key_13KeyboardState_8__reduce_cython__},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_5renpy_6pygame_3key_13KeyboardState_11__setstate_cython__, METH_O, __pyx_doc_5renpy_6pygame_3key_13KeyboardState_10__setstate_cython__},
   {0, 0, 0, 0}
 };
 
@@ -3228,7 +3241,7 @@ static PyTypeObject __pyx_type_5renpy_6pygame_3key_KeyboardState = {
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  0, /*tp_doc*/
+  "KeyboardState()", /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/
@@ -3317,7 +3330,7 @@ static struct PyModuleDef __pyx_moduledef = {
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_IndexError, __pyx_k_IndexError, sizeof(__pyx_k_IndexError), 0, 0, 1, 1},
   {&__pyx_n_s_KeyboardState, __pyx_k_KeyboardState, sizeof(__pyx_k_KeyboardState), 0, 0, 1, 1},
-  {&__pyx_kp_u_Out_of_range, __pyx_k_Out_of_range, sizeof(__pyx_k_Out_of_range), 0, 1, 0, 0},
+  {&__pyx_kp_s_Out_of_range, __pyx_k_Out_of_range, sizeof(__pyx_k_Out_of_range), 0, 0, 1, 0},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_delay, __pyx_k_delay, sizeof(__pyx_k_delay), 0, 0, 1, 1},
@@ -3379,7 +3392,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         cdef int sc = <int>SDL_GetScancodeFromKey(key)
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Out_of_range); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_Out_of_range); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
@@ -3889,7 +3902,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_error);
   __Pyx_GIVEREF(__pyx_n_s_error);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame_error, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy_pygame_error, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_error); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
@@ -3905,7 +3918,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renpy, 0, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_renpy, __pyx_t_2) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;

@@ -959,9 +959,9 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\style.pyx",
+  "renpy/style.pyx",
   "stringsource",
-  "renpy\\style.pxd",
+  "renpy/style.pxd",
   "type.pxd",
 };
 
@@ -1896,7 +1896,7 @@ static const char __pyx_k_copy_properties[] = "copy_properties";
 static const char __pyx_k_is_style_compat[] = "_is_style_compat";
 static const char __pyx_k_prefix_priority[] = "prefix_priority";
 static const char __pyx_k_prepare_screens[] = "prepare_screens";
-static const char __pyx_k_renpy_style_pyx[] = "renpy\\style.pyx";
+static const char __pyx_k_renpy_style_pyx[] = "renpy/style.pyx";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_StyleManager_get[] = "StyleManager.get";
 static const char __pyx_k_insensitive_child[] = "insensitive_child";

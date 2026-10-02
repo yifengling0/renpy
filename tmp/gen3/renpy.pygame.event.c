@@ -11,7 +11,7 @@
 #else
 #define CYTHON_ABI "0_29_37"
 #define CYTHON_HEX_VERSION 0x001D25F0
-#define CYTHON_FUTURE_DIVISION 1
+#define CYTHON_FUTURE_DIVISION 0
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -961,11 +961,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\pygame\\event.pyx",
+  "renpy/pygame/event.pyx",
   "type.pxd",
-  "renpy\\pygame\\surface.pxd",
-  "renpy\\pygame\\display.pxd",
-  "renpy\\pygame\\event_names.pxi",
+  "renpy/pygame/surface.pxd",
+  "renpy/pygame/display.pxd",
+  "renpy/pygame/event_names.pxi",
 };
 /* NoFastGil.proto */
 #define __Pyx_PyGILState_Ensure PyGILState_Ensure
@@ -1338,6 +1338,13 @@ static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int eq
 /* UnicodeEquals.proto */
 static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
 
+/* StrEquals.proto */
+#if PY_MAJOR_VERSION >= 3
+#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
+#else
+#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
+#endif
+
 /* ListAppend.proto */
 #if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
 static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
@@ -1355,13 +1362,23 @@ static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
 #define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
 #endif
 
-/* PyObjectFormatAndDecref.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f);
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObject* f);
-
-/* JoinPyUnicode.proto */
-static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
-                                      Py_UCS4 max_char);
+/* StringJoin.proto */
+#if PY_MAJOR_VERSION < 3
+#define __Pyx_PyString_Join __Pyx_PyBytes_Join
+#define __Pyx_PyBaseString_Join(s, v) (PyUnicode_CheckExact(s) ? PyUnicode_Join(s, v) : __Pyx_PyBytes_Join(s, v))
+#else
+#define __Pyx_PyString_Join PyUnicode_Join
+#define __Pyx_PyBaseString_Join PyUnicode_Join
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+    #if PY_MAJOR_VERSION < 3
+    #define __Pyx_PyBytes_Join _PyString_Join
+    #else
+    #define __Pyx_PyBytes_Join _PyBytes_Join
+    #endif
+#else
+static CYTHON_INLINE PyObject* __Pyx_PyBytes_Join(PyObject* sep, PyObject* values);
+#endif
 
 /* PyIntCompare.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_NeObjC(PyObject *op1, PyObject *op2, long intval, long inplace);
@@ -1490,33 +1507,6 @@ static PyObject* __Pyx__PyList_PopIndex(PyObject* L, PyObject* py_ix, Py_ssize_t
     (unlikely((py_ix) == Py_None)) ? __Pyx__PyObject_PopNewIndex(L, to_py_func(ix)) :\
         __Pyx__PyObject_PopIndex(L, py_ix))
 #endif
-
-/* PyObjectCallMethod0.proto */
-static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name);
-
-/* RaiseNoneIterError.proto */
-static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
-
-/* UnpackTupleError.proto */
-static void __Pyx_UnpackTupleError(PyObject *, Py_ssize_t index);
-
-/* UnpackTuple2.proto */
-#define __Pyx_unpack_tuple2(tuple, value1, value2, is_tuple, has_known_size, decref_tuple)\
-    (likely(is_tuple || PyTuple_Check(tuple)) ?\
-        (likely(has_known_size || PyTuple_GET_SIZE(tuple) == 2) ?\
-            __Pyx_unpack_tuple2_exact(tuple, value1, value2, decref_tuple) :\
-            (__Pyx_UnpackTupleError(tuple, 2), -1)) :\
-        __Pyx_unpack_tuple2_generic(tuple, value1, value2, has_known_size, decref_tuple))
-static CYTHON_INLINE int __Pyx_unpack_tuple2_exact(
-    PyObject* tuple, PyObject** value1, PyObject** value2, int decref_tuple);
-static int __Pyx_unpack_tuple2_generic(
-    PyObject* tuple, PyObject** value1, PyObject** value2, int has_known_size, int decref_tuple);
-
-/* dict_iter.proto */
-static CYTHON_INLINE PyObject* __Pyx_dict_iterator(PyObject* dict, int is_dict, PyObject* method_name,
-                                                   Py_ssize_t* p_orig_length, int* p_is_dict);
-static CYTHON_INLINE int __Pyx_dict_iter_next(PyObject* dict_or_iter, Py_ssize_t orig_length, Py_ssize_t* ppos,
-                                              PyObject** pkey, PyObject** pvalue, PyObject** pitem, int is_dict);
 
 /* ListCompAppend.proto */
 #if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
@@ -1780,7 +1770,7 @@ static PyTypeObject *__pyx_ptype_7cpython_4type_type = 0;
 
 /* Module declarations from 'libc.stddef' */
 
-/* Module declarations from 'sdl2' */
+/* Module declarations from 'renpy.pygame.sdl2' */
 
 /* Module declarations from 'renpy.pygame.surface' */
 static PyTypeObject *__pyx_ptype_5renpy_6pygame_7surface_Surface = 0;
@@ -1822,8 +1812,7 @@ static PyObject *__pyx_builtin_object;
 static PyObject *__pyx_builtin_property;
 static PyObject *__pyx_builtin_KeyError;
 static PyObject *__pyx_builtin_UnicodeDecodeError;
-static const char __pyx_k_[] = "=";
-static const char __pyx_k_d[] = "d";
+static const char __pyx_k_[] = ", ";
 static const char __pyx_k_e[] = "e";
 static const char __pyx_k_h[] = "h";
 static const char __pyx_k_i[] = "i";
@@ -1833,11 +1822,7 @@ static const char __pyx_k_v[] = "v";
 static const char __pyx_k_w[] = "w";
 static const char __pyx_k_x[] = "x";
 static const char __pyx_k_y[] = "y";
-static const char __pyx_k__2[] = "-";
-static const char __pyx_k__3[] = " ";
-static const char __pyx_k__4[] = ", ";
-static const char __pyx_k__5[] = ")>";
-static const char __pyx_k__6[] = "";
+static const char __pyx_k__2[] = "";
 static const char __pyx_k_dx[] = "dx";
 static const char __pyx_k_dy[] = "dy";
 static const char __pyx_k_eq[] = "__eq__";
@@ -1856,6 +1841,7 @@ static const char __pyx_k_mod[] = "mod";
 static const char __pyx_k_pop[] = "pop";
 static const char __pyx_k_pos[] = "pos";
 static const char __pyx_k_rel[] = "rel";
+static const char __pyx_k_s_r[] = "%s=%r";
 static const char __pyx_k_sys[] = "sys";
 static const char __pyx_k_QUIT[] = "QUIT";
 static const char __pyx_k_axis[] = "axis";
@@ -1867,6 +1853,7 @@ static const char __pyx_k_file[] = "file";
 static const char __pyx_k_flag[] = "flag";
 static const char __pyx_k_gain[] = "gain";
 static const char __pyx_k_init[] = "__init__";
+static const char __pyx_k_join[] = "join";
 static const char __pyx_k_keys[] = "keys";
 static const char __pyx_k_lock[] = "lock";
 static const char __pyx_k_main[] = "__main__";
@@ -1883,7 +1870,7 @@ static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_text[] = "text";
 static const char __pyx_k_type[] = "type";
 static const char __pyx_k_wait[] = "wait";
-static const char __pyx_k_Event[] = "<Event(";
+static const char __pyx_k_Event[] = "Event";
 static const char __pyx_k_KEYUP[] = "KEYUP";
 static const char __pyx_k_RLock[] = "RLock";
 static const char __pyx_k_clear[] = "clear";
@@ -1920,13 +1907,11 @@ static const char __pyx_k_result[] = "result";
 static const char __pyx_k_type_2[] = "_type";
 static const char __pyx_k_unichr[] = "unichr";
 static const char __pyx_k_update[] = "update";
-static const char __pyx_k_Event_2[] = "Event";
 static const char __pyx_k_KEYDOWN[] = "KEYDOWN";
 static const char __pyx_k_NOEVENT[] = "NOEVENT";
 static const char __pyx_k_UNKNOWN[] = "UNKNOWN";
 static const char __pyx_k_buttons[] = "buttons";
 static const char __pyx_k_display[] = "display";
-static const char __pyx_k_evt_ptr[] = "evt_ptr";
 static const char __pyx_k_nonzero[] = "__nonzero__";
 static const char __pyx_k_pinched[] = "pinched";
 static const char __pyx_k_prepare[] = "__prepare__";
@@ -1964,6 +1949,7 @@ static const char __pyx_k_numFingers[] = "numFingers";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_text_input[] = "text_input";
 static const char __pyx_k_ACTIVEEVENT[] = "ACTIVEEVENT";
+static const char __pyx_k_Event_d_s_s[] = "<Event(%d-%s %s)>";
 static const char __pyx_k_JOYBUTTONUP[] = "JOYBUTTONUP";
 static const char __pyx_k_MOUSEMOTION[] = "MOUSEMOTION";
 static const char __pyx_k_TEXTEDITING[] = "TEXTEDITING";
@@ -2025,39 +2011,38 @@ static const char __pyx_k_CONTROLLERDEVICEADDED[] = "CONTROLLERDEVICEADDED";
 static const char __pyx_k_APP_DIDENTERBACKGROUND[] = "APP_DIDENTERBACKGROUND";
 static const char __pyx_k_APP_DIDENTERFOREGROUND[] = "APP_DIDENTERFOREGROUND";
 static const char __pyx_k_get_mousewheel_buttons[] = "get_mousewheel_buttons";
-static const char __pyx_k_renpy_pygame_event_pyx[] = "renpy\\pygame\\event.pyx";
+static const char __pyx_k_renpy_pygame_event_pyx[] = "renpy/pygame/event.pyx";
 static const char __pyx_k_set_mousewheel_buttons[] = "set_mousewheel_buttons";
 static const char __pyx_k_APP_WILLENTERBACKGROUND[] = "APP_WILLENTERBACKGROUND";
 static const char __pyx_k_APP_WILLENTERFOREGROUND[] = "APP_WILLENTERFOREGROUND";
 static const char __pyx_k_CONTROLLERDEVICEREMOVED[] = "CONTROLLERDEVICEREMOVED";
 static const char __pyx_k_CONTROLLERDEVICEREMAPPED[] = "CONTROLLERDEVICEREMAPPED";
 static const char __pyx_k_event_post_must_be_called_with_a[] = "event.post must be called with an Event.";
-static PyObject *__pyx_kp_u_;
+static PyObject *__pyx_kp_s_;
 static PyObject *__pyx_n_s_ACTIVEEVENT;
-static PyObject *__pyx_n_u_ACTIVEEVENT;
-static PyObject *__pyx_n_u_APP_DIDENTERBACKGROUND;
-static PyObject *__pyx_n_u_APP_DIDENTERFOREGROUND;
-static PyObject *__pyx_n_u_APP_LOWMEMORY;
-static PyObject *__pyx_n_u_APP_TERMINATING;
-static PyObject *__pyx_n_u_APP_WILLENTERBACKGROUND;
-static PyObject *__pyx_n_u_APP_WILLENTERFOREGROUND;
-static PyObject *__pyx_n_u_AUDIODEVICEADDED;
-static PyObject *__pyx_n_u_AUDIODEVICEREMOVED;
-static PyObject *__pyx_n_u_CLIPBOARDUPDATE;
-static PyObject *__pyx_n_u_CONTROLLERAXISMOTION;
-static PyObject *__pyx_n_u_CONTROLLERBUTTONDOWN;
-static PyObject *__pyx_n_u_CONTROLLERBUTTONUP;
-static PyObject *__pyx_n_u_CONTROLLERDEVICEADDED;
-static PyObject *__pyx_n_u_CONTROLLERDEVICEREMAPPED;
-static PyObject *__pyx_n_u_CONTROLLERDEVICEREMOVED;
-static PyObject *__pyx_n_u_DISPLAYEVENT;
-static PyObject *__pyx_n_u_DOLLARGESTURE;
-static PyObject *__pyx_n_u_DOLLARRECORD;
-static PyObject *__pyx_n_u_DROPBEGIN;
-static PyObject *__pyx_n_u_DROPCOMPLETE;
-static PyObject *__pyx_n_u_DROPFILE;
-static PyObject *__pyx_n_u_DROPTEXT;
-static PyObject *__pyx_kp_u_Event;
+static PyObject *__pyx_n_s_APP_DIDENTERBACKGROUND;
+static PyObject *__pyx_n_s_APP_DIDENTERFOREGROUND;
+static PyObject *__pyx_n_s_APP_LOWMEMORY;
+static PyObject *__pyx_n_s_APP_TERMINATING;
+static PyObject *__pyx_n_s_APP_WILLENTERBACKGROUND;
+static PyObject *__pyx_n_s_APP_WILLENTERFOREGROUND;
+static PyObject *__pyx_n_s_AUDIODEVICEADDED;
+static PyObject *__pyx_n_s_AUDIODEVICEREMOVED;
+static PyObject *__pyx_n_s_CLIPBOARDUPDATE;
+static PyObject *__pyx_n_s_CONTROLLERAXISMOTION;
+static PyObject *__pyx_n_s_CONTROLLERBUTTONDOWN;
+static PyObject *__pyx_n_s_CONTROLLERBUTTONUP;
+static PyObject *__pyx_n_s_CONTROLLERDEVICEADDED;
+static PyObject *__pyx_n_s_CONTROLLERDEVICEREMAPPED;
+static PyObject *__pyx_n_s_CONTROLLERDEVICEREMOVED;
+static PyObject *__pyx_n_s_DISPLAYEVENT;
+static PyObject *__pyx_n_s_DOLLARGESTURE;
+static PyObject *__pyx_n_s_DOLLARRECORD;
+static PyObject *__pyx_n_s_DROPBEGIN;
+static PyObject *__pyx_n_s_DROPCOMPLETE;
+static PyObject *__pyx_n_s_DROPFILE;
+static PyObject *__pyx_n_s_DROPTEXT;
+static PyObject *__pyx_n_s_Event;
 static PyObject *__pyx_n_s_EventType;
 static PyObject *__pyx_n_s_EventType___eq;
 static PyObject *__pyx_n_s_EventType___init;
@@ -2066,54 +2051,48 @@ static PyObject *__pyx_n_s_EventType___nonzero;
 static PyObject *__pyx_n_s_EventType___repr;
 static PyObject *__pyx_n_s_EventType_dict;
 static PyObject *__pyx_n_s_EventType_type;
-static PyObject *__pyx_n_s_Event_2;
-static PyObject *__pyx_n_u_FINGERDOWN;
-static PyObject *__pyx_n_u_FINGERMOTION;
-static PyObject *__pyx_n_u_FINGERUP;
-static PyObject *__pyx_n_u_JOYAXISMOTION;
-static PyObject *__pyx_n_u_JOYBALLMOTION;
-static PyObject *__pyx_n_u_JOYBUTTONDOWN;
-static PyObject *__pyx_n_u_JOYBUTTONUP;
-static PyObject *__pyx_n_u_JOYDEVICEADDED;
-static PyObject *__pyx_n_u_JOYDEVICEREMOVED;
-static PyObject *__pyx_n_u_JOYHATMOTION;
-static PyObject *__pyx_n_u_KEYDOWN;
-static PyObject *__pyx_n_u_KEYMAPCHANGED;
-static PyObject *__pyx_n_u_KEYUP;
+static PyObject *__pyx_kp_s_Event_d_s_s;
+static PyObject *__pyx_n_s_FINGERDOWN;
+static PyObject *__pyx_n_s_FINGERMOTION;
+static PyObject *__pyx_n_s_FINGERUP;
+static PyObject *__pyx_n_s_JOYAXISMOTION;
+static PyObject *__pyx_n_s_JOYBALLMOTION;
+static PyObject *__pyx_n_s_JOYBUTTONDOWN;
+static PyObject *__pyx_n_s_JOYBUTTONUP;
+static PyObject *__pyx_n_s_JOYDEVICEADDED;
+static PyObject *__pyx_n_s_JOYDEVICEREMOVED;
+static PyObject *__pyx_n_s_JOYHATMOTION;
+static PyObject *__pyx_n_s_KEYDOWN;
+static PyObject *__pyx_n_s_KEYMAPCHANGED;
+static PyObject *__pyx_n_s_KEYUP;
 static PyObject *__pyx_n_s_KeyError;
-static PyObject *__pyx_n_u_LASTEVENT;
-static PyObject *__pyx_n_u_MOUSEBUTTONDOWN;
-static PyObject *__pyx_n_u_MOUSEBUTTONUP;
-static PyObject *__pyx_n_u_MOUSEMOTION;
-static PyObject *__pyx_n_u_MOUSEWHEEL;
-static PyObject *__pyx_n_u_MULTIGESTURE;
+static PyObject *__pyx_n_s_LASTEVENT;
+static PyObject *__pyx_n_s_MOUSEBUTTONDOWN;
+static PyObject *__pyx_n_s_MOUSEBUTTONUP;
+static PyObject *__pyx_n_s_MOUSEMOTION;
+static PyObject *__pyx_n_s_MOUSEWHEEL;
+static PyObject *__pyx_n_s_MULTIGESTURE;
 static PyObject *__pyx_n_u_NOEVENT;
 static PyObject *__pyx_n_s_NOEVENT_EVENT;
-static PyObject *__pyx_n_u_QUIT;
-static PyObject *__pyx_n_u_RENDER_DEVICE_RESET;
-static PyObject *__pyx_n_u_RENDER_TARGETS_RESET;
+static PyObject *__pyx_n_s_QUIT;
+static PyObject *__pyx_n_s_RENDER_DEVICE_RESET;
+static PyObject *__pyx_n_s_RENDER_TARGETS_RESET;
 static PyObject *__pyx_n_s_RLock;
-static PyObject *__pyx_n_u_SENSORUPDATE;
-static PyObject *__pyx_n_u_SYSWMEVENT;
-static PyObject *__pyx_n_u_TEXTEDITING;
-static PyObject *__pyx_n_u_TEXTINPUT;
-static PyObject *__pyx_n_u_UNKNOWN;
-static PyObject *__pyx_n_u_USEREVENT;
+static PyObject *__pyx_n_s_SENSORUPDATE;
+static PyObject *__pyx_n_s_SYSWMEVENT;
+static PyObject *__pyx_n_s_TEXTEDITING;
+static PyObject *__pyx_n_s_TEXTINPUT;
+static PyObject *__pyx_n_s_UNKNOWN;
+static PyObject *__pyx_n_s_USEREVENT;
 static PyObject *__pyx_n_s_USEREVENT_MAX;
 static PyObject *__pyx_n_s_UnicodeDecodeError;
-static PyObject *__pyx_kp_u_UserEvent_d;
+static PyObject *__pyx_kp_s_UserEvent_d;
 static PyObject *__pyx_n_s_VIDEOEXPOSE;
-static PyObject *__pyx_n_u_VIDEOEXPOSE;
 static PyObject *__pyx_n_s_VIDEORESIZE;
-static PyObject *__pyx_n_u_VIDEORESIZE;
-static PyObject *__pyx_n_u_WINDOWEVENT;
+static PyObject *__pyx_n_s_WINDOWEVENT;
 static PyObject *__pyx_n_s_WINDOWMOVED;
-static PyObject *__pyx_n_u_WINDOWMOVED;
+static PyObject *__pyx_kp_s__2;
 static PyObject *__pyx_kp_u__2;
-static PyObject *__pyx_kp_u__3;
-static PyObject *__pyx_kp_u__4;
-static PyObject *__pyx_kp_u__5;
-static PyObject *__pyx_kp_u__6;
 static PyObject *__pyx_n_s_append;
 static PyObject *__pyx_n_s_axis;
 static PyObject *__pyx_n_s_ball;
@@ -2124,7 +2103,6 @@ static PyObject *__pyx_n_s_clear;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_code;
 static PyObject *__pyx_n_s_copy_event_queue;
-static PyObject *__pyx_n_u_d;
 static PyObject *__pyx_n_s_dDist;
 static PyObject *__pyx_n_s_dTheta;
 static PyObject *__pyx_n_s_data1;
@@ -2144,9 +2122,8 @@ static PyObject *__pyx_n_s_et;
 static PyObject *__pyx_n_s_event;
 static PyObject *__pyx_n_s_event_name;
 static PyObject *__pyx_n_s_event_names;
-static PyObject *__pyx_kp_u_event_post_must_be_called_with_a;
+static PyObject *__pyx_kp_s_event_post_must_be_called_with_a;
 static PyObject *__pyx_n_s_evt;
-static PyObject *__pyx_n_s_evt_ptr;
 static PyObject *__pyx_n_s_exit;
 static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_fingerId;
@@ -2167,17 +2144,17 @@ static PyObject *__pyx_n_s_init_2;
 static PyObject *__pyx_n_s_insert;
 static PyObject *__pyx_n_s_instance_id;
 static PyObject *__pyx_n_s_items;
+static PyObject *__pyx_n_s_join;
 static PyObject *__pyx_n_s_joy;
 static PyObject *__pyx_n_s_k;
 static PyObject *__pyx_n_s_key;
-static PyObject *__pyx_n_u_key;
 static PyObject *__pyx_n_s_keys;
 static PyObject *__pyx_n_s_kwargs;
 static PyObject *__pyx_n_s_length;
 static PyObject *__pyx_n_s_lock;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_metaclass;
-static PyObject *__pyx_n_u_mod;
+static PyObject *__pyx_n_s_mod;
 static PyObject *__pyx_n_s_module;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_name_2;
@@ -2208,13 +2185,13 @@ static PyObject *__pyx_n_s_renpy_pygame;
 static PyObject *__pyx_n_s_renpy_pygame_event;
 static PyObject *__pyx_kp_s_renpy_pygame_event_pyx;
 static PyObject *__pyx_n_s_repeat;
-static PyObject *__pyx_n_u_repeat;
 static PyObject *__pyx_n_s_repr;
 static PyObject *__pyx_n_s_rest;
 static PyObject *__pyx_n_s_result;
 static PyObject *__pyx_n_s_rotated;
 static PyObject *__pyx_n_s_rv;
-static PyObject *__pyx_n_u_scancode;
+static PyObject *__pyx_kp_s_s_r;
+static PyObject *__pyx_n_s_scancode;
 static PyObject *__pyx_n_s_sdl_main_init;
 static PyObject *__pyx_n_s_self;
 static PyObject *__pyx_n_s_set_allowed;
@@ -2231,15 +2208,13 @@ static PyObject *__pyx_n_s_text;
 static PyObject *__pyx_n_s_text_input;
 static PyObject *__pyx_n_s_threading;
 static PyObject *__pyx_n_s_timestamp;
-static PyObject *__pyx_n_u_timestamp;
 static PyObject *__pyx_n_s_touch;
 static PyObject *__pyx_n_s_touchId;
 static PyObject *__pyx_n_s_touch_id;
 static PyObject *__pyx_n_s_type;
 static PyObject *__pyx_n_s_type_2;
-static PyObject *__pyx_n_u_type_2;
 static PyObject *__pyx_n_s_unichr;
-static PyObject *__pyx_n_u_unicode;
+static PyObject *__pyx_n_s_unicode;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_v;
 static PyObject *__pyx_n_s_value;
@@ -2281,19 +2256,21 @@ static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_2;
 static PyObject *__pyx_int_3;
 static PyObject *__pyx_int_4;
-static PyObject *__pyx_slice__8;
-static PyObject *__pyx_tuple__7;
+static PyObject *__pyx_slice__4;
+static PyObject *__pyx_tuple__3;
+static PyObject *__pyx_tuple__5;
+static PyObject *__pyx_tuple__6;
+static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
-static PyObject *__pyx_tuple__10;
-static PyObject *__pyx_tuple__12;
+static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__13;
 static PyObject *__pyx_tuple__15;
 static PyObject *__pyx_tuple__17;
 static PyObject *__pyx_tuple__19;
 static PyObject *__pyx_tuple__21;
 static PyObject *__pyx_tuple__23;
-static PyObject *__pyx_tuple__25;
-static PyObject *__pyx_tuple__27;
+static PyObject *__pyx_tuple__26;
+static PyObject *__pyx_tuple__28;
 static PyObject *__pyx_tuple__30;
 static PyObject *__pyx_tuple__32;
 static PyObject *__pyx_tuple__34;
@@ -2301,20 +2278,20 @@ static PyObject *__pyx_tuple__36;
 static PyObject *__pyx_tuple__38;
 static PyObject *__pyx_tuple__40;
 static PyObject *__pyx_tuple__42;
-static PyObject *__pyx_tuple__44;
-static PyObject *__pyx_tuple__46;
-static PyObject *__pyx_tuple__49;
-static PyObject *__pyx_tuple__52;
-static PyObject *__pyx_tuple__54;
-static PyObject *__pyx_codeobj__11;
+static PyObject *__pyx_tuple__45;
+static PyObject *__pyx_tuple__48;
+static PyObject *__pyx_tuple__50;
+static PyObject *__pyx_codeobj__7;
+static PyObject *__pyx_codeobj__10;
+static PyObject *__pyx_codeobj__12;
 static PyObject *__pyx_codeobj__14;
 static PyObject *__pyx_codeobj__16;
 static PyObject *__pyx_codeobj__18;
 static PyObject *__pyx_codeobj__20;
 static PyObject *__pyx_codeobj__22;
 static PyObject *__pyx_codeobj__24;
-static PyObject *__pyx_codeobj__26;
-static PyObject *__pyx_codeobj__28;
+static PyObject *__pyx_codeobj__25;
+static PyObject *__pyx_codeobj__27;
 static PyObject *__pyx_codeobj__29;
 static PyObject *__pyx_codeobj__31;
 static PyObject *__pyx_codeobj__33;
@@ -2323,15 +2300,13 @@ static PyObject *__pyx_codeobj__37;
 static PyObject *__pyx_codeobj__39;
 static PyObject *__pyx_codeobj__41;
 static PyObject *__pyx_codeobj__43;
-static PyObject *__pyx_codeobj__45;
+static PyObject *__pyx_codeobj__44;
+static PyObject *__pyx_codeobj__46;
 static PyObject *__pyx_codeobj__47;
-static PyObject *__pyx_codeobj__48;
-static PyObject *__pyx_codeobj__50;
+static PyObject *__pyx_codeobj__49;
 static PyObject *__pyx_codeobj__51;
+static PyObject *__pyx_codeobj__52;
 static PyObject *__pyx_codeobj__53;
-static PyObject *__pyx_codeobj__55;
-static PyObject *__pyx_codeobj__56;
-static PyObject *__pyx_codeobj__57;
 /* Late includes */
 PyObject *event_queue = 0;
 
@@ -2345,7 +2320,8 @@ PyObject *event_queue = 0;
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_1__init__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_1__init__ = {"__init__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_1__init__, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType___init__[] = "EventType.__init__(self, type, dict=None, **kwargs)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_1__init__ = {"__init__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_1__init__, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_9EventType___init__};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_1__init__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
   PyObject *__pyx_v_type = 0;
@@ -2559,7 +2535,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType___init__(CYTHON_UNUSE
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_3__repr__(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_3__repr__ = {"__repr__", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_3__repr__, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_2__repr__[] = "EventType.__repr__(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_3__repr__ = {"__repr__", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_3__repr__, METH_O, __pyx_doc_5renpy_6pygame_5event_9EventType_2__repr__};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_3__repr__(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -2592,8 +2569,6 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
   PyObject *__pyx_t_12 = NULL;
   PyObject *(*__pyx_t_13)(PyObject *);
   int __pyx_t_14;
-  Py_ssize_t __pyx_t_15;
-  Py_UCS4 __pyx_t_16;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2639,7 +2614,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyUnicode_FormatSafe(__pyx_kp_u_UserEvent_d, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyString_FormatSafe(__pyx_kp_s_UserEvent_d, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_ename = __pyx_t_2;
@@ -2730,8 +2705,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
  * 
  *         rest = [ ]
  */
-        __Pyx_INCREF(__pyx_n_u_UNKNOWN);
-        __Pyx_XDECREF_SET(__pyx_v_ename, __pyx_n_u_UNKNOWN);
+        __Pyx_INCREF(__pyx_n_s_UNKNOWN);
+        __Pyx_XDECREF_SET(__pyx_v_ename, __pyx_n_s_UNKNOWN);
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -2879,13 +2854,13 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
  *                 continue
  * 
  */
-    __pyx_t_14 = (__Pyx_PyUnicode_Equals(__pyx_v_k, __pyx_n_u_type_2, Py_EQ)); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+    __pyx_t_14 = (__Pyx_PyString_Equals(__pyx_v_k, __pyx_n_s_type_2, Py_EQ)); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
     if (!__pyx_t_14) {
     } else {
       __pyx_t_5 = __pyx_t_14;
       goto __pyx_L17_bool_binop_done;
     }
-    __pyx_t_14 = (__Pyx_PyUnicode_Equals(__pyx_v_k, __pyx_n_u_timestamp, Py_EQ)); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+    __pyx_t_14 = (__Pyx_PyString_Equals(__pyx_v_k, __pyx_n_s_timestamp, Py_EQ)); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
     __pyx_t_5 = __pyx_t_14;
     __pyx_L17_bool_binop_done:;
     if (__pyx_t_5) {
@@ -2915,29 +2890,15 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
  * 
  *         return '<Event(%d-%s %s)>' % (self.type, ename, ", ".join(rest))
  */
-    __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 88, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_15 = 0;
-    __pyx_t_16 = 127;
-    __pyx_t_3 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Unicode(__pyx_v_k), __pyx_empty_unicode); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_16 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_3) > __pyx_t_16) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_3) : __pyx_t_16;
-    __pyx_t_15 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-    __pyx_t_3 = 0;
-    __Pyx_INCREF(__pyx_kp_u_);
-    __pyx_t_15 += 1;
-    __Pyx_GIVEREF(__pyx_kp_u_);
-    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_kp_u_);
-    __pyx_t_3 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Repr(__pyx_v_v), __pyx_empty_unicode); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_16 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_3) > __pyx_t_16) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_3) : __pyx_t_16;
-    __pyx_t_15 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_t_3);
-    __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyUnicode_Join(__pyx_t_2, 3, __pyx_t_15, __pyx_t_16); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_v_k);
+    __Pyx_GIVEREF(__pyx_v_k);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_k);
+    __Pyx_INCREF(__pyx_v_v);
+    __Pyx_GIVEREF(__pyx_v_v);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_v);
+    __pyx_t_3 = __Pyx_PyString_Format(__pyx_kp_s_s_r, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_rest, __pyx_t_3); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 88, __pyx_L1_error)
@@ -2962,55 +2923,26 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
  *     @property
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyTuple_New(7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_type); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_11 = 0;
-  __pyx_t_16 = 127;
-  __Pyx_INCREF(__pyx_kp_u_Event);
-  __pyx_t_11 += 7;
-  __Pyx_GIVEREF(__pyx_kp_u_Event);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_kp_u_Event);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_type); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyString_Join(__pyx_kp_s_, __pyx_v_rest); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_FormatAndDecref(__Pyx_PyNumber_IntOrLong(__pyx_t_3), __pyx_n_u_d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_16 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_16) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_16;
-  __pyx_t_11 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __Pyx_INCREF(__pyx_kp_u__2);
-  __pyx_t_11 += 1;
-  __Pyx_GIVEREF(__pyx_kp_u__2);
-  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_kp_u__2);
-  __pyx_t_2 = __Pyx_PyObject_FormatSimpleAndDecref(PyObject_Unicode(__pyx_v_ename), __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_16 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_16) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_16;
-  __pyx_t_11 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 3, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __Pyx_INCREF(__pyx_kp_u__3);
-  __pyx_t_11 += 1;
-  __Pyx_GIVEREF(__pyx_kp_u__3);
-  PyTuple_SET_ITEM(__pyx_t_4, 4, __pyx_kp_u__3);
-  __pyx_t_2 = PyUnicode_Join(__pyx_kp_u__4, __pyx_v_rest); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_16 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_16) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_16;
-  __pyx_t_11 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 5, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __Pyx_INCREF(__pyx_kp_u__5);
-  __pyx_t_11 += 2;
-  __Pyx_GIVEREF(__pyx_kp_u__5);
-  PyTuple_SET_ITEM(__pyx_t_4, 6, __pyx_kp_u__5);
-  __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_4, 7, __pyx_t_11, __pyx_t_16); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 90, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
+  __Pyx_INCREF(__pyx_v_ename);
+  __Pyx_GIVEREF(__pyx_v_ename);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_ename);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_t_3);
+  __pyx_t_4 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyString_Format(__pyx_kp_s_Event_d_s_s, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
   goto __pyx_L0;
 
   /* "renpy/pygame/event.pyx":73
@@ -3050,7 +2982,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_2__repr__(CYTHON_UNUS
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_5dict(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_5dict = {"dict", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_5dict, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_4dict[] = "EventType.dict(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_5dict = {"dict", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_5dict, METH_O, __pyx_doc_5renpy_6pygame_5event_9EventType_4dict};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_5dict(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3114,7 +3047,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_4dict(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_7type(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_7type = {"type", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_7type, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_6type[] = "EventType.type(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_7type = {"type", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_7type, METH_O, __pyx_doc_5renpy_6pygame_5event_9EventType_6type};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_7type(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3178,7 +3112,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_6type(CYTHON_UNUSED P
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_9__eq__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_9__eq__ = {"__eq__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_9__eq__, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_8__eq__[] = "EventType.__eq__(self, other)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_9__eq__ = {"__eq__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_9__eq__, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_9EventType_8__eq__};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_9__eq__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
   PyObject *__pyx_v_other = 0;
@@ -3302,7 +3237,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_8__eq__(CYTHON_UNUSED
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_11__ne__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_11__ne__ = {"__ne__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_11__ne__, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_10__ne__[] = "EventType.__ne__(self, other)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_11__ne__ = {"__ne__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9EventType_11__ne__, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_9EventType_10__ne__};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_11__ne__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
   PyObject *__pyx_v_other = 0;
@@ -3421,7 +3357,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_9EventType_10__ne__(CYTHON_UNUSE
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_13__nonzero__(PyObject *__pyx_self, PyObject *__pyx_v_self); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_13__nonzero__ = {"__nonzero__", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_13__nonzero__, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_9EventType_12__nonzero__[] = "EventType.__nonzero__(self)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9EventType_13__nonzero__ = {"__nonzero__", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_9EventType_13__nonzero__, METH_O, __pyx_doc_5renpy_6pygame_5event_9EventType_12__nonzero__};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9EventType_13__nonzero__(PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3552,8 +3489,8 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_get_textinput(void) {
  * cdef make_keyboard_event(SDL_KeyboardEvent *e):
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_kp_u__6);
-  __pyx_r = __pyx_kp_u__6;
+  __Pyx_INCREF(__pyx_kp_u__2);
+  __pyx_r = __pyx_kp_u__2;
   goto __pyx_L0;
 
   /* "renpy/pygame/event.pyx":111
@@ -3609,7 +3546,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_From_SDL_Scancode(__pyx_v_e->keysym.scancode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_scancode, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_scancode, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "renpy/pygame/event.pyx":122
@@ -3621,7 +3558,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
  */
   __pyx_t_2 = __Pyx_PyInt_From_int32_t(__pyx_v_e->keysym.sym); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_key, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_key, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "renpy/pygame/event.pyx":123
@@ -3633,9 +3570,9 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
  */
   __pyx_t_2 = __Pyx_PyInt_From_uint16_t(__pyx_v_e->keysym.mod); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_mod, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_mod, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_unicode, __pyx_kp_u__6) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_unicode, __pyx_kp_s__2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":125
  *               'mod' : e.keysym.mod,
@@ -3646,7 +3583,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
  */
   __pyx_t_2 = __Pyx_PyInt_From_uint8_t(__pyx_v_e->repeat); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_repeat, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_repeat, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_dargs = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
@@ -3721,7 +3658,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
         if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_u_unicode, __pyx_t_2) < 0)) __PYX_ERR(0, 134, __pyx_L1_error)
+        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_s_unicode, __pyx_t_2) < 0)) __PYX_ERR(0, 134, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
         /* "renpy/pygame/event.pyx":133
@@ -3753,7 +3690,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
  */
         __pyx_t_2 = __pyx_f_5renpy_6pygame_5event_get_textinput(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
-        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_u_unicode, __pyx_t_2) < 0)) __PYX_ERR(0, 136, __pyx_L1_error)
+        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_s_unicode, __pyx_t_2) < 0)) __PYX_ERR(0, 136, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
         /* "renpy/pygame/event.pyx":135
@@ -3836,7 +3773,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_keyboard_event(SDL_KeyboardE
  * 
  *     return EventType(e.type, dict=dargs, repeat=e.repeat)
  */
-        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_u_unicode, __pyx_kp_u__6) < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
+        if (unlikely(PyDict_SetItem(__pyx_v_dargs, __pyx_n_s_unicode, __pyx_kp_s__2) < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
 
         /* "renpy/pygame/event.pyx":140
  *     else:
@@ -4680,7 +4617,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_joyaxis_event(SDL_JoyAxisEve
   __Pyx_GOTREF(__pyx_t_4);
   if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_axis, __pyx_t_4) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyFloat_FromDouble((((double)__pyx_v_e->value) / 32768.0)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble((__pyx_v_e->value / 32768.0)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_value, __pyx_t_4) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5108,7 +5045,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_textinput_event(SDL_TextInpu
       __pyx_t_10 = 0;
       __pyx_t_10 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 208, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_text, __pyx_kp_u__6) < 0) __PYX_ERR(0, 208, __pyx_L5_except_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_text, __pyx_kp_s__2) < 0) __PYX_ERR(0, 208, __pyx_L5_except_error)
       __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_11, __pyx_t_10); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 208, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5308,7 +5245,7 @@ static PyObject *__pyx_f_5renpy_6pygame_5event_make_textediting_event(SDL_TextEd
       __pyx_t_10 = 0;
       __pyx_t_10 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 214, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_text, __pyx_kp_u__6) < 0) __PYX_ERR(0, 214, __pyx_L5_except_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_text, __pyx_kp_s__2) < 0) __PYX_ERR(0, 214, __pyx_L5_except_error)
       __pyx_t_12 = __Pyx_PyInt_From_int32_t(__pyx_v_e->start); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 214, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_12);
       if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_start, __pyx_t_12) < 0) __PYX_ERR(0, 214, __pyx_L5_except_error)
@@ -7964,7 +7901,7 @@ static int __pyx_f_5renpy_6pygame_5event_poll_sdl(void) {
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 372, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
@@ -8023,7 +7960,8 @@ static int __pyx_f_5renpy_6pygame_5event_poll_sdl(void) {
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_1pump(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_1pump = {"pump", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_1pump, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_pump[] = "pump()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_1pump = {"pump", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_1pump, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_pump};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_1pump(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8169,7 +8107,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_pump(CYTHON_UNUSED PyObject *__p
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 416, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
@@ -8220,7 +8158,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_pump(CYTHON_UNUSED PyObject *__p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_3get(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_3get = {"get", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_3get, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_2get[] = "get(t=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_3get = {"get", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_3get, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_2get};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_3get(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_t = 0;
   int __pyx_lineno = 0;
@@ -8512,7 +8451,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_2get(CYTHON_UNUSED PyObject *__p
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 424, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
@@ -8575,7 +8514,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_2get(CYTHON_UNUSED PyObject *__p
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_5poll(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_5poll = {"poll", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_5poll, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_4poll[] = "poll()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_5poll = {"poll", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_5poll, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_4poll};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_5poll(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8769,7 +8709,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_4poll(CYTHON_UNUSED PyObject *__
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 442, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
@@ -8781,7 +8721,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_4poll(CYTHON_UNUSED PyObject *__
         __pyx_t_8 = __pyx_r;
         __pyx_r = 0;
         if (__pyx_t_2) {
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 442, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_7);
@@ -8834,7 +8774,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_4poll(CYTHON_UNUSED PyObject *__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_7wait(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_7wait = {"wait", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_7wait, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_6wait[] = "wait()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_7wait = {"wait", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_7wait, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_6wait};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_7wait(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -8849,7 +8790,6 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_7wait(PyObject *__pyx_self, CYTH
 static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__pyx_self) {
   SDL_Event __pyx_v_evt;
   int __pyx_v_result;
-  SDL_Event *__pyx_v_evt_ptr;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -8869,19 +8809,19 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("wait", 0);
 
-  /* "renpy/pygame/event.pyx":457
- *     cdef SDL_Event *evt_ptr
+  /* "renpy/pygame/event.pyx":456
+ *     cdef int result
  * 
  *     with lock:             # <<<<<<<<<<<<<<
  *         poll_sdl()
  * 
  */
   /*with:*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_lock); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 457, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_lock); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 456, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 457, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 456, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 457, __pyx_L3_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 456, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -8895,7 +8835,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
     }
     __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 457, __pyx_L3_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 456, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8910,40 +8850,40 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
         __Pyx_XGOTREF(__pyx_t_8);
         /*try:*/ {
 
-          /* "renpy/pygame/event.pyx":458
+          /* "renpy/pygame/event.pyx":457
  * 
  *     with lock:
  *         poll_sdl()             # <<<<<<<<<<<<<<
  * 
  *         if event_queue:
  */
-          __pyx_t_9 = __pyx_f_5renpy_6pygame_5event_poll_sdl(); if (unlikely(__pyx_t_9 == ((int)1))) __PYX_ERR(0, 458, __pyx_L7_error)
+          __pyx_t_9 = __pyx_f_5renpy_6pygame_5event_poll_sdl(); if (unlikely(__pyx_t_9 == ((int)1))) __PYX_ERR(0, 457, __pyx_L7_error)
 
-          /* "renpy/pygame/event.pyx":460
+          /* "renpy/pygame/event.pyx":459
  *         poll_sdl()
  * 
  *         if event_queue:             # <<<<<<<<<<<<<<
  *             return event_queue.pop(0)
  * 
  */
-          __pyx_t_10 = __Pyx_PyObject_IsTrue(event_queue); if (unlikely(__pyx_t_10 < 0)) __PYX_ERR(0, 460, __pyx_L7_error)
+          __pyx_t_10 = __Pyx_PyObject_IsTrue(event_queue); if (unlikely(__pyx_t_10 < 0)) __PYX_ERR(0, 459, __pyx_L7_error)
           if (__pyx_t_10) {
 
-            /* "renpy/pygame/event.pyx":461
+            /* "renpy/pygame/event.pyx":460
  * 
  *         if event_queue:
  *             return event_queue.pop(0)             # <<<<<<<<<<<<<<
  * 
- *     evt_ptr = &evt
+ *     with nogil:
  */
             __Pyx_XDECREF(__pyx_r);
-            __pyx_t_1 = __Pyx_PyObject_PopIndex(event_queue, __pyx_int_0, 0, 1, Py_ssize_t, PyInt_FromSsize_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 461, __pyx_L7_error)
+            __pyx_t_1 = __Pyx_PyObject_PopIndex(event_queue, __pyx_int_0, 0, 1, Py_ssize_t, PyInt_FromSsize_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 460, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __pyx_r = __pyx_t_1;
             __pyx_t_1 = 0;
             goto __pyx_L11_try_return;
 
-            /* "renpy/pygame/event.pyx":460
+            /* "renpy/pygame/event.pyx":459
  *         poll_sdl()
  * 
  *         if event_queue:             # <<<<<<<<<<<<<<
@@ -8952,8 +8892,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
  */
           }
 
-          /* "renpy/pygame/event.pyx":457
- *     cdef SDL_Event *evt_ptr
+          /* "renpy/pygame/event.pyx":456
+ *     cdef int result
  * 
  *     with lock:             # <<<<<<<<<<<<<<
  *         poll_sdl()
@@ -8971,20 +8911,20 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("renpy.pygame.event.wait", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_4) < 0) __PYX_ERR(0, 457, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_4) < 0) __PYX_ERR(0, 456, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_1);
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 457, __pyx_L9_except_error)
+          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 456, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_5);
           __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 457, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 456, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_11);
           __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_t_11);
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-          if (__pyx_t_10 < 0) __PYX_ERR(0, 457, __pyx_L9_except_error)
+          if (__pyx_t_10 < 0) __PYX_ERR(0, 456, __pyx_L9_except_error)
           __pyx_t_12 = ((!(__pyx_t_10 != 0)) != 0);
           if (__pyx_t_12) {
             __Pyx_GIVEREF(__pyx_t_1);
@@ -8992,7 +8932,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
             __Pyx_XGIVEREF(__pyx_t_4);
             __Pyx_ErrRestoreWithState(__pyx_t_1, __pyx_t_3, __pyx_t_4);
             __pyx_t_1 = 0; __pyx_t_3 = 0; __pyx_t_4 = 0; 
-            __PYX_ERR(0, 457, __pyx_L9_except_error)
+            __PYX_ERR(0, 456, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9022,9 +8962,9 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 457, __pyx_L1_error)
+          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 456, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         }
@@ -9034,9 +8974,9 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
         __pyx_t_8 = __pyx_r;
         __pyx_r = 0;
         if (__pyx_t_2) {
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 457, __pyx_L1_error)
+          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 456, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
@@ -9053,20 +8993,11 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
     __pyx_L17:;
   }
 
-  /* "renpy/pygame/event.pyx":463
+  /* "renpy/pygame/event.pyx":462
  *             return event_queue.pop(0)
  * 
- *     evt_ptr = &evt             # <<<<<<<<<<<<<<
- *     with nogil:
- *         result = SDL_WaitEvent(evt_ptr)
- */
-  __pyx_v_evt_ptr = (&__pyx_v_evt);
-
-  /* "renpy/pygame/event.pyx":464
- * 
- *     evt_ptr = &evt
  *     with nogil:             # <<<<<<<<<<<<<<
- *         result = SDL_WaitEvent(evt_ptr)
+ *         result = SDL_WaitEvent(&evt)
  * 
  */
   {
@@ -9077,21 +9008,21 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
       #endif
       /*try:*/ {
 
-        /* "renpy/pygame/event.pyx":465
- *     evt_ptr = &evt
+        /* "renpy/pygame/event.pyx":463
+ * 
  *     with nogil:
- *         result = SDL_WaitEvent(evt_ptr)             # <<<<<<<<<<<<<<
+ *         result = SDL_WaitEvent(&evt)             # <<<<<<<<<<<<<<
  * 
  *     if result:
  */
-        __pyx_v_result = SDL_WaitEvent(__pyx_v_evt_ptr);
+        __pyx_v_result = SDL_WaitEvent((&__pyx_v_evt));
       }
 
-      /* "renpy/pygame/event.pyx":464
+      /* "renpy/pygame/event.pyx":462
+ *             return event_queue.pop(0)
  * 
- *     evt_ptr = &evt
  *     with nogil:             # <<<<<<<<<<<<<<
- *         result = SDL_WaitEvent(evt_ptr)
+ *         result = SDL_WaitEvent(&evt)
  * 
  */
       /*finally:*/ {
@@ -9106,8 +9037,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
       }
   }
 
-  /* "renpy/pygame/event.pyx":467
- *         result = SDL_WaitEvent(evt_ptr)
+  /* "renpy/pygame/event.pyx":465
+ *         result = SDL_WaitEvent(&evt)
  * 
  *     if result:             # <<<<<<<<<<<<<<
  *         return make_event(&evt)
@@ -9116,7 +9047,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
   __pyx_t_12 = (__pyx_v_result != 0);
   if (__pyx_t_12) {
 
-    /* "renpy/pygame/event.pyx":468
+    /* "renpy/pygame/event.pyx":466
  * 
  *     if result:
  *         return make_event(&evt)             # <<<<<<<<<<<<<<
@@ -9124,14 +9055,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
  *         return NOEVENT_EVENT
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __pyx_f_5renpy_6pygame_5event_make_event((&__pyx_v_evt)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 468, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_5renpy_6pygame_5event_make_event((&__pyx_v_evt)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 466, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "renpy/pygame/event.pyx":467
- *         result = SDL_WaitEvent(evt_ptr)
+    /* "renpy/pygame/event.pyx":465
+ *         result = SDL_WaitEvent(&evt)
  * 
  *     if result:             # <<<<<<<<<<<<<<
  *         return make_event(&evt)
@@ -9139,7 +9070,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
  */
   }
 
-  /* "renpy/pygame/event.pyx":470
+  /* "renpy/pygame/event.pyx":468
  *         return make_event(&evt)
  *     else:
  *         return NOEVENT_EVENT             # <<<<<<<<<<<<<<
@@ -9148,7 +9079,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_NOEVENT_EVENT); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 470, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_NOEVENT_EVENT); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 468, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
@@ -9177,7 +9108,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":473
+/* "renpy/pygame/event.pyx":471
  * 
  * 
  * def peek(t=None):             # <<<<<<<<<<<<<<
@@ -9187,7 +9118,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_6wait(CYTHON_UNUSED PyObject *__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9peek(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9peek = {"peek", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9peek, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_8peek[] = "peek(t=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_9peek = {"peek", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_9peek, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_8peek};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_9peek(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_t = 0;
   int __pyx_lineno = 0;
@@ -9218,7 +9150,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_9peek(PyObject *__pyx_self, PyOb
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "peek") < 0)) __PYX_ERR(0, 473, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "peek") < 0)) __PYX_ERR(0, 471, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -9232,7 +9164,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_9peek(PyObject *__pyx_self, PyOb
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("peek", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 473, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("peek", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 471, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renpy.pygame.event.peek", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -9266,7 +9198,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("peek", 0);
 
-  /* "renpy/pygame/event.pyx":475
+  /* "renpy/pygame/event.pyx":473
  * def peek(t=None):
  * 
  *     with lock:             # <<<<<<<<<<<<<<
@@ -9274,11 +9206,11 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
  * 
  */
   /*with:*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_lock); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 475, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_lock); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 473, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 475, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 473, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 475, __pyx_L3_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 473, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -9292,7 +9224,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
     }
     __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 475, __pyx_L3_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 473, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9307,16 +9239,16 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
         __Pyx_XGOTREF(__pyx_t_8);
         /*try:*/ {
 
-          /* "renpy/pygame/event.pyx":476
+          /* "renpy/pygame/event.pyx":474
  * 
  *     with lock:
  *         poll_sdl()             # <<<<<<<<<<<<<<
  * 
  *         if t is None:
  */
-          __pyx_t_9 = __pyx_f_5renpy_6pygame_5event_poll_sdl(); if (unlikely(__pyx_t_9 == ((int)1))) __PYX_ERR(0, 476, __pyx_L7_error)
+          __pyx_t_9 = __pyx_f_5renpy_6pygame_5event_poll_sdl(); if (unlikely(__pyx_t_9 == ((int)1))) __PYX_ERR(0, 474, __pyx_L7_error)
 
-          /* "renpy/pygame/event.pyx":478
+          /* "renpy/pygame/event.pyx":476
  *         poll_sdl()
  * 
  *         if t is None:             # <<<<<<<<<<<<<<
@@ -9327,7 +9259,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
           __pyx_t_11 = (__pyx_t_10 != 0);
           if (__pyx_t_11) {
 
-            /* "renpy/pygame/event.pyx":479
+            /* "renpy/pygame/event.pyx":477
  * 
  *         if t is None:
  *             return len(event_queue) != 0             # <<<<<<<<<<<<<<
@@ -9337,15 +9269,15 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
             __Pyx_XDECREF(__pyx_r);
             __pyx_t_1 = event_queue;
             __Pyx_INCREF(__pyx_t_1);
-            __pyx_t_12 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_ssize_t)-1))) __PYX_ERR(0, 479, __pyx_L7_error)
+            __pyx_t_12 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_12 == ((Py_ssize_t)-1))) __PYX_ERR(0, 477, __pyx_L7_error)
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_t_12 != 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 479, __pyx_L7_error)
+            __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_t_12 != 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 477, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __pyx_r = __pyx_t_1;
             __pyx_t_1 = 0;
             goto __pyx_L11_try_return;
 
-            /* "renpy/pygame/event.pyx":478
+            /* "renpy/pygame/event.pyx":476
  *         poll_sdl()
  * 
  *         if t is None:             # <<<<<<<<<<<<<<
@@ -9354,7 +9286,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
  */
           }
 
-          /* "renpy/pygame/event.pyx":480
+          /* "renpy/pygame/event.pyx":478
  *         if t is None:
  *             return len(event_queue) != 0
  *         elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -9365,7 +9297,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
           __pyx_t_10 = (__pyx_t_11 != 0);
           if (__pyx_t_10) {
 
-            /* "renpy/pygame/event.pyx":481
+            /* "renpy/pygame/event.pyx":479
  *             return len(event_queue) != 0
  *         elif isinstance(t, int):
  *             return has_event(( t, ))             # <<<<<<<<<<<<<<
@@ -9373,19 +9305,19 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
  *             return has_event(t)
  */
             __Pyx_XDECREF(__pyx_r);
-            __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 481, __pyx_L7_error)
+            __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 479, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_INCREF(__pyx_v_t);
             __Pyx_GIVEREF(__pyx_v_t);
             PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_t);
-            __pyx_t_3 = __Pyx_PyBool_FromLong(__pyx_f_5renpy_6pygame_5event_has_event(__pyx_t_1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 481, __pyx_L7_error)
+            __pyx_t_3 = __Pyx_PyBool_FromLong(__pyx_f_5renpy_6pygame_5event_has_event(__pyx_t_1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 479, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
             __pyx_r = __pyx_t_3;
             __pyx_t_3 = 0;
             goto __pyx_L11_try_return;
 
-            /* "renpy/pygame/event.pyx":480
+            /* "renpy/pygame/event.pyx":478
  *         if t is None:
  *             return len(event_queue) != 0
  *         elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -9394,7 +9326,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
  */
           }
 
-          /* "renpy/pygame/event.pyx":483
+          /* "renpy/pygame/event.pyx":481
  *             return has_event(( t, ))
  *         else:
  *             return has_event(t)             # <<<<<<<<<<<<<<
@@ -9403,14 +9335,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
  */
           /*else*/ {
             __Pyx_XDECREF(__pyx_r);
-            __pyx_t_3 = __Pyx_PyBool_FromLong(__pyx_f_5renpy_6pygame_5event_has_event(__pyx_v_t)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 483, __pyx_L7_error)
+            __pyx_t_3 = __Pyx_PyBool_FromLong(__pyx_f_5renpy_6pygame_5event_has_event(__pyx_v_t)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 481, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_3);
             __pyx_r = __pyx_t_3;
             __pyx_t_3 = 0;
             goto __pyx_L11_try_return;
           }
 
-          /* "renpy/pygame/event.pyx":475
+          /* "renpy/pygame/event.pyx":473
  * def peek(t=None):
  * 
  *     with lock:             # <<<<<<<<<<<<<<
@@ -9425,20 +9357,20 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("renpy.pygame.event.peek", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_3, &__pyx_t_1, &__pyx_t_4) < 0) __PYX_ERR(0, 475, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_3, &__pyx_t_1, &__pyx_t_4) < 0) __PYX_ERR(0, 473, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_GOTREF(__pyx_t_1);
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_3, __pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 475, __pyx_L9_except_error)
+          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_3, __pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 473, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_5);
           __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 475, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 473, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_13);
           __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_t_13);
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-          if (__pyx_t_10 < 0) __PYX_ERR(0, 475, __pyx_L9_except_error)
+          if (__pyx_t_10 < 0) __PYX_ERR(0, 473, __pyx_L9_except_error)
           __pyx_t_11 = ((!(__pyx_t_10 != 0)) != 0);
           if (__pyx_t_11) {
             __Pyx_GIVEREF(__pyx_t_3);
@@ -9446,7 +9378,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
             __Pyx_XGIVEREF(__pyx_t_4);
             __Pyx_ErrRestoreWithState(__pyx_t_3, __pyx_t_1, __pyx_t_4);
             __pyx_t_3 = 0; __pyx_t_1 = 0; __pyx_t_4 = 0; 
-            __PYX_ERR(0, 475, __pyx_L9_except_error)
+            __PYX_ERR(0, 473, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -9475,9 +9407,9 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
     /*finally:*/ {
       /*normal exit:*/{
         if (__pyx_t_2) {
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 475, __pyx_L1_error)
+          if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 473, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         }
@@ -9487,9 +9419,9 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
         __pyx_t_8 = __pyx_r;
         __pyx_r = 0;
         if (__pyx_t_2) {
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__7, NULL);
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 475, __pyx_L1_error)
+          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 473, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
@@ -9506,7 +9438,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
     __pyx_L17:;
   }
 
-  /* "renpy/pygame/event.pyx":473
+  /* "renpy/pygame/event.pyx":471
  * 
  * 
  * def peek(t=None):             # <<<<<<<<<<<<<<
@@ -9530,7 +9462,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":486
+/* "renpy/pygame/event.pyx":484
  * 
  * 
  * def clear(t=None):             # <<<<<<<<<<<<<<
@@ -9540,7 +9472,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_8peek(CYTHON_UNUSED PyObject *__
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_11clear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_11clear = {"clear", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_11clear, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_10clear[] = "clear(t=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_11clear = {"clear", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_11clear, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_10clear};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_11clear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_t = 0;
   int __pyx_lineno = 0;
@@ -9571,7 +9504,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_11clear(PyObject *__pyx_self, Py
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "clear") < 0)) __PYX_ERR(0, 486, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "clear") < 0)) __PYX_ERR(0, 484, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -9585,7 +9518,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_11clear(PyObject *__pyx_self, Py
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("clear", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 486, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("clear", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 484, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renpy.pygame.event.clear", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -9609,14 +9542,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_10clear(CYTHON_UNUSED PyObject *
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("clear", 0);
 
-  /* "renpy/pygame/event.pyx":489
+  /* "renpy/pygame/event.pyx":487
  * 
  *     # Clear is implemented in terms of get.
  *     get(t)             # <<<<<<<<<<<<<<
  * 
  * def get_standard_events():
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_get); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 489, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_get); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -9630,12 +9563,12 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_10clear(CYTHON_UNUSED PyObject *
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_t) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_t);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 489, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":486
+  /* "renpy/pygame/event.pyx":484
  * 
  * 
  * def clear(t=None):             # <<<<<<<<<<<<<<
@@ -9658,7 +9591,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_10clear(CYTHON_UNUSED PyObject *
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":491
+/* "renpy/pygame/event.pyx":489
  *     get(t)
  * 
  * def get_standard_events():             # <<<<<<<<<<<<<<
@@ -9668,7 +9601,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_10clear(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_13get_standard_events(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_12get_standard_events[] = "\n    Returns a list of standard events that renpy.pygame knows about.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_12get_standard_events[] = "get_standard_events()\n\n    Returns a list of standard events that renpy.pygame knows about.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_13get_standard_events = {"get_standard_events", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_13get_standard_events, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_12get_standard_events};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_13get_standard_events(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -9682,25 +9615,23 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_13get_standard_events(PyObject *
 }
 
 static PyObject *__pyx_pf_5renpy_6pygame_5event_12get_standard_events(CYTHON_UNUSED PyObject *__pyx_self) {
-  PyObject *__pyx_7genexpr__pyx_v_i = NULL;
+  PyObject *__pyx_v_i = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  Py_ssize_t __pyx_t_3;
-  Py_ssize_t __pyx_t_4;
-  int __pyx_t_5;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  Py_ssize_t __pyx_t_5;
+  PyObject *(*__pyx_t_6)(PyObject *);
+  int __pyx_t_7;
   int __pyx_t_8;
-  int __pyx_t_9;
-  int __pyx_t_10;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_standard_events", 0);
 
-  /* "renpy/pygame/event.pyx":496
+  /* "renpy/pygame/event.pyx":494
  *     """
  * 
  *     return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]             # <<<<<<<<<<<<<<
@@ -9708,65 +9639,99 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_12get_standard_events(CYTHON_UNU
  * def event_name(t):
  */
   __Pyx_XDECREF(__pyx_r);
-  { /* enter inner scope */
-    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 496, __pyx_L5_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = 0;
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_event_names); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 496, __pyx_L5_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    if (unlikely(__pyx_t_6 == Py_None)) {
-      PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(0, 496, __pyx_L5_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 494, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_event_names); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 494, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_keys); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 494, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_t_6, 0, __pyx_n_s_keys, (&__pyx_t_4), (&__pyx_t_5)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 496, __pyx_L5_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_XDECREF(__pyx_t_2);
-    __pyx_t_2 = __pyx_t_7;
-    __pyx_t_7 = 0;
-    while (1) {
-      __pyx_t_8 = __Pyx_dict_iter_next(__pyx_t_2, __pyx_t_4, &__pyx_t_3, &__pyx_t_7, NULL, NULL, __pyx_t_5);
-      if (unlikely(__pyx_t_8 == 0)) break;
-      if (unlikely(__pyx_t_8 == -1)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_XDECREF_SET(__pyx_7genexpr__pyx_v_i, __pyx_t_7);
-      __pyx_t_7 = 0;
-      __pyx_t_7 = __Pyx_PyInt_From_SDL_EventType(SDL_USEREVENT); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_6 = PyObject_RichCompare(__pyx_7genexpr__pyx_v_i, __pyx_t_7, Py_LT); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_10 < 0)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (!__pyx_t_10) {
+  }
+  __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 494, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (likely(PyList_CheckExact(__pyx_t_2)) || PyTuple_CheckExact(__pyx_t_2)) {
+    __pyx_t_4 = __pyx_t_2; __Pyx_INCREF(__pyx_t_4); __pyx_t_5 = 0;
+    __pyx_t_6 = NULL;
+  } else {
+    __pyx_t_5 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_6 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 494, __pyx_L1_error)
+  }
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  for (;;) {
+    if (likely(!__pyx_t_6)) {
+      if (likely(PyList_CheckExact(__pyx_t_4))) {
+        if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_4)) break;
+        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_2); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 494, __pyx_L1_error)
+        #else
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 494, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        #endif
       } else {
-        __pyx_t_9 = __pyx_t_10;
-        goto __pyx_L9_bool_binop_done;
+        if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_2); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 494, __pyx_L1_error)
+        #else
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 494, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        #endif
       }
-      __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_USEREVENT_MAX); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_7 = PyObject_RichCompare(__pyx_7genexpr__pyx_v_i, __pyx_t_6, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_10 < 0)) __PYX_ERR(0, 496, __pyx_L5_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_9 = __pyx_t_10;
-      __pyx_L9_bool_binop_done:;
-      if (__pyx_t_9) {
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_7genexpr__pyx_v_i))) __PYX_ERR(0, 496, __pyx_L5_error)
+    } else {
+      __pyx_t_2 = __pyx_t_6(__pyx_t_4);
+      if (unlikely(!__pyx_t_2)) {
+        PyObject* exc_type = PyErr_Occurred();
+        if (exc_type) {
+          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+          else __PYX_ERR(0, 494, __pyx_L1_error)
+        }
+        break;
       }
+      __Pyx_GOTREF(__pyx_t_2);
     }
+    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_2);
+    __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_PyInt_From_SDL_EventType(SDL_USEREVENT); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_i, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 494, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_i); __pyx_7genexpr__pyx_v_i = 0;
-    goto __pyx_L11_exit_scope;
-    __pyx_L5_error:;
-    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_i); __pyx_7genexpr__pyx_v_i = 0;
-    goto __pyx_L1_error;
-    __pyx_L11_exit_scope:;
-  } /* exit inner scope */
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (!__pyx_t_8) {
+    } else {
+      __pyx_t_7 = __pyx_t_8;
+      goto __pyx_L6_bool_binop_done;
+    }
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_USEREVENT_MAX); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_2 = PyObject_RichCompare(__pyx_v_i, __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 494, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_7 = __pyx_t_8;
+    __pyx_L6_bool_binop_done:;
+    if (__pyx_t_7) {
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_v_i))) __PYX_ERR(0, 494, __pyx_L1_error)
+    }
+  }
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":491
+  /* "renpy/pygame/event.pyx":489
  *     get(t)
  * 
  * def get_standard_events():             # <<<<<<<<<<<<<<
@@ -9778,18 +9743,18 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_12get_standard_events(CYTHON_UNU
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("renpy.pygame.event.get_standard_events", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_7genexpr__pyx_v_i);
+  __Pyx_XDECREF(__pyx_v_i);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":498
+/* "renpy/pygame/event.pyx":496
  *     return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]
  * 
  * def event_name(t):             # <<<<<<<<<<<<<<
@@ -9799,7 +9764,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_12get_standard_events(CYTHON_UNU
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_15event_name(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_15event_name = {"event_name", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_15event_name, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_14event_name[] = "event_name(t)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_15event_name = {"event_name", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_15event_name, METH_O, __pyx_doc_5renpy_6pygame_5event_14event_name};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_15event_name(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -9826,7 +9792,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("event_name", 0);
 
-  /* "renpy/pygame/event.pyx":499
+  /* "renpy/pygame/event.pyx":497
  * 
  * def event_name(t):
  *     try:             # <<<<<<<<<<<<<<
@@ -9842,7 +9808,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "renpy/pygame/event.pyx":500
+      /* "renpy/pygame/event.pyx":498
  * def event_name(t):
  *     try:
  *         return event_names[t]             # <<<<<<<<<<<<<<
@@ -9850,16 +9816,16 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
  *         return "UNKNOWN"
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_event_names); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 500, __pyx_L3_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_event_names); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 498, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_4, __pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 500, __pyx_L3_error)
+      __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_4, __pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 498, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_r = __pyx_t_5;
       __pyx_t_5 = 0;
       goto __pyx_L7_try_return;
 
-      /* "renpy/pygame/event.pyx":499
+      /* "renpy/pygame/event.pyx":497
  * 
  * def event_name(t):
  *     try:             # <<<<<<<<<<<<<<
@@ -9871,7 +9837,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "renpy/pygame/event.pyx":501
+    /* "renpy/pygame/event.pyx":499
  *     try:
  *         return event_names[t]
  *     except KeyError:             # <<<<<<<<<<<<<<
@@ -9881,12 +9847,12 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
       __Pyx_AddTraceback("renpy.pygame.event.event_name", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_7) < 0) __PYX_ERR(0, 501, __pyx_L5_except_error)
+      if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_7) < 0) __PYX_ERR(0, 499, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_7);
 
-      /* "renpy/pygame/event.pyx":502
+      /* "renpy/pygame/event.pyx":500
  *         return event_names[t]
  *     except KeyError:
  *         return "UNKNOWN"             # <<<<<<<<<<<<<<
@@ -9894,8 +9860,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
  * def set_blocked(t=None):
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_INCREF(__pyx_n_u_UNKNOWN);
-      __pyx_r = __pyx_n_u_UNKNOWN;
+      __Pyx_INCREF(__pyx_n_s_UNKNOWN);
+      __pyx_r = __pyx_n_s_UNKNOWN;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -9904,7 +9870,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
     goto __pyx_L5_except_error;
     __pyx_L5_except_error:;
 
-    /* "renpy/pygame/event.pyx":499
+    /* "renpy/pygame/event.pyx":497
  * 
  * def event_name(t):
  *     try:             # <<<<<<<<<<<<<<
@@ -9930,7 +9896,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
     goto __pyx_L0;
   }
 
-  /* "renpy/pygame/event.pyx":498
+  /* "renpy/pygame/event.pyx":496
  *     return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]
  * 
  * def event_name(t):             # <<<<<<<<<<<<<<
@@ -9951,7 +9917,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":504
+/* "renpy/pygame/event.pyx":502
  *         return "UNKNOWN"
  * 
  * def set_blocked(t=None):             # <<<<<<<<<<<<<<
@@ -9961,7 +9927,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_14event_name(CYTHON_UNUSED PyObj
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_17set_blocked(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_17set_blocked = {"set_blocked", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_17set_blocked, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_16set_blocked[] = "set_blocked(t=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_17set_blocked = {"set_blocked", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_17set_blocked, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_16set_blocked};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_17set_blocked(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_t = 0;
   int __pyx_lineno = 0;
@@ -9992,7 +9959,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_17set_blocked(PyObject *__pyx_se
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_blocked") < 0)) __PYX_ERR(0, 504, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_blocked") < 0)) __PYX_ERR(0, 502, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -10006,7 +9973,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_17set_blocked(PyObject *__pyx_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("set_blocked", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 504, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("set_blocked", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 502, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renpy.pygame.event.set_blocked", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -10025,73 +9992,120 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   int __pyx_t_2;
-  Py_ssize_t __pyx_t_3;
-  Py_ssize_t __pyx_t_4;
-  int __pyx_t_5;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  Py_ssize_t __pyx_t_5;
+  PyObject *(*__pyx_t_6)(PyObject *);
+  Uint32 __pyx_t_7;
   int __pyx_t_8;
-  Uint32 __pyx_t_9;
-  int __pyx_t_10;
-  PyObject *(*__pyx_t_11)(PyObject *);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_blocked", 0);
 
-  /* "renpy/pygame/event.pyx":505
+  /* "renpy/pygame/event.pyx":503
  * 
  * def set_blocked(t=None):
  *     if t == None:             # <<<<<<<<<<<<<<
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_ENABLE)
  */
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_t, Py_None, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 505, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 505, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_t, Py_None, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 503, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 503, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_2) {
 
-    /* "renpy/pygame/event.pyx":506
+    /* "renpy/pygame/event.pyx":504
  * def set_blocked(t=None):
  *     if t == None:
  *         for et in event_names.keys():             # <<<<<<<<<<<<<<
  *             SDL_EventState(et, SDL_ENABLE)
  *     elif isinstance(t, int):
  */
-    __pyx_t_3 = 0;
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_event_names); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 506, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    if (unlikely(__pyx_t_6 == Py_None)) {
-      PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(0, 506, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_event_names); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 504, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_keys); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 504, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_3 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+      if (likely(__pyx_t_3)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        __Pyx_INCREF(__pyx_t_3);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_4, function);
+      }
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_t_6, 0, __pyx_n_s_keys, (&__pyx_t_4), (&__pyx_t_5)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 506, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_XDECREF(__pyx_t_1);
-    __pyx_t_1 = __pyx_t_7;
-    __pyx_t_7 = 0;
-    while (1) {
-      __pyx_t_8 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_4, &__pyx_t_3, &__pyx_t_7, NULL, NULL, __pyx_t_5);
-      if (unlikely(__pyx_t_8 == 0)) break;
-      if (unlikely(__pyx_t_8 == -1)) __PYX_ERR(0, 506, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_7);
-      __pyx_t_7 = 0;
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 504, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
+      __pyx_t_4 = __pyx_t_1; __Pyx_INCREF(__pyx_t_4); __pyx_t_5 = 0;
+      __pyx_t_6 = NULL;
+    } else {
+      __pyx_t_5 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 504, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_6 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 504, __pyx_L1_error)
+    }
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    for (;;) {
+      if (likely(!__pyx_t_6)) {
+        if (likely(PyList_CheckExact(__pyx_t_4))) {
+          if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_4)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 504, __pyx_L1_error)
+          #else
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 504, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          #endif
+        } else {
+          if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 504, __pyx_L1_error)
+          #else
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 504, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          #endif
+        }
+      } else {
+        __pyx_t_1 = __pyx_t_6(__pyx_t_4);
+        if (unlikely(!__pyx_t_1)) {
+          PyObject* exc_type = PyErr_Occurred();
+          if (exc_type) {
+            if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+            else __PYX_ERR(0, 504, __pyx_L1_error)
+          }
+          break;
+        }
+        __Pyx_GOTREF(__pyx_t_1);
+      }
+      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_1);
+      __pyx_t_1 = 0;
 
-      /* "renpy/pygame/event.pyx":507
+      /* "renpy/pygame/event.pyx":505
  *     if t == None:
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_ENABLE)             # <<<<<<<<<<<<<<
  *     elif isinstance(t, int):
  *         SDL_EventState(t, SDL_IGNORE)
  */
-      __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 507, __pyx_L1_error)
-      (void)(SDL_EventState(__pyx_t_9, SDL_ENABLE));
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L1_error)
+      (void)(SDL_EventState(__pyx_t_7, SDL_ENABLE));
 
-    /* "renpy/pygame/event.pyx":505
+      /* "renpy/pygame/event.pyx":504
+ * def set_blocked(t=None):
+ *     if t == None:
+ *         for et in event_names.keys():             # <<<<<<<<<<<<<<
+ *             SDL_EventState(et, SDL_ENABLE)
+ *     elif isinstance(t, int):
+ */
+    }
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+    /* "renpy/pygame/event.pyx":503
  * 
  * def set_blocked(t=None):
  *     if t == None:             # <<<<<<<<<<<<<<
@@ -10101,7 +10115,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
     goto __pyx_L3;
   }
 
-  /* "renpy/pygame/event.pyx":508
+  /* "renpy/pygame/event.pyx":506
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_ENABLE)
  *     elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -10109,20 +10123,20 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
  *     else:
  */
   __pyx_t_2 = PyInt_Check(__pyx_v_t); 
-  __pyx_t_10 = (__pyx_t_2 != 0);
-  if (__pyx_t_10) {
+  __pyx_t_8 = (__pyx_t_2 != 0);
+  if (__pyx_t_8) {
 
-    /* "renpy/pygame/event.pyx":509
+    /* "renpy/pygame/event.pyx":507
  *             SDL_EventState(et, SDL_ENABLE)
  *     elif isinstance(t, int):
  *         SDL_EventState(t, SDL_IGNORE)             # <<<<<<<<<<<<<<
  *     else:
  *         for et in t:
  */
-    __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 509, __pyx_L1_error)
-    (void)(SDL_EventState(__pyx_t_9, SDL_IGNORE));
+    __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 507, __pyx_L1_error)
+    (void)(SDL_EventState(__pyx_t_7, SDL_IGNORE));
 
-    /* "renpy/pygame/event.pyx":508
+    /* "renpy/pygame/event.pyx":506
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_ENABLE)
  *     elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -10132,7 +10146,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
     goto __pyx_L3;
   }
 
-  /* "renpy/pygame/event.pyx":511
+  /* "renpy/pygame/event.pyx":509
  *         SDL_EventState(t, SDL_IGNORE)
  *     else:
  *         for et in t:             # <<<<<<<<<<<<<<
@@ -10141,58 +10155,58 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
  */
   /*else*/ {
     if (likely(PyList_CheckExact(__pyx_v_t)) || PyTuple_CheckExact(__pyx_v_t)) {
-      __pyx_t_1 = __pyx_v_t; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
-      __pyx_t_11 = NULL;
+      __pyx_t_4 = __pyx_v_t; __Pyx_INCREF(__pyx_t_4); __pyx_t_5 = 0;
+      __pyx_t_6 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 511, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_11 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 511, __pyx_L1_error)
+      __pyx_t_5 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 509, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_6 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 509, __pyx_L1_error)
     }
     for (;;) {
-      if (likely(!__pyx_t_11)) {
-        if (likely(PyList_CheckExact(__pyx_t_1))) {
-          if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
+      if (likely(!__pyx_t_6)) {
+        if (likely(PyList_CheckExact(__pyx_t_4))) {
+          if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_7 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_7); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 511, __pyx_L1_error)
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 509, __pyx_L1_error)
           #else
-          __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 511, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 509, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
           #endif
         } else {
-          if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_7); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 511, __pyx_L1_error)
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 509, __pyx_L1_error)
           #else
-          __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 511, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 509, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
           #endif
         }
       } else {
-        __pyx_t_7 = __pyx_t_11(__pyx_t_1);
-        if (unlikely(!__pyx_t_7)) {
+        __pyx_t_1 = __pyx_t_6(__pyx_t_4);
+        if (unlikely(!__pyx_t_1)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 511, __pyx_L1_error)
+            else __PYX_ERR(0, 509, __pyx_L1_error)
           }
           break;
         }
-        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_GOTREF(__pyx_t_1);
       }
-      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_7);
-      __pyx_t_7 = 0;
+      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_1);
+      __pyx_t_1 = 0;
 
-      /* "renpy/pygame/event.pyx":512
+      /* "renpy/pygame/event.pyx":510
  *     else:
  *         for et in t:
  *             SDL_EventState(et, SDL_IGNORE)             # <<<<<<<<<<<<<<
  * 
  * def set_allowed(t=None):
  */
-      __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 512, __pyx_L1_error)
-      (void)(SDL_EventState(__pyx_t_9, SDL_IGNORE));
+      __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 510, __pyx_L1_error)
+      (void)(SDL_EventState(__pyx_t_7, SDL_IGNORE));
 
-      /* "renpy/pygame/event.pyx":511
+      /* "renpy/pygame/event.pyx":509
  *         SDL_EventState(t, SDL_IGNORE)
  *     else:
  *         for et in t:             # <<<<<<<<<<<<<<
@@ -10200,11 +10214,11 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
  * 
  */
     }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_L3:;
 
-  /* "renpy/pygame/event.pyx":504
+  /* "renpy/pygame/event.pyx":502
  *         return "UNKNOWN"
  * 
  * def set_blocked(t=None):             # <<<<<<<<<<<<<<
@@ -10217,8 +10231,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("renpy.pygame.event.set_blocked", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -10228,7 +10242,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":514
+/* "renpy/pygame/event.pyx":512
  *             SDL_EventState(et, SDL_IGNORE)
  * 
  * def set_allowed(t=None):             # <<<<<<<<<<<<<<
@@ -10238,7 +10252,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_16set_blocked(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_19set_allowed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_19set_allowed = {"set_allowed", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_19set_allowed, METH_VARARGS|METH_KEYWORDS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_18set_allowed[] = "set_allowed(t=None)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_19set_allowed = {"set_allowed", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5renpy_6pygame_5event_19set_allowed, METH_VARARGS|METH_KEYWORDS, __pyx_doc_5renpy_6pygame_5event_18set_allowed};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_19set_allowed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_t = 0;
   int __pyx_lineno = 0;
@@ -10269,7 +10284,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_19set_allowed(PyObject *__pyx_se
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_allowed") < 0)) __PYX_ERR(0, 514, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_allowed") < 0)) __PYX_ERR(0, 512, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -10283,7 +10298,7 @@ static PyObject *__pyx_pw_5renpy_6pygame_5event_19set_allowed(PyObject *__pyx_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("set_allowed", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 514, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("set_allowed", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 512, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renpy.pygame.event.set_allowed", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -10302,73 +10317,120 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   int __pyx_t_2;
-  Py_ssize_t __pyx_t_3;
-  Py_ssize_t __pyx_t_4;
-  int __pyx_t_5;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  Py_ssize_t __pyx_t_5;
+  PyObject *(*__pyx_t_6)(PyObject *);
+  Uint32 __pyx_t_7;
   int __pyx_t_8;
-  Uint32 __pyx_t_9;
-  int __pyx_t_10;
-  PyObject *(*__pyx_t_11)(PyObject *);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_allowed", 0);
 
-  /* "renpy/pygame/event.pyx":515
+  /* "renpy/pygame/event.pyx":513
  * 
  * def set_allowed(t=None):
  *     if t == None:             # <<<<<<<<<<<<<<
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_IGNORE)
  */
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_t, Py_None, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 515, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 515, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_t, Py_None, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 513, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 513, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_2) {
 
-    /* "renpy/pygame/event.pyx":516
+    /* "renpy/pygame/event.pyx":514
  * def set_allowed(t=None):
  *     if t == None:
  *         for et in event_names.keys():             # <<<<<<<<<<<<<<
  *             SDL_EventState(et, SDL_IGNORE)
  *     elif isinstance(t, int):
  */
-    __pyx_t_3 = 0;
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_event_names); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 516, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    if (unlikely(__pyx_t_6 == Py_None)) {
-      PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(0, 516, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_event_names); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 514, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_keys); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 514, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_3 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+      if (likely(__pyx_t_3)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        __Pyx_INCREF(__pyx_t_3);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_4, function);
+      }
     }
-    __pyx_t_7 = __Pyx_dict_iterator(__pyx_t_6, 0, __pyx_n_s_keys, (&__pyx_t_4), (&__pyx_t_5)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 516, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_XDECREF(__pyx_t_1);
-    __pyx_t_1 = __pyx_t_7;
-    __pyx_t_7 = 0;
-    while (1) {
-      __pyx_t_8 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_4, &__pyx_t_3, &__pyx_t_7, NULL, NULL, __pyx_t_5);
-      if (unlikely(__pyx_t_8 == 0)) break;
-      if (unlikely(__pyx_t_8 == -1)) __PYX_ERR(0, 516, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_7);
-      __pyx_t_7 = 0;
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 514, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
+      __pyx_t_4 = __pyx_t_1; __Pyx_INCREF(__pyx_t_4); __pyx_t_5 = 0;
+      __pyx_t_6 = NULL;
+    } else {
+      __pyx_t_5 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 514, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_6 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 514, __pyx_L1_error)
+    }
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    for (;;) {
+      if (likely(!__pyx_t_6)) {
+        if (likely(PyList_CheckExact(__pyx_t_4))) {
+          if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_4)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 514, __pyx_L1_error)
+          #else
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 514, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          #endif
+        } else {
+          if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 514, __pyx_L1_error)
+          #else
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 514, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          #endif
+        }
+      } else {
+        __pyx_t_1 = __pyx_t_6(__pyx_t_4);
+        if (unlikely(!__pyx_t_1)) {
+          PyObject* exc_type = PyErr_Occurred();
+          if (exc_type) {
+            if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+            else __PYX_ERR(0, 514, __pyx_L1_error)
+          }
+          break;
+        }
+        __Pyx_GOTREF(__pyx_t_1);
+      }
+      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_1);
+      __pyx_t_1 = 0;
 
-      /* "renpy/pygame/event.pyx":517
+      /* "renpy/pygame/event.pyx":515
  *     if t == None:
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_IGNORE)             # <<<<<<<<<<<<<<
  *     elif isinstance(t, int):
  *         SDL_EventState(t, SDL_ENABLE)
  */
-      __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 517, __pyx_L1_error)
-      (void)(SDL_EventState(__pyx_t_9, SDL_IGNORE));
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 515, __pyx_L1_error)
+      (void)(SDL_EventState(__pyx_t_7, SDL_IGNORE));
 
-    /* "renpy/pygame/event.pyx":515
+      /* "renpy/pygame/event.pyx":514
+ * def set_allowed(t=None):
+ *     if t == None:
+ *         for et in event_names.keys():             # <<<<<<<<<<<<<<
+ *             SDL_EventState(et, SDL_IGNORE)
+ *     elif isinstance(t, int):
+ */
+    }
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+    /* "renpy/pygame/event.pyx":513
  * 
  * def set_allowed(t=None):
  *     if t == None:             # <<<<<<<<<<<<<<
@@ -10378,7 +10440,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
     goto __pyx_L3;
   }
 
-  /* "renpy/pygame/event.pyx":518
+  /* "renpy/pygame/event.pyx":516
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_IGNORE)
  *     elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -10386,20 +10448,20 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
  *     else:
  */
   __pyx_t_2 = PyInt_Check(__pyx_v_t); 
-  __pyx_t_10 = (__pyx_t_2 != 0);
-  if (__pyx_t_10) {
+  __pyx_t_8 = (__pyx_t_2 != 0);
+  if (__pyx_t_8) {
 
-    /* "renpy/pygame/event.pyx":519
+    /* "renpy/pygame/event.pyx":517
  *             SDL_EventState(et, SDL_IGNORE)
  *     elif isinstance(t, int):
  *         SDL_EventState(t, SDL_ENABLE)             # <<<<<<<<<<<<<<
  *     else:
  *         for et in t:
  */
-    __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 519, __pyx_L1_error)
-    (void)(SDL_EventState(__pyx_t_9, SDL_ENABLE));
+    __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 517, __pyx_L1_error)
+    (void)(SDL_EventState(__pyx_t_7, SDL_ENABLE));
 
-    /* "renpy/pygame/event.pyx":518
+    /* "renpy/pygame/event.pyx":516
  *         for et in event_names.keys():
  *             SDL_EventState(et, SDL_IGNORE)
  *     elif isinstance(t, int):             # <<<<<<<<<<<<<<
@@ -10409,7 +10471,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
     goto __pyx_L3;
   }
 
-  /* "renpy/pygame/event.pyx":521
+  /* "renpy/pygame/event.pyx":519
  *         SDL_EventState(t, SDL_ENABLE)
  *     else:
  *         for et in t:             # <<<<<<<<<<<<<<
@@ -10418,58 +10480,58 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
  */
   /*else*/ {
     if (likely(PyList_CheckExact(__pyx_v_t)) || PyTuple_CheckExact(__pyx_v_t)) {
-      __pyx_t_1 = __pyx_v_t; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
-      __pyx_t_11 = NULL;
+      __pyx_t_4 = __pyx_v_t; __Pyx_INCREF(__pyx_t_4); __pyx_t_5 = 0;
+      __pyx_t_6 = NULL;
     } else {
-      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 521, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_11 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 521, __pyx_L1_error)
+      __pyx_t_5 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_6 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 519, __pyx_L1_error)
     }
     for (;;) {
-      if (likely(!__pyx_t_11)) {
-        if (likely(PyList_CheckExact(__pyx_t_1))) {
-          if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
+      if (likely(!__pyx_t_6)) {
+        if (likely(PyList_CheckExact(__pyx_t_4))) {
+          if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_7 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_7); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 521, __pyx_L1_error)
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 519, __pyx_L1_error)
           #else
-          __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 521, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
           #endif
         } else {
-          if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_7); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 521, __pyx_L1_error)
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 519, __pyx_L1_error)
           #else
-          __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 521, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_7);
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
           #endif
         }
       } else {
-        __pyx_t_7 = __pyx_t_11(__pyx_t_1);
-        if (unlikely(!__pyx_t_7)) {
+        __pyx_t_1 = __pyx_t_6(__pyx_t_4);
+        if (unlikely(!__pyx_t_1)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 521, __pyx_L1_error)
+            else __PYX_ERR(0, 519, __pyx_L1_error)
           }
           break;
         }
-        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_GOTREF(__pyx_t_1);
       }
-      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_7);
-      __pyx_t_7 = 0;
+      __Pyx_XDECREF_SET(__pyx_v_et, __pyx_t_1);
+      __pyx_t_1 = 0;
 
-      /* "renpy/pygame/event.pyx":522
+      /* "renpy/pygame/event.pyx":520
  *     else:
  *         for et in t:
  *             SDL_EventState(et, SDL_ENABLE)             # <<<<<<<<<<<<<<
  * 
  * def get_blocked(t):
  */
-      __pyx_t_9 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_9 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 522, __pyx_L1_error)
-      (void)(SDL_EventState(__pyx_t_9, SDL_ENABLE));
+      __pyx_t_7 = __Pyx_PyInt_As_uint32_t(__pyx_v_et); if (unlikely((__pyx_t_7 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 520, __pyx_L1_error)
+      (void)(SDL_EventState(__pyx_t_7, SDL_ENABLE));
 
-      /* "renpy/pygame/event.pyx":521
+      /* "renpy/pygame/event.pyx":519
  *         SDL_EventState(t, SDL_ENABLE)
  *     else:
  *         for et in t:             # <<<<<<<<<<<<<<
@@ -10477,11 +10539,11 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
  * 
  */
     }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_L3:;
 
-  /* "renpy/pygame/event.pyx":514
+  /* "renpy/pygame/event.pyx":512
  *             SDL_EventState(et, SDL_IGNORE)
  * 
  * def set_allowed(t=None):             # <<<<<<<<<<<<<<
@@ -10494,8 +10556,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("renpy.pygame.event.set_allowed", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -10505,7 +10567,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":524
+/* "renpy/pygame/event.pyx":522
  *             SDL_EventState(et, SDL_ENABLE)
  * 
  * def get_blocked(t):             # <<<<<<<<<<<<<<
@@ -10515,7 +10577,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_18set_allowed(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_21get_blocked(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_21get_blocked = {"get_blocked", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_21get_blocked, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_20get_blocked[] = "get_blocked(t)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_21get_blocked = {"get_blocked", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_21get_blocked, METH_O, __pyx_doc_5renpy_6pygame_5event_20get_blocked};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_21get_blocked(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10537,7 +10600,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_20get_blocked(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_blocked", 0);
 
-  /* "renpy/pygame/event.pyx":525
+  /* "renpy/pygame/event.pyx":523
  * 
  * def get_blocked(t):
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE             # <<<<<<<<<<<<<<
@@ -10545,14 +10608,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_20get_blocked(CYTHON_UNUSED PyOb
  * def set_grab(on):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_1 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyBool_FromLong((SDL_EventState(__pyx_t_1, SDL_QUERY) == SDL_IGNORE)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 525, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_uint32_t(__pyx_v_t); if (unlikely((__pyx_t_1 == ((Uint32)-1)) && PyErr_Occurred())) __PYX_ERR(0, 523, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong((SDL_EventState(__pyx_t_1, SDL_QUERY) == SDL_IGNORE)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":524
+  /* "renpy/pygame/event.pyx":522
  *             SDL_EventState(et, SDL_ENABLE)
  * 
  * def get_blocked(t):             # <<<<<<<<<<<<<<
@@ -10571,7 +10634,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_20get_blocked(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":527
+/* "renpy/pygame/event.pyx":525
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  * def set_grab(on):             # <<<<<<<<<<<<<<
@@ -10581,7 +10644,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_20get_blocked(CYTHON_UNUSED PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_23set_grab(PyObject *__pyx_self, PyObject *__pyx_v_on); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_23set_grab = {"set_grab", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_23set_grab, METH_O, 0};
+static char __pyx_doc_5renpy_6pygame_5event_22set_grab[] = "set_grab(on)";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_23set_grab = {"set_grab", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_23set_grab, METH_O, __pyx_doc_5renpy_6pygame_5event_22set_grab};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_23set_grab(PyObject *__pyx_self, PyObject *__pyx_v_on) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10605,7 +10669,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_grab", 0);
 
-  /* "renpy/pygame/event.pyx":528
+  /* "renpy/pygame/event.pyx":526
  * 
  * def set_grab(on):
  *     if main_window is None or main_window.window == NULL:             # <<<<<<<<<<<<<<
@@ -10624,7 +10688,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "renpy/pygame/event.pyx":529
+    /* "renpy/pygame/event.pyx":527
  * def set_grab(on):
  *     if main_window is None or main_window.window == NULL:
  *         return             # <<<<<<<<<<<<<<
@@ -10635,7 +10699,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "renpy/pygame/event.pyx":528
+    /* "renpy/pygame/event.pyx":526
  * 
  * def set_grab(on):
  *     if main_window is None or main_window.window == NULL:             # <<<<<<<<<<<<<<
@@ -10644,17 +10708,17 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
  */
   }
 
-  /* "renpy/pygame/event.pyx":531
+  /* "renpy/pygame/event.pyx":529
  *         return
  * 
  *     SDL_SetWindowGrab(main_window.window, on)             # <<<<<<<<<<<<<<
  * 
  *     if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:
  */
-  __pyx_t_4 = ((SDL_bool)__Pyx_PyInt_As_SDL_bool(__pyx_v_on)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 531, __pyx_L1_error)
+  __pyx_t_4 = ((SDL_bool)__Pyx_PyInt_As_SDL_bool(__pyx_v_on)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 529, __pyx_L1_error)
   SDL_SetWindowGrab(__pyx_v_5renpy_6pygame_7display_main_window->window, __pyx_t_4);
 
-  /* "renpy/pygame/event.pyx":533
+  /* "renpy/pygame/event.pyx":531
  *     SDL_SetWindowGrab(main_window.window, on)
  * 
  *     if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:             # <<<<<<<<<<<<<<
@@ -10664,17 +10728,17 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
   __pyx_t_1 = ((SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE) != 0);
   if (__pyx_t_1) {
 
-    /* "renpy/pygame/event.pyx":534
+    /* "renpy/pygame/event.pyx":532
  * 
  *     if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:
  *         SDL_SetRelativeMouseMode(on)             # <<<<<<<<<<<<<<
  * 
  * def get_grab():
  */
-    __pyx_t_4 = ((SDL_bool)__Pyx_PyInt_As_SDL_bool(__pyx_v_on)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 534, __pyx_L1_error)
+    __pyx_t_4 = ((SDL_bool)__Pyx_PyInt_As_SDL_bool(__pyx_v_on)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 532, __pyx_L1_error)
     (void)(SDL_SetRelativeMouseMode(__pyx_t_4));
 
-    /* "renpy/pygame/event.pyx":533
+    /* "renpy/pygame/event.pyx":531
  *     SDL_SetWindowGrab(main_window.window, on)
  * 
  *     if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:             # <<<<<<<<<<<<<<
@@ -10683,7 +10747,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
  */
   }
 
-  /* "renpy/pygame/event.pyx":527
+  /* "renpy/pygame/event.pyx":525
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  * def set_grab(on):             # <<<<<<<<<<<<<<
@@ -10703,7 +10767,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":536
+/* "renpy/pygame/event.pyx":534
  *         SDL_SetRelativeMouseMode(on)
  * 
  * def get_grab():             # <<<<<<<<<<<<<<
@@ -10713,7 +10777,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_22set_grab(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_25get_grab(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_25get_grab = {"get_grab", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_25get_grab, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_24get_grab[] = "get_grab()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_25get_grab = {"get_grab", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_25get_grab, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_24get_grab};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_25get_grab(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -10737,7 +10802,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_grab", 0);
 
-  /* "renpy/pygame/event.pyx":537
+  /* "renpy/pygame/event.pyx":535
  * 
  * def get_grab():
  *     if main_window is None or main_window.window == NULL:             # <<<<<<<<<<<<<<
@@ -10756,7 +10821,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "renpy/pygame/event.pyx":538
+    /* "renpy/pygame/event.pyx":536
  * def get_grab():
  *     if main_window is None or main_window.window == NULL:
  *         return False             # <<<<<<<<<<<<<<
@@ -10768,7 +10833,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
     __pyx_r = Py_False;
     goto __pyx_L0;
 
-    /* "renpy/pygame/event.pyx":537
+    /* "renpy/pygame/event.pyx":535
  * 
  * def get_grab():
  *     if main_window is None or main_window.window == NULL:             # <<<<<<<<<<<<<<
@@ -10777,7 +10842,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
  */
   }
 
-  /* "renpy/pygame/event.pyx":540
+  /* "renpy/pygame/event.pyx":538
  *         return False
  * 
  *     return SDL_GetWindowGrab(main_window.window)             # <<<<<<<<<<<<<<
@@ -10785,13 +10850,13 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
  * def set_mousewheel_buttons(flag):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyInt_From_SDL_bool(SDL_GetWindowGrab(__pyx_v_5renpy_6pygame_7display_main_window->window)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_SDL_bool(SDL_GetWindowGrab(__pyx_v_5renpy_6pygame_7display_main_window->window)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 538, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":536
+  /* "renpy/pygame/event.pyx":534
  *         SDL_SetRelativeMouseMode(on)
  * 
  * def get_grab():             # <<<<<<<<<<<<<<
@@ -10810,7 +10875,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":542
+/* "renpy/pygame/event.pyx":540
  *     return SDL_GetWindowGrab(main_window.window)
  * 
  * def set_mousewheel_buttons(flag):             # <<<<<<<<<<<<<<
@@ -10820,7 +10885,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_24get_grab(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_27set_mousewheel_buttons(PyObject *__pyx_self, PyObject *__pyx_v_flag); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_26set_mousewheel_buttons[] = "\n    If true (the default), the mousewheel will generate events involving\n    mouse buttons 4 and 5, and mousebuttons 4 and higher will be mapped to 6 and higher.\n\n    If false, MOUSEWHEEL events are generated, and the mousebuttons are\n    not remapped.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_26set_mousewheel_buttons[] = "set_mousewheel_buttons(flag)\n\n    If true (the default), the mousewheel will generate events involving\n    mouse buttons 4 and 5, and mousebuttons 4 and higher will be mapped to 6 and higher.\n\n    If false, MOUSEWHEEL events are generated, and the mousebuttons are\n    not remapped.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_27set_mousewheel_buttons = {"set_mousewheel_buttons", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_27set_mousewheel_buttons, METH_O, __pyx_doc_5renpy_6pygame_5event_26set_mousewheel_buttons};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_27set_mousewheel_buttons(PyObject *__pyx_self, PyObject *__pyx_v_flag) {
   PyObject *__pyx_r = 0;
@@ -10842,17 +10907,17 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_26set_mousewheel_buttons(CYTHON_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_mousewheel_buttons", 0);
 
-  /* "renpy/pygame/event.pyx":552
+  /* "renpy/pygame/event.pyx":550
  * 
  *     global mousewheel_buttons
  *     mousewheel_buttons = flag             # <<<<<<<<<<<<<<
  * 
  * def get_mousewheel_buttons():
  */
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_flag); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 552, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_flag); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 550, __pyx_L1_error)
   __pyx_v_5renpy_6pygame_5event_mousewheel_buttons = __pyx_t_1;
 
-  /* "renpy/pygame/event.pyx":542
+  /* "renpy/pygame/event.pyx":540
  *     return SDL_GetWindowGrab(main_window.window)
  * 
  * def set_mousewheel_buttons(flag):             # <<<<<<<<<<<<<<
@@ -10872,7 +10937,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_26set_mousewheel_buttons(CYTHON_
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":554
+/* "renpy/pygame/event.pyx":552
  *     mousewheel_buttons = flag
  * 
  * def get_mousewheel_buttons():             # <<<<<<<<<<<<<<
@@ -10882,7 +10947,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_26set_mousewheel_buttons(CYTHON_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_29get_mousewheel_buttons(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_28get_mousewheel_buttons[] = "\n    Returns the value set by mousehweel buttons,.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_28get_mousewheel_buttons[] = "get_mousewheel_buttons()\n\n    Returns the value set by mousehweel buttons,.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_29get_mousewheel_buttons = {"get_mousewheel_buttons", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_29get_mousewheel_buttons, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_28get_mousewheel_buttons};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_29get_mousewheel_buttons(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -10904,7 +10969,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_28get_mousewheel_buttons(CYTHON_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_mousewheel_buttons", 0);
 
-  /* "renpy/pygame/event.pyx":559
+  /* "renpy/pygame/event.pyx":557
  *     """
  * 
  *     return mousewheel_buttons             # <<<<<<<<<<<<<<
@@ -10912,13 +10977,13 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_28get_mousewheel_buttons(CYTHON_
  * def post(e):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_5renpy_6pygame_5event_mousewheel_buttons); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 559, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_5renpy_6pygame_5event_mousewheel_buttons); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 557, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":554
+  /* "renpy/pygame/event.pyx":552
  *     mousewheel_buttons = flag
  * 
  * def get_mousewheel_buttons():             # <<<<<<<<<<<<<<
@@ -10937,7 +11002,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_28get_mousewheel_buttons(CYTHON_
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":561
+/* "renpy/pygame/event.pyx":559
  *     return mousewheel_buttons
  * 
  * def post(e):             # <<<<<<<<<<<<<<
@@ -10947,7 +11012,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_28get_mousewheel_buttons(CYTHON_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_31post(PyObject *__pyx_self, PyObject *__pyx_v_e); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_30post[] = "\n    Posts event object `e` to the event queue.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_30post[] = "post(e)\n\n    Posts event object `e` to the event queue.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_31post = {"post", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_31post, METH_O, __pyx_doc_5renpy_6pygame_5event_30post};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_31post(PyObject *__pyx_self, PyObject *__pyx_v_e) {
   PyObject *__pyx_r = 0;
@@ -10975,33 +11040,33 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("post", 0);
 
-  /* "renpy/pygame/event.pyx":568
+  /* "renpy/pygame/event.pyx":566
  *     cdef SDL_Event event;
  * 
  *     if not isinstance(e, EventType):             # <<<<<<<<<<<<<<
  *         raise renpy.pygame.error("event.post must be called with an Event.")
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_EventType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 568, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_EventType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 566, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_e, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 568, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_e, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 566, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_3 = ((!(__pyx_t_2 != 0)) != 0);
   if (unlikely(__pyx_t_3)) {
 
-    /* "renpy/pygame/event.pyx":569
+    /* "renpy/pygame/event.pyx":567
  * 
  *     if not isinstance(e, EventType):
  *         raise renpy.pygame.error("event.post must be called with an Event.")             # <<<<<<<<<<<<<<
  * 
  *     if get_blocked(e.type):
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_renpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 569, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_renpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 567, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_pygame); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 569, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_pygame); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 567, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 569, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 567, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -11014,16 +11079,16 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
         __Pyx_DECREF_SET(__pyx_t_4, function);
       }
     }
-    __pyx_t_1 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_u_event_post_must_be_called_with_a) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_u_event_post_must_be_called_with_a);
+    __pyx_t_1 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_kp_s_event_post_must_be_called_with_a) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_kp_s_event_post_must_be_called_with_a);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 569, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 567, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 569, __pyx_L1_error)
+    __PYX_ERR(0, 567, __pyx_L1_error)
 
-    /* "renpy/pygame/event.pyx":568
+    /* "renpy/pygame/event.pyx":566
  *     cdef SDL_Event event;
  * 
  *     if not isinstance(e, EventType):             # <<<<<<<<<<<<<<
@@ -11032,16 +11097,16 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   }
 
-  /* "renpy/pygame/event.pyx":571
+  /* "renpy/pygame/event.pyx":569
  *         raise renpy.pygame.error("event.post must be called with an Event.")
  * 
  *     if get_blocked(e.type):             # <<<<<<<<<<<<<<
  *         return
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_get_blocked); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 571, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_get_blocked); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 569, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_type); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 571, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_type); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 569, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_6 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -11056,14 +11121,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
   __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_6, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 571, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 569, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 571, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 569, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_3) {
 
-    /* "renpy/pygame/event.pyx":572
+    /* "renpy/pygame/event.pyx":570
  * 
  *     if get_blocked(e.type):
  *         return             # <<<<<<<<<<<<<<
@@ -11074,7 +11139,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "renpy/pygame/event.pyx":571
+    /* "renpy/pygame/event.pyx":569
  *         raise renpy.pygame.error("event.post must be called with an Event.")
  * 
  *     if get_blocked(e.type):             # <<<<<<<<<<<<<<
@@ -11083,7 +11148,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   }
 
-  /* "renpy/pygame/event.pyx":574
+  /* "renpy/pygame/event.pyx":572
  *         return
  * 
  *     Py_INCREF(e)             # <<<<<<<<<<<<<<
@@ -11092,7 +11157,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   Py_INCREF(__pyx_v_e);
 
-  /* "renpy/pygame/event.pyx":576
+  /* "renpy/pygame/event.pyx":574
  *     Py_INCREF(e)
  * 
  *     event.type = POSTEDEVENT             # <<<<<<<<<<<<<<
@@ -11101,7 +11166,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   __pyx_v_event.type = __pyx_v_5renpy_6pygame_5event_POSTEDEVENT;
 
-  /* "renpy/pygame/event.pyx":577
+  /* "renpy/pygame/event.pyx":575
  * 
  *     event.type = POSTEDEVENT
  *     event.user.data1 = <void *> e             # <<<<<<<<<<<<<<
@@ -11110,7 +11175,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   __pyx_v_event.user.data1 = ((void *)__pyx_v_e);
 
-  /* "renpy/pygame/event.pyx":579
+  /* "renpy/pygame/event.pyx":577
  *     event.user.data1 = <void *> e
  * 
  *     SDL_PushEvent(&event)             # <<<<<<<<<<<<<<
@@ -11119,7 +11184,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
  */
   (void)(SDL_PushEvent((&__pyx_v_event)));
 
-  /* "renpy/pygame/event.pyx":561
+  /* "renpy/pygame/event.pyx":559
  *     return mousewheel_buttons
  * 
  * def post(e):             # <<<<<<<<<<<<<<
@@ -11143,7 +11208,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":581
+/* "renpy/pygame/event.pyx":579
  *     SDL_PushEvent(&event)
  * 
  * def register(name):             # <<<<<<<<<<<<<<
@@ -11153,7 +11218,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_30post(CYTHON_UNUSED PyObject *_
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_33register(PyObject *__pyx_self, PyObject *__pyx_v_name); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_32register[] = "\n    Registers a unique event number and returns that number.\n\n    `name`\n        A string name for the event. This is used when calling `repr` on\n        the event.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_32register[] = "register(name)\n\n    Registers a unique event number and returns that number.\n\n    `name`\n        A string name for the event. This is used when calling `repr` on\n        the event.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_33register = {"register", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_33register, METH_O, __pyx_doc_5renpy_6pygame_5event_32register};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_33register(PyObject *__pyx_self, PyObject *__pyx_v_name) {
   PyObject *__pyx_r = 0;
@@ -11176,7 +11241,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_32register(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("register", 0);
 
-  /* "renpy/pygame/event.pyx":590
+  /* "renpy/pygame/event.pyx":588
  *     """
  * 
  *     rv = SDL_RegisterEvents(1)             # <<<<<<<<<<<<<<
@@ -11185,19 +11250,19 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_32register(CYTHON_UNUSED PyObjec
  */
   __pyx_v_rv = SDL_RegisterEvents(1);
 
-  /* "renpy/pygame/event.pyx":592
+  /* "renpy/pygame/event.pyx":590
  *     rv = SDL_RegisterEvents(1)
  * 
  *     event_names[rv] = name             # <<<<<<<<<<<<<<
  *     return rv
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_event_names); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 592, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_event_names); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(__Pyx_SetItemInt(__pyx_t_1, __pyx_v_rv, __pyx_v_name, Uint32, 0, __Pyx_PyInt_From_uint32_t, 0, 0, 1) < 0)) __PYX_ERR(0, 592, __pyx_L1_error)
+  if (unlikely(__Pyx_SetItemInt(__pyx_t_1, __pyx_v_rv, __pyx_v_name, Uint32, 0, __Pyx_PyInt_From_uint32_t, 0, 0, 1) < 0)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":593
+  /* "renpy/pygame/event.pyx":591
  * 
  *     event_names[rv] = name
  *     return rv             # <<<<<<<<<<<<<<
@@ -11205,13 +11270,13 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_32register(CYTHON_UNUSED PyObjec
  * def copy_event_queue():
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_uint32_t(__pyx_v_rv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_uint32_t(__pyx_v_rv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":581
+  /* "renpy/pygame/event.pyx":579
  *     SDL_PushEvent(&event)
  * 
  * def register(name):             # <<<<<<<<<<<<<<
@@ -11230,7 +11295,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_32register(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":595
+/* "renpy/pygame/event.pyx":593
  *     return rv
  * 
  * def copy_event_queue():             # <<<<<<<<<<<<<<
@@ -11240,7 +11305,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_32register(CYTHON_UNUSED PyObjec
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_35copy_event_queue(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_5renpy_6pygame_5event_34copy_event_queue[] = "\n    Returns a copy of the event queue. The copy cannot be used for modifying\n    the event queue.\n    ";
+static char __pyx_doc_5renpy_6pygame_5event_34copy_event_queue[] = "copy_event_queue()\n\n    Returns a copy of the event queue. The copy cannot be used for modifying\n    the event queue.\n    ";
 static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_35copy_event_queue = {"copy_event_queue", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_35copy_event_queue, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_34copy_event_queue};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_35copy_event_queue(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
@@ -11262,7 +11327,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_34copy_event_queue(CYTHON_UNUSED
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("copy_event_queue", 0);
 
-  /* "renpy/pygame/event.pyx":601
+  /* "renpy/pygame/event.pyx":599
  *     """
  * 
  *     return event_queue[:]             # <<<<<<<<<<<<<<
@@ -11270,13 +11335,13 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_34copy_event_queue(CYTHON_UNUSED
  * # Usually called by display.init.
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetSlice(event_queue, 0, 0, NULL, NULL, &__pyx_slice__8, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 601, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetSlice(event_queue, 0, 0, NULL, NULL, &__pyx_slice__4, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 599, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renpy/pygame/event.pyx":595
+  /* "renpy/pygame/event.pyx":593
  *     return rv
  * 
  * def copy_event_queue():             # <<<<<<<<<<<<<<
@@ -11295,7 +11360,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_34copy_event_queue(CYTHON_UNUSED
   return __pyx_r;
 }
 
-/* "renpy/pygame/event.pyx":604
+/* "renpy/pygame/event.pyx":602
  * 
  * # Usually called by display.init.
  * def init():             # <<<<<<<<<<<<<<
@@ -11305,7 +11370,8 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_34copy_event_queue(CYTHON_UNUSED
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5renpy_6pygame_5event_37init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_37init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_37init, METH_NOARGS, 0};
+static char __pyx_doc_5renpy_6pygame_5event_36init[] = "init()";
+static PyMethodDef __pyx_mdef_5renpy_6pygame_5event_37init = {"init", (PyCFunction)__pyx_pw_5renpy_6pygame_5event_37init, METH_NOARGS, __pyx_doc_5renpy_6pygame_5event_36init};
 static PyObject *__pyx_pw_5renpy_6pygame_5event_37init(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -11329,7 +11395,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("init", 0);
 
-  /* "renpy/pygame/event.pyx":605
+  /* "renpy/pygame/event.pyx":603
  * # Usually called by display.init.
  * def init():
  *     if not SDL_WasInit(SDL_INIT_EVENTS):             # <<<<<<<<<<<<<<
@@ -11339,22 +11405,22 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
   __pyx_t_1 = ((!(SDL_WasInit(SDL_INIT_EVENTS) != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "renpy/pygame/event.pyx":607
+    /* "renpy/pygame/event.pyx":605
  *     if not SDL_WasInit(SDL_INIT_EVENTS):
  * 
  *         renpy.pygame.display.sdl_main_init()             # <<<<<<<<<<<<<<
  * 
  *         if SDL_InitSubSystem(SDL_INIT_EVENTS):
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_renpy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 607, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_renpy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 605, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_pygame); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 607, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_pygame); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 605, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_display); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 607, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_display); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 605, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sdl_main_init); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 607, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_sdl_main_init); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 605, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_3 = NULL;
@@ -11369,12 +11435,12 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
     }
     __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 607, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 605, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renpy/pygame/event.pyx":609
+    /* "renpy/pygame/event.pyx":607
  *         renpy.pygame.display.sdl_main_init()
  * 
  *         if SDL_InitSubSystem(SDL_INIT_EVENTS):             # <<<<<<<<<<<<<<
@@ -11383,20 +11449,20 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
     __pyx_t_1 = (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0);
     if (unlikely(__pyx_t_1)) {
 
-      /* "renpy/pygame/event.pyx":610
+      /* "renpy/pygame/event.pyx":608
  * 
  *         if SDL_InitSubSystem(SDL_INIT_EVENTS):
  *             raise renpy.pygame.error.error()             # <<<<<<<<<<<<<<
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_renpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 610, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_renpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_pygame); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 610, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_pygame); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 610, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 610, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_t_4 = NULL;
@@ -11411,14 +11477,14 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
       }
       __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 610, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 608, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_Raise(__pyx_t_2, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __PYX_ERR(0, 610, __pyx_L1_error)
+      __PYX_ERR(0, 608, __pyx_L1_error)
 
-      /* "renpy/pygame/event.pyx":609
+      /* "renpy/pygame/event.pyx":607
  *         renpy.pygame.display.sdl_main_init()
  * 
  *         if SDL_InitSubSystem(SDL_INIT_EVENTS):             # <<<<<<<<<<<<<<
@@ -11426,7 +11492,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
  */
     }
 
-    /* "renpy/pygame/event.pyx":605
+    /* "renpy/pygame/event.pyx":603
  * # Usually called by display.init.
  * def init():
  *     if not SDL_WasInit(SDL_INIT_EVENTS):             # <<<<<<<<<<<<<<
@@ -11435,7 +11501,7 @@ static PyObject *__pyx_pf_5renpy_6pygame_5event_36init(CYTHON_UNUSED PyObject *_
  */
   }
 
-  /* "renpy/pygame/event.pyx":604
+  /* "renpy/pygame/event.pyx":602
  * 
  * # Usually called by display.init.
  * def init():             # <<<<<<<<<<<<<<
@@ -11504,32 +11570,31 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_u_, __pyx_k_, sizeof(__pyx_k_), 0, 1, 0, 0},
+  {&__pyx_kp_s_, __pyx_k_, sizeof(__pyx_k_), 0, 0, 1, 0},
   {&__pyx_n_s_ACTIVEEVENT, __pyx_k_ACTIVEEVENT, sizeof(__pyx_k_ACTIVEEVENT), 0, 0, 1, 1},
-  {&__pyx_n_u_ACTIVEEVENT, __pyx_k_ACTIVEEVENT, sizeof(__pyx_k_ACTIVEEVENT), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_DIDENTERBACKGROUND, __pyx_k_APP_DIDENTERBACKGROUND, sizeof(__pyx_k_APP_DIDENTERBACKGROUND), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_DIDENTERFOREGROUND, __pyx_k_APP_DIDENTERFOREGROUND, sizeof(__pyx_k_APP_DIDENTERFOREGROUND), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_LOWMEMORY, __pyx_k_APP_LOWMEMORY, sizeof(__pyx_k_APP_LOWMEMORY), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_TERMINATING, __pyx_k_APP_TERMINATING, sizeof(__pyx_k_APP_TERMINATING), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_WILLENTERBACKGROUND, __pyx_k_APP_WILLENTERBACKGROUND, sizeof(__pyx_k_APP_WILLENTERBACKGROUND), 0, 1, 0, 1},
-  {&__pyx_n_u_APP_WILLENTERFOREGROUND, __pyx_k_APP_WILLENTERFOREGROUND, sizeof(__pyx_k_APP_WILLENTERFOREGROUND), 0, 1, 0, 1},
-  {&__pyx_n_u_AUDIODEVICEADDED, __pyx_k_AUDIODEVICEADDED, sizeof(__pyx_k_AUDIODEVICEADDED), 0, 1, 0, 1},
-  {&__pyx_n_u_AUDIODEVICEREMOVED, __pyx_k_AUDIODEVICEREMOVED, sizeof(__pyx_k_AUDIODEVICEREMOVED), 0, 1, 0, 1},
-  {&__pyx_n_u_CLIPBOARDUPDATE, __pyx_k_CLIPBOARDUPDATE, sizeof(__pyx_k_CLIPBOARDUPDATE), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERAXISMOTION, __pyx_k_CONTROLLERAXISMOTION, sizeof(__pyx_k_CONTROLLERAXISMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERBUTTONDOWN, __pyx_k_CONTROLLERBUTTONDOWN, sizeof(__pyx_k_CONTROLLERBUTTONDOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERBUTTONUP, __pyx_k_CONTROLLERBUTTONUP, sizeof(__pyx_k_CONTROLLERBUTTONUP), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERDEVICEADDED, __pyx_k_CONTROLLERDEVICEADDED, sizeof(__pyx_k_CONTROLLERDEVICEADDED), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERDEVICEREMAPPED, __pyx_k_CONTROLLERDEVICEREMAPPED, sizeof(__pyx_k_CONTROLLERDEVICEREMAPPED), 0, 1, 0, 1},
-  {&__pyx_n_u_CONTROLLERDEVICEREMOVED, __pyx_k_CONTROLLERDEVICEREMOVED, sizeof(__pyx_k_CONTROLLERDEVICEREMOVED), 0, 1, 0, 1},
-  {&__pyx_n_u_DISPLAYEVENT, __pyx_k_DISPLAYEVENT, sizeof(__pyx_k_DISPLAYEVENT), 0, 1, 0, 1},
-  {&__pyx_n_u_DOLLARGESTURE, __pyx_k_DOLLARGESTURE, sizeof(__pyx_k_DOLLARGESTURE), 0, 1, 0, 1},
-  {&__pyx_n_u_DOLLARRECORD, __pyx_k_DOLLARRECORD, sizeof(__pyx_k_DOLLARRECORD), 0, 1, 0, 1},
-  {&__pyx_n_u_DROPBEGIN, __pyx_k_DROPBEGIN, sizeof(__pyx_k_DROPBEGIN), 0, 1, 0, 1},
-  {&__pyx_n_u_DROPCOMPLETE, __pyx_k_DROPCOMPLETE, sizeof(__pyx_k_DROPCOMPLETE), 0, 1, 0, 1},
-  {&__pyx_n_u_DROPFILE, __pyx_k_DROPFILE, sizeof(__pyx_k_DROPFILE), 0, 1, 0, 1},
-  {&__pyx_n_u_DROPTEXT, __pyx_k_DROPTEXT, sizeof(__pyx_k_DROPTEXT), 0, 1, 0, 1},
-  {&__pyx_kp_u_Event, __pyx_k_Event, sizeof(__pyx_k_Event), 0, 1, 0, 0},
+  {&__pyx_n_s_APP_DIDENTERBACKGROUND, __pyx_k_APP_DIDENTERBACKGROUND, sizeof(__pyx_k_APP_DIDENTERBACKGROUND), 0, 0, 1, 1},
+  {&__pyx_n_s_APP_DIDENTERFOREGROUND, __pyx_k_APP_DIDENTERFOREGROUND, sizeof(__pyx_k_APP_DIDENTERFOREGROUND), 0, 0, 1, 1},
+  {&__pyx_n_s_APP_LOWMEMORY, __pyx_k_APP_LOWMEMORY, sizeof(__pyx_k_APP_LOWMEMORY), 0, 0, 1, 1},
+  {&__pyx_n_s_APP_TERMINATING, __pyx_k_APP_TERMINATING, sizeof(__pyx_k_APP_TERMINATING), 0, 0, 1, 1},
+  {&__pyx_n_s_APP_WILLENTERBACKGROUND, __pyx_k_APP_WILLENTERBACKGROUND, sizeof(__pyx_k_APP_WILLENTERBACKGROUND), 0, 0, 1, 1},
+  {&__pyx_n_s_APP_WILLENTERFOREGROUND, __pyx_k_APP_WILLENTERFOREGROUND, sizeof(__pyx_k_APP_WILLENTERFOREGROUND), 0, 0, 1, 1},
+  {&__pyx_n_s_AUDIODEVICEADDED, __pyx_k_AUDIODEVICEADDED, sizeof(__pyx_k_AUDIODEVICEADDED), 0, 0, 1, 1},
+  {&__pyx_n_s_AUDIODEVICEREMOVED, __pyx_k_AUDIODEVICEREMOVED, sizeof(__pyx_k_AUDIODEVICEREMOVED), 0, 0, 1, 1},
+  {&__pyx_n_s_CLIPBOARDUPDATE, __pyx_k_CLIPBOARDUPDATE, sizeof(__pyx_k_CLIPBOARDUPDATE), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERAXISMOTION, __pyx_k_CONTROLLERAXISMOTION, sizeof(__pyx_k_CONTROLLERAXISMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERBUTTONDOWN, __pyx_k_CONTROLLERBUTTONDOWN, sizeof(__pyx_k_CONTROLLERBUTTONDOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERBUTTONUP, __pyx_k_CONTROLLERBUTTONUP, sizeof(__pyx_k_CONTROLLERBUTTONUP), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERDEVICEADDED, __pyx_k_CONTROLLERDEVICEADDED, sizeof(__pyx_k_CONTROLLERDEVICEADDED), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERDEVICEREMAPPED, __pyx_k_CONTROLLERDEVICEREMAPPED, sizeof(__pyx_k_CONTROLLERDEVICEREMAPPED), 0, 0, 1, 1},
+  {&__pyx_n_s_CONTROLLERDEVICEREMOVED, __pyx_k_CONTROLLERDEVICEREMOVED, sizeof(__pyx_k_CONTROLLERDEVICEREMOVED), 0, 0, 1, 1},
+  {&__pyx_n_s_DISPLAYEVENT, __pyx_k_DISPLAYEVENT, sizeof(__pyx_k_DISPLAYEVENT), 0, 0, 1, 1},
+  {&__pyx_n_s_DOLLARGESTURE, __pyx_k_DOLLARGESTURE, sizeof(__pyx_k_DOLLARGESTURE), 0, 0, 1, 1},
+  {&__pyx_n_s_DOLLARRECORD, __pyx_k_DOLLARRECORD, sizeof(__pyx_k_DOLLARRECORD), 0, 0, 1, 1},
+  {&__pyx_n_s_DROPBEGIN, __pyx_k_DROPBEGIN, sizeof(__pyx_k_DROPBEGIN), 0, 0, 1, 1},
+  {&__pyx_n_s_DROPCOMPLETE, __pyx_k_DROPCOMPLETE, sizeof(__pyx_k_DROPCOMPLETE), 0, 0, 1, 1},
+  {&__pyx_n_s_DROPFILE, __pyx_k_DROPFILE, sizeof(__pyx_k_DROPFILE), 0, 0, 1, 1},
+  {&__pyx_n_s_DROPTEXT, __pyx_k_DROPTEXT, sizeof(__pyx_k_DROPTEXT), 0, 0, 1, 1},
+  {&__pyx_n_s_Event, __pyx_k_Event, sizeof(__pyx_k_Event), 0, 0, 1, 1},
   {&__pyx_n_s_EventType, __pyx_k_EventType, sizeof(__pyx_k_EventType), 0, 0, 1, 1},
   {&__pyx_n_s_EventType___eq, __pyx_k_EventType___eq, sizeof(__pyx_k_EventType___eq), 0, 0, 1, 1},
   {&__pyx_n_s_EventType___init, __pyx_k_EventType___init, sizeof(__pyx_k_EventType___init), 0, 0, 1, 1},
@@ -11538,54 +11603,48 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_EventType___repr, __pyx_k_EventType___repr, sizeof(__pyx_k_EventType___repr), 0, 0, 1, 1},
   {&__pyx_n_s_EventType_dict, __pyx_k_EventType_dict, sizeof(__pyx_k_EventType_dict), 0, 0, 1, 1},
   {&__pyx_n_s_EventType_type, __pyx_k_EventType_type, sizeof(__pyx_k_EventType_type), 0, 0, 1, 1},
-  {&__pyx_n_s_Event_2, __pyx_k_Event_2, sizeof(__pyx_k_Event_2), 0, 0, 1, 1},
-  {&__pyx_n_u_FINGERDOWN, __pyx_k_FINGERDOWN, sizeof(__pyx_k_FINGERDOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_FINGERMOTION, __pyx_k_FINGERMOTION, sizeof(__pyx_k_FINGERMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_FINGERUP, __pyx_k_FINGERUP, sizeof(__pyx_k_FINGERUP), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYAXISMOTION, __pyx_k_JOYAXISMOTION, sizeof(__pyx_k_JOYAXISMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYBALLMOTION, __pyx_k_JOYBALLMOTION, sizeof(__pyx_k_JOYBALLMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYBUTTONDOWN, __pyx_k_JOYBUTTONDOWN, sizeof(__pyx_k_JOYBUTTONDOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYBUTTONUP, __pyx_k_JOYBUTTONUP, sizeof(__pyx_k_JOYBUTTONUP), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYDEVICEADDED, __pyx_k_JOYDEVICEADDED, sizeof(__pyx_k_JOYDEVICEADDED), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYDEVICEREMOVED, __pyx_k_JOYDEVICEREMOVED, sizeof(__pyx_k_JOYDEVICEREMOVED), 0, 1, 0, 1},
-  {&__pyx_n_u_JOYHATMOTION, __pyx_k_JOYHATMOTION, sizeof(__pyx_k_JOYHATMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_KEYDOWN, __pyx_k_KEYDOWN, sizeof(__pyx_k_KEYDOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_KEYMAPCHANGED, __pyx_k_KEYMAPCHANGED, sizeof(__pyx_k_KEYMAPCHANGED), 0, 1, 0, 1},
-  {&__pyx_n_u_KEYUP, __pyx_k_KEYUP, sizeof(__pyx_k_KEYUP), 0, 1, 0, 1},
+  {&__pyx_kp_s_Event_d_s_s, __pyx_k_Event_d_s_s, sizeof(__pyx_k_Event_d_s_s), 0, 0, 1, 0},
+  {&__pyx_n_s_FINGERDOWN, __pyx_k_FINGERDOWN, sizeof(__pyx_k_FINGERDOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_FINGERMOTION, __pyx_k_FINGERMOTION, sizeof(__pyx_k_FINGERMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_FINGERUP, __pyx_k_FINGERUP, sizeof(__pyx_k_FINGERUP), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYAXISMOTION, __pyx_k_JOYAXISMOTION, sizeof(__pyx_k_JOYAXISMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYBALLMOTION, __pyx_k_JOYBALLMOTION, sizeof(__pyx_k_JOYBALLMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYBUTTONDOWN, __pyx_k_JOYBUTTONDOWN, sizeof(__pyx_k_JOYBUTTONDOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYBUTTONUP, __pyx_k_JOYBUTTONUP, sizeof(__pyx_k_JOYBUTTONUP), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYDEVICEADDED, __pyx_k_JOYDEVICEADDED, sizeof(__pyx_k_JOYDEVICEADDED), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYDEVICEREMOVED, __pyx_k_JOYDEVICEREMOVED, sizeof(__pyx_k_JOYDEVICEREMOVED), 0, 0, 1, 1},
+  {&__pyx_n_s_JOYHATMOTION, __pyx_k_JOYHATMOTION, sizeof(__pyx_k_JOYHATMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_KEYDOWN, __pyx_k_KEYDOWN, sizeof(__pyx_k_KEYDOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_KEYMAPCHANGED, __pyx_k_KEYMAPCHANGED, sizeof(__pyx_k_KEYMAPCHANGED), 0, 0, 1, 1},
+  {&__pyx_n_s_KEYUP, __pyx_k_KEYUP, sizeof(__pyx_k_KEYUP), 0, 0, 1, 1},
   {&__pyx_n_s_KeyError, __pyx_k_KeyError, sizeof(__pyx_k_KeyError), 0, 0, 1, 1},
-  {&__pyx_n_u_LASTEVENT, __pyx_k_LASTEVENT, sizeof(__pyx_k_LASTEVENT), 0, 1, 0, 1},
-  {&__pyx_n_u_MOUSEBUTTONDOWN, __pyx_k_MOUSEBUTTONDOWN, sizeof(__pyx_k_MOUSEBUTTONDOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_MOUSEBUTTONUP, __pyx_k_MOUSEBUTTONUP, sizeof(__pyx_k_MOUSEBUTTONUP), 0, 1, 0, 1},
-  {&__pyx_n_u_MOUSEMOTION, __pyx_k_MOUSEMOTION, sizeof(__pyx_k_MOUSEMOTION), 0, 1, 0, 1},
-  {&__pyx_n_u_MOUSEWHEEL, __pyx_k_MOUSEWHEEL, sizeof(__pyx_k_MOUSEWHEEL), 0, 1, 0, 1},
-  {&__pyx_n_u_MULTIGESTURE, __pyx_k_MULTIGESTURE, sizeof(__pyx_k_MULTIGESTURE), 0, 1, 0, 1},
+  {&__pyx_n_s_LASTEVENT, __pyx_k_LASTEVENT, sizeof(__pyx_k_LASTEVENT), 0, 0, 1, 1},
+  {&__pyx_n_s_MOUSEBUTTONDOWN, __pyx_k_MOUSEBUTTONDOWN, sizeof(__pyx_k_MOUSEBUTTONDOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_MOUSEBUTTONUP, __pyx_k_MOUSEBUTTONUP, sizeof(__pyx_k_MOUSEBUTTONUP), 0, 0, 1, 1},
+  {&__pyx_n_s_MOUSEMOTION, __pyx_k_MOUSEMOTION, sizeof(__pyx_k_MOUSEMOTION), 0, 0, 1, 1},
+  {&__pyx_n_s_MOUSEWHEEL, __pyx_k_MOUSEWHEEL, sizeof(__pyx_k_MOUSEWHEEL), 0, 0, 1, 1},
+  {&__pyx_n_s_MULTIGESTURE, __pyx_k_MULTIGESTURE, sizeof(__pyx_k_MULTIGESTURE), 0, 0, 1, 1},
   {&__pyx_n_u_NOEVENT, __pyx_k_NOEVENT, sizeof(__pyx_k_NOEVENT), 0, 1, 0, 1},
   {&__pyx_n_s_NOEVENT_EVENT, __pyx_k_NOEVENT_EVENT, sizeof(__pyx_k_NOEVENT_EVENT), 0, 0, 1, 1},
-  {&__pyx_n_u_QUIT, __pyx_k_QUIT, sizeof(__pyx_k_QUIT), 0, 1, 0, 1},
-  {&__pyx_n_u_RENDER_DEVICE_RESET, __pyx_k_RENDER_DEVICE_RESET, sizeof(__pyx_k_RENDER_DEVICE_RESET), 0, 1, 0, 1},
-  {&__pyx_n_u_RENDER_TARGETS_RESET, __pyx_k_RENDER_TARGETS_RESET, sizeof(__pyx_k_RENDER_TARGETS_RESET), 0, 1, 0, 1},
+  {&__pyx_n_s_QUIT, __pyx_k_QUIT, sizeof(__pyx_k_QUIT), 0, 0, 1, 1},
+  {&__pyx_n_s_RENDER_DEVICE_RESET, __pyx_k_RENDER_DEVICE_RESET, sizeof(__pyx_k_RENDER_DEVICE_RESET), 0, 0, 1, 1},
+  {&__pyx_n_s_RENDER_TARGETS_RESET, __pyx_k_RENDER_TARGETS_RESET, sizeof(__pyx_k_RENDER_TARGETS_RESET), 0, 0, 1, 1},
   {&__pyx_n_s_RLock, __pyx_k_RLock, sizeof(__pyx_k_RLock), 0, 0, 1, 1},
-  {&__pyx_n_u_SENSORUPDATE, __pyx_k_SENSORUPDATE, sizeof(__pyx_k_SENSORUPDATE), 0, 1, 0, 1},
-  {&__pyx_n_u_SYSWMEVENT, __pyx_k_SYSWMEVENT, sizeof(__pyx_k_SYSWMEVENT), 0, 1, 0, 1},
-  {&__pyx_n_u_TEXTEDITING, __pyx_k_TEXTEDITING, sizeof(__pyx_k_TEXTEDITING), 0, 1, 0, 1},
-  {&__pyx_n_u_TEXTINPUT, __pyx_k_TEXTINPUT, sizeof(__pyx_k_TEXTINPUT), 0, 1, 0, 1},
-  {&__pyx_n_u_UNKNOWN, __pyx_k_UNKNOWN, sizeof(__pyx_k_UNKNOWN), 0, 1, 0, 1},
-  {&__pyx_n_u_USEREVENT, __pyx_k_USEREVENT, sizeof(__pyx_k_USEREVENT), 0, 1, 0, 1},
+  {&__pyx_n_s_SENSORUPDATE, __pyx_k_SENSORUPDATE, sizeof(__pyx_k_SENSORUPDATE), 0, 0, 1, 1},
+  {&__pyx_n_s_SYSWMEVENT, __pyx_k_SYSWMEVENT, sizeof(__pyx_k_SYSWMEVENT), 0, 0, 1, 1},
+  {&__pyx_n_s_TEXTEDITING, __pyx_k_TEXTEDITING, sizeof(__pyx_k_TEXTEDITING), 0, 0, 1, 1},
+  {&__pyx_n_s_TEXTINPUT, __pyx_k_TEXTINPUT, sizeof(__pyx_k_TEXTINPUT), 0, 0, 1, 1},
+  {&__pyx_n_s_UNKNOWN, __pyx_k_UNKNOWN, sizeof(__pyx_k_UNKNOWN), 0, 0, 1, 1},
+  {&__pyx_n_s_USEREVENT, __pyx_k_USEREVENT, sizeof(__pyx_k_USEREVENT), 0, 0, 1, 1},
   {&__pyx_n_s_USEREVENT_MAX, __pyx_k_USEREVENT_MAX, sizeof(__pyx_k_USEREVENT_MAX), 0, 0, 1, 1},
   {&__pyx_n_s_UnicodeDecodeError, __pyx_k_UnicodeDecodeError, sizeof(__pyx_k_UnicodeDecodeError), 0, 0, 1, 1},
-  {&__pyx_kp_u_UserEvent_d, __pyx_k_UserEvent_d, sizeof(__pyx_k_UserEvent_d), 0, 1, 0, 0},
+  {&__pyx_kp_s_UserEvent_d, __pyx_k_UserEvent_d, sizeof(__pyx_k_UserEvent_d), 0, 0, 1, 0},
   {&__pyx_n_s_VIDEOEXPOSE, __pyx_k_VIDEOEXPOSE, sizeof(__pyx_k_VIDEOEXPOSE), 0, 0, 1, 1},
-  {&__pyx_n_u_VIDEOEXPOSE, __pyx_k_VIDEOEXPOSE, sizeof(__pyx_k_VIDEOEXPOSE), 0, 1, 0, 1},
   {&__pyx_n_s_VIDEORESIZE, __pyx_k_VIDEORESIZE, sizeof(__pyx_k_VIDEORESIZE), 0, 0, 1, 1},
-  {&__pyx_n_u_VIDEORESIZE, __pyx_k_VIDEORESIZE, sizeof(__pyx_k_VIDEORESIZE), 0, 1, 0, 1},
-  {&__pyx_n_u_WINDOWEVENT, __pyx_k_WINDOWEVENT, sizeof(__pyx_k_WINDOWEVENT), 0, 1, 0, 1},
+  {&__pyx_n_s_WINDOWEVENT, __pyx_k_WINDOWEVENT, sizeof(__pyx_k_WINDOWEVENT), 0, 0, 1, 1},
   {&__pyx_n_s_WINDOWMOVED, __pyx_k_WINDOWMOVED, sizeof(__pyx_k_WINDOWMOVED), 0, 0, 1, 1},
-  {&__pyx_n_u_WINDOWMOVED, __pyx_k_WINDOWMOVED, sizeof(__pyx_k_WINDOWMOVED), 0, 1, 0, 1},
+  {&__pyx_kp_s__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 0, 1, 0},
   {&__pyx_kp_u__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 1, 0, 0},
-  {&__pyx_kp_u__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 1, 0, 0},
-  {&__pyx_kp_u__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 1, 0, 0},
-  {&__pyx_kp_u__5, __pyx_k__5, sizeof(__pyx_k__5), 0, 1, 0, 0},
-  {&__pyx_kp_u__6, __pyx_k__6, sizeof(__pyx_k__6), 0, 1, 0, 0},
   {&__pyx_n_s_append, __pyx_k_append, sizeof(__pyx_k_append), 0, 0, 1, 1},
   {&__pyx_n_s_axis, __pyx_k_axis, sizeof(__pyx_k_axis), 0, 0, 1, 1},
   {&__pyx_n_s_ball, __pyx_k_ball, sizeof(__pyx_k_ball), 0, 0, 1, 1},
@@ -11596,7 +11655,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_code, __pyx_k_code, sizeof(__pyx_k_code), 0, 0, 1, 1},
   {&__pyx_n_s_copy_event_queue, __pyx_k_copy_event_queue, sizeof(__pyx_k_copy_event_queue), 0, 0, 1, 1},
-  {&__pyx_n_u_d, __pyx_k_d, sizeof(__pyx_k_d), 0, 1, 0, 1},
   {&__pyx_n_s_dDist, __pyx_k_dDist, sizeof(__pyx_k_dDist), 0, 0, 1, 1},
   {&__pyx_n_s_dTheta, __pyx_k_dTheta, sizeof(__pyx_k_dTheta), 0, 0, 1, 1},
   {&__pyx_n_s_data1, __pyx_k_data1, sizeof(__pyx_k_data1), 0, 0, 1, 1},
@@ -11616,9 +11674,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_event, __pyx_k_event, sizeof(__pyx_k_event), 0, 0, 1, 1},
   {&__pyx_n_s_event_name, __pyx_k_event_name, sizeof(__pyx_k_event_name), 0, 0, 1, 1},
   {&__pyx_n_s_event_names, __pyx_k_event_names, sizeof(__pyx_k_event_names), 0, 0, 1, 1},
-  {&__pyx_kp_u_event_post_must_be_called_with_a, __pyx_k_event_post_must_be_called_with_a, sizeof(__pyx_k_event_post_must_be_called_with_a), 0, 1, 0, 0},
+  {&__pyx_kp_s_event_post_must_be_called_with_a, __pyx_k_event_post_must_be_called_with_a, sizeof(__pyx_k_event_post_must_be_called_with_a), 0, 0, 1, 0},
   {&__pyx_n_s_evt, __pyx_k_evt, sizeof(__pyx_k_evt), 0, 0, 1, 1},
-  {&__pyx_n_s_evt_ptr, __pyx_k_evt_ptr, sizeof(__pyx_k_evt_ptr), 0, 0, 1, 1},
   {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
   {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_fingerId, __pyx_k_fingerId, sizeof(__pyx_k_fingerId), 0, 0, 1, 1},
@@ -11639,17 +11696,17 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_insert, __pyx_k_insert, sizeof(__pyx_k_insert), 0, 0, 1, 1},
   {&__pyx_n_s_instance_id, __pyx_k_instance_id, sizeof(__pyx_k_instance_id), 0, 0, 1, 1},
   {&__pyx_n_s_items, __pyx_k_items, sizeof(__pyx_k_items), 0, 0, 1, 1},
+  {&__pyx_n_s_join, __pyx_k_join, sizeof(__pyx_k_join), 0, 0, 1, 1},
   {&__pyx_n_s_joy, __pyx_k_joy, sizeof(__pyx_k_joy), 0, 0, 1, 1},
   {&__pyx_n_s_k, __pyx_k_k, sizeof(__pyx_k_k), 0, 0, 1, 1},
   {&__pyx_n_s_key, __pyx_k_key, sizeof(__pyx_k_key), 0, 0, 1, 1},
-  {&__pyx_n_u_key, __pyx_k_key, sizeof(__pyx_k_key), 0, 1, 0, 1},
   {&__pyx_n_s_keys, __pyx_k_keys, sizeof(__pyx_k_keys), 0, 0, 1, 1},
   {&__pyx_n_s_kwargs, __pyx_k_kwargs, sizeof(__pyx_k_kwargs), 0, 0, 1, 1},
   {&__pyx_n_s_length, __pyx_k_length, sizeof(__pyx_k_length), 0, 0, 1, 1},
   {&__pyx_n_s_lock, __pyx_k_lock, sizeof(__pyx_k_lock), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
-  {&__pyx_n_u_mod, __pyx_k_mod, sizeof(__pyx_k_mod), 0, 1, 0, 1},
+  {&__pyx_n_s_mod, __pyx_k_mod, sizeof(__pyx_k_mod), 0, 0, 1, 1},
   {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
@@ -11680,13 +11737,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_renpy_pygame_event, __pyx_k_renpy_pygame_event, sizeof(__pyx_k_renpy_pygame_event), 0, 0, 1, 1},
   {&__pyx_kp_s_renpy_pygame_event_pyx, __pyx_k_renpy_pygame_event_pyx, sizeof(__pyx_k_renpy_pygame_event_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_repeat, __pyx_k_repeat, sizeof(__pyx_k_repeat), 0, 0, 1, 1},
-  {&__pyx_n_u_repeat, __pyx_k_repeat, sizeof(__pyx_k_repeat), 0, 1, 0, 1},
   {&__pyx_n_s_repr, __pyx_k_repr, sizeof(__pyx_k_repr), 0, 0, 1, 1},
   {&__pyx_n_s_rest, __pyx_k_rest, sizeof(__pyx_k_rest), 0, 0, 1, 1},
   {&__pyx_n_s_result, __pyx_k_result, sizeof(__pyx_k_result), 0, 0, 1, 1},
   {&__pyx_n_s_rotated, __pyx_k_rotated, sizeof(__pyx_k_rotated), 0, 0, 1, 1},
   {&__pyx_n_s_rv, __pyx_k_rv, sizeof(__pyx_k_rv), 0, 0, 1, 1},
-  {&__pyx_n_u_scancode, __pyx_k_scancode, sizeof(__pyx_k_scancode), 0, 1, 0, 1},
+  {&__pyx_kp_s_s_r, __pyx_k_s_r, sizeof(__pyx_k_s_r), 0, 0, 1, 0},
+  {&__pyx_n_s_scancode, __pyx_k_scancode, sizeof(__pyx_k_scancode), 0, 0, 1, 1},
   {&__pyx_n_s_sdl_main_init, __pyx_k_sdl_main_init, sizeof(__pyx_k_sdl_main_init), 0, 0, 1, 1},
   {&__pyx_n_s_self, __pyx_k_self, sizeof(__pyx_k_self), 0, 0, 1, 1},
   {&__pyx_n_s_set_allowed, __pyx_k_set_allowed, sizeof(__pyx_k_set_allowed), 0, 0, 1, 1},
@@ -11703,15 +11760,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_text_input, __pyx_k_text_input, sizeof(__pyx_k_text_input), 0, 0, 1, 1},
   {&__pyx_n_s_threading, __pyx_k_threading, sizeof(__pyx_k_threading), 0, 0, 1, 1},
   {&__pyx_n_s_timestamp, __pyx_k_timestamp, sizeof(__pyx_k_timestamp), 0, 0, 1, 1},
-  {&__pyx_n_u_timestamp, __pyx_k_timestamp, sizeof(__pyx_k_timestamp), 0, 1, 0, 1},
   {&__pyx_n_s_touch, __pyx_k_touch, sizeof(__pyx_k_touch), 0, 0, 1, 1},
   {&__pyx_n_s_touchId, __pyx_k_touchId, sizeof(__pyx_k_touchId), 0, 0, 1, 1},
   {&__pyx_n_s_touch_id, __pyx_k_touch_id, sizeof(__pyx_k_touch_id), 0, 0, 1, 1},
   {&__pyx_n_s_type, __pyx_k_type, sizeof(__pyx_k_type), 0, 0, 1, 1},
   {&__pyx_n_s_type_2, __pyx_k_type_2, sizeof(__pyx_k_type_2), 0, 0, 1, 1},
-  {&__pyx_n_u_type_2, __pyx_k_type_2, sizeof(__pyx_k_type_2), 0, 1, 0, 1},
   {&__pyx_n_s_unichr, __pyx_k_unichr, sizeof(__pyx_k_unichr), 0, 0, 1, 1},
-  {&__pyx_n_u_unicode, __pyx_k_unicode, sizeof(__pyx_k_unicode), 0, 1, 0, 1},
+  {&__pyx_n_s_unicode, __pyx_k_unicode, sizeof(__pyx_k_unicode), 0, 0, 1, 1},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
   {&__pyx_n_s_v, __pyx_k_v, sizeof(__pyx_k_v), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
@@ -11746,20 +11801,20 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         while SDL_PollEvent(&evt):
  *             if evt.type == SDL_MOUSEMOTION:
  */
-  __pyx_tuple__7 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 372, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__3 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 372, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__3);
+  __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "renpy/pygame/event.pyx":601
+  /* "renpy/pygame/event.pyx":599
  *     """
  * 
  *     return event_queue[:]             # <<<<<<<<<<<<<<
  * 
  * # Usually called by display.init.
  */
-  __pyx_slice__8 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__8)) __PYX_ERR(0, 601, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__8);
-  __Pyx_GIVEREF(__pyx_slice__8);
+  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 599, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__4);
+  __Pyx_GIVEREF(__pyx_slice__4);
 
   /* "renpy/pygame/event.pyx":63
  * SDL_TOUCH_MOUSEID = <unsigned int> -1
@@ -11768,9 +11823,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     def __init__(self, type, dict=None, **kwargs):
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_builtin_object); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 63, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_builtin_object); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
 
   /* "renpy/pygame/event.pyx":65
  * class EventType(object):
@@ -11779,13 +11834,13 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         self._type = type
  * 
  */
-  __pyx_tuple__10 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_type, __pyx_n_s_dict, __pyx_n_s_kwargs); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_init, 65, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __pyx_tuple__12 = PyTuple_Pack(1, ((PyObject *)Py_None)); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__6 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_type, __pyx_n_s_dict, __pyx_n_s_kwargs); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(3, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_init, 65, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(1, ((PyObject *)Py_None)); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
 
   /* "renpy/pygame/event.pyx":73
  *         self.__dict__.update(kwargs)
@@ -11794,10 +11849,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         if SDL_USEREVENT <= self.type < WINDOWMOVED:
  *             ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
  */
-  __pyx_tuple__13 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_ename, __pyx_n_s_rest, __pyx_n_s_k, __pyx_n_s_v); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 73, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
-  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_repr, 73, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_ename, __pyx_n_s_rest, __pyx_n_s_k, __pyx_n_s_v); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_repr, 73, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 73, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":93
  * 
@@ -11806,10 +11861,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return self.__dict__
  * 
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 93, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__15);
-  __Pyx_GIVEREF(__pyx_tuple__15);
-  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_dict, 93, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_dict, 93, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 93, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":97
  * 
@@ -11818,10 +11873,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return self._type
  * 
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 97, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__17);
-  __Pyx_GIVEREF(__pyx_tuple__17);
-  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_type, 97, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_type, 97, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 97, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":100
  *         return self._type
@@ -11830,10 +11885,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return self.__dict__ == other.__dict__
  * 
  */
-  __pyx_tuple__19 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_other); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__19);
-  __Pyx_GIVEREF(__pyx_tuple__19);
-  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_eq, 100, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_tuple__15 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_other); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_eq, 100, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 100, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":103
  *         return self.__dict__ == other.__dict__
@@ -11842,10 +11897,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return not (self == other)
  * 
  */
-  __pyx_tuple__21 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_other); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__21);
-  __Pyx_GIVEREF(__pyx_tuple__21);
-  __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_ne, 103, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_other); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_ne, 103, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 103, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":106
  *         return not (self == other)
@@ -11854,10 +11909,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return self.type != 0
  * 
  */
-  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 106, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__23);
-  __Pyx_GIVEREF(__pyx_tuple__23);
-  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_nonzero, 106, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_tuple__19 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__19);
+  __Pyx_GIVEREF(__pyx_tuple__19);
+  __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_nonzero, 106, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) __PYX_ERR(0, 106, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":313
  * 
@@ -11866,9 +11921,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__25 = PyTuple_Pack(1, __pyx_int_0); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(0, 313, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__25);
-  __Pyx_GIVEREF(__pyx_tuple__25);
+  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_int_0); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 313, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "renpy/pygame/event.pyx":415
  * 
@@ -11877,7 +11932,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *     with lock:
  *         poll_sdl()
  */
-  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_pump, 415, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 415, __pyx_L1_error)
+  __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_pump, 415, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 415, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":420
  * 
@@ -11886,10 +11941,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     global event_queue
  */
-  __pyx_tuple__27 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_rv); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(0, 420, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__27);
-  __Pyx_GIVEREF(__pyx_tuple__27);
-  __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get, 420, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) __PYX_ERR(0, 420, __pyx_L1_error)
+  __pyx_tuple__23 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_rv); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 420, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__23);
+  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get, 420, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 420, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":440
  * 
@@ -11898,7 +11953,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     with lock:
  */
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_poll, 440, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 440, __pyx_L1_error)
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_poll, 440, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 440, __pyx_L1_error)
 
   /* "renpy/pygame/event.pyx":451
  * 
@@ -11907,178 +11962,178 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     cdef SDL_Event evt
  */
-  __pyx_tuple__30 = PyTuple_Pack(3, __pyx_n_s_evt, __pyx_n_s_result, __pyx_n_s_evt_ptr); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 451, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__30);
-  __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_wait, 451, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 451, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(2, __pyx_n_s_evt, __pyx_n_s_result); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 451, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__26);
+  __Pyx_GIVEREF(__pyx_tuple__26);
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_wait, 451, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 451, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":473
+  /* "renpy/pygame/event.pyx":471
  * 
  * 
  * def peek(t=None):             # <<<<<<<<<<<<<<
  * 
  *     with lock:
  */
-  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 473, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__32);
-  __Pyx_GIVEREF(__pyx_tuple__32);
-  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_peek, 473, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 473, __pyx_L1_error)
+  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 471, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__28);
+  __Pyx_GIVEREF(__pyx_tuple__28);
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_peek, 471, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 471, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":486
+  /* "renpy/pygame/event.pyx":484
  * 
  * 
  * def clear(t=None):             # <<<<<<<<<<<<<<
  * 
  *     # Clear is implemented in terms of get.
  */
-  __pyx_tuple__34 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 486, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__34);
-  __Pyx_GIVEREF(__pyx_tuple__34);
-  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_clear, 486, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 486, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 484, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
+  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_clear, 484, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 484, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":491
+  /* "renpy/pygame/event.pyx":489
  *     get(t)
  * 
  * def get_standard_events():             # <<<<<<<<<<<<<<
  *     """
  *     Returns a list of standard events that renpy.pygame knows about.
  */
-  __pyx_tuple__36 = PyTuple_Pack(1, __pyx_n_s_i); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 491, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__36);
-  __Pyx_GIVEREF(__pyx_tuple__36);
-  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_standard_events, 491, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 491, __pyx_L1_error)
+  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_n_s_i); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 489, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__32);
+  __Pyx_GIVEREF(__pyx_tuple__32);
+  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_standard_events, 489, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 489, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":498
+  /* "renpy/pygame/event.pyx":496
  *     return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]
  * 
  * def event_name(t):             # <<<<<<<<<<<<<<
  *     try:
  *         return event_names[t]
  */
-  __pyx_tuple__38 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 498, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__38);
-  __Pyx_GIVEREF(__pyx_tuple__38);
-  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_event_name, 498, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 498, __pyx_L1_error)
+  __pyx_tuple__34 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 496, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__34);
+  __Pyx_GIVEREF(__pyx_tuple__34);
+  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_event_name, 496, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 496, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":504
+  /* "renpy/pygame/event.pyx":502
  *         return "UNKNOWN"
  * 
  * def set_blocked(t=None):             # <<<<<<<<<<<<<<
  *     if t == None:
  *         for et in event_names.keys():
  */
-  __pyx_tuple__40 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_et); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 504, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__40);
-  __Pyx_GIVEREF(__pyx_tuple__40);
-  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_blocked, 504, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 504, __pyx_L1_error)
+  __pyx_tuple__36 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_et); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 502, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__36);
+  __Pyx_GIVEREF(__pyx_tuple__36);
+  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_blocked, 502, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 502, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":514
+  /* "renpy/pygame/event.pyx":512
  *             SDL_EventState(et, SDL_IGNORE)
  * 
  * def set_allowed(t=None):             # <<<<<<<<<<<<<<
  *     if t == None:
  *         for et in event_names.keys():
  */
-  __pyx_tuple__42 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_et); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(0, 514, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__42);
-  __Pyx_GIVEREF(__pyx_tuple__42);
-  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_allowed, 514, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 514, __pyx_L1_error)
+  __pyx_tuple__38 = PyTuple_Pack(2, __pyx_n_s_t, __pyx_n_s_et); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 512, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__38);
+  __Pyx_GIVEREF(__pyx_tuple__38);
+  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_allowed, 512, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 512, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":524
+  /* "renpy/pygame/event.pyx":522
  *             SDL_EventState(et, SDL_ENABLE)
  * 
  * def get_blocked(t):             # <<<<<<<<<<<<<<
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  */
-  __pyx_tuple__44 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__44)) __PYX_ERR(0, 524, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__44);
-  __Pyx_GIVEREF(__pyx_tuple__44);
-  __pyx_codeobj__45 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__44, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_blocked, 524, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__45)) __PYX_ERR(0, 524, __pyx_L1_error)
+  __pyx_tuple__40 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 522, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__40);
+  __Pyx_GIVEREF(__pyx_tuple__40);
+  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_blocked, 522, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 522, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":527
+  /* "renpy/pygame/event.pyx":525
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  * def set_grab(on):             # <<<<<<<<<<<<<<
  *     if main_window is None or main_window.window == NULL:
  *         return
  */
-  __pyx_tuple__46 = PyTuple_Pack(1, __pyx_n_s_on); if (unlikely(!__pyx_tuple__46)) __PYX_ERR(0, 527, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__46);
-  __Pyx_GIVEREF(__pyx_tuple__46);
-  __pyx_codeobj__47 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__46, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_grab, 527, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__47)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_tuple__42 = PyTuple_Pack(1, __pyx_n_s_on); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(0, 525, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__42);
+  __Pyx_GIVEREF(__pyx_tuple__42);
+  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_grab, 525, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 525, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":536
+  /* "renpy/pygame/event.pyx":534
  *         SDL_SetRelativeMouseMode(on)
  * 
  * def get_grab():             # <<<<<<<<<<<<<<
  *     if main_window is None or main_window.window == NULL:
  *         return False
  */
-  __pyx_codeobj__48 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_grab, 536, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__48)) __PYX_ERR(0, 536, __pyx_L1_error)
+  __pyx_codeobj__44 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_grab, 534, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__44)) __PYX_ERR(0, 534, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":542
+  /* "renpy/pygame/event.pyx":540
  *     return SDL_GetWindowGrab(main_window.window)
  * 
  * def set_mousewheel_buttons(flag):             # <<<<<<<<<<<<<<
  *     """
  *     If true (the default), the mousewheel will generate events involving
  */
-  __pyx_tuple__49 = PyTuple_Pack(1, __pyx_n_s_flag); if (unlikely(!__pyx_tuple__49)) __PYX_ERR(0, 542, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__49);
-  __Pyx_GIVEREF(__pyx_tuple__49);
-  __pyx_codeobj__50 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__49, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_mousewheel_buttons, 542, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__50)) __PYX_ERR(0, 542, __pyx_L1_error)
+  __pyx_tuple__45 = PyTuple_Pack(1, __pyx_n_s_flag); if (unlikely(!__pyx_tuple__45)) __PYX_ERR(0, 540, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__45);
+  __Pyx_GIVEREF(__pyx_tuple__45);
+  __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_set_mousewheel_buttons, 540, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) __PYX_ERR(0, 540, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":554
+  /* "renpy/pygame/event.pyx":552
  *     mousewheel_buttons = flag
  * 
  * def get_mousewheel_buttons():             # <<<<<<<<<<<<<<
  *     """
  *     Returns the value set by mousehweel buttons,.
  */
-  __pyx_codeobj__51 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_mousewheel_buttons, 554, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__51)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __pyx_codeobj__47 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_get_mousewheel_buttons, 552, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__47)) __PYX_ERR(0, 552, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":561
+  /* "renpy/pygame/event.pyx":559
  *     return mousewheel_buttons
  * 
  * def post(e):             # <<<<<<<<<<<<<<
  *     """
  *     Posts event object `e` to the event queue.
  */
-  __pyx_tuple__52 = PyTuple_Pack(2, __pyx_n_s_e, __pyx_n_s_event); if (unlikely(!__pyx_tuple__52)) __PYX_ERR(0, 561, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__52);
-  __Pyx_GIVEREF(__pyx_tuple__52);
-  __pyx_codeobj__53 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__52, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_post, 561, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__53)) __PYX_ERR(0, 561, __pyx_L1_error)
+  __pyx_tuple__48 = PyTuple_Pack(2, __pyx_n_s_e, __pyx_n_s_event); if (unlikely(!__pyx_tuple__48)) __PYX_ERR(0, 559, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__48);
+  __Pyx_GIVEREF(__pyx_tuple__48);
+  __pyx_codeobj__49 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__48, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_post, 559, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__49)) __PYX_ERR(0, 559, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":581
+  /* "renpy/pygame/event.pyx":579
  *     SDL_PushEvent(&event)
  * 
  * def register(name):             # <<<<<<<<<<<<<<
  *     """
  *     Registers a unique event number and returns that number.
  */
-  __pyx_tuple__54 = PyTuple_Pack(2, __pyx_n_s_name_2, __pyx_n_s_rv); if (unlikely(!__pyx_tuple__54)) __PYX_ERR(0, 581, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__54);
-  __Pyx_GIVEREF(__pyx_tuple__54);
-  __pyx_codeobj__55 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__54, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_register, 581, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__55)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __pyx_tuple__50 = PyTuple_Pack(2, __pyx_n_s_name_2, __pyx_n_s_rv); if (unlikely(!__pyx_tuple__50)) __PYX_ERR(0, 579, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__50);
+  __Pyx_GIVEREF(__pyx_tuple__50);
+  __pyx_codeobj__51 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__50, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_register, 579, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__51)) __PYX_ERR(0, 579, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":595
+  /* "renpy/pygame/event.pyx":593
  *     return rv
  * 
  * def copy_event_queue():             # <<<<<<<<<<<<<<
  *     """
  *     Returns a copy of the event queue. The copy cannot be used for modifying
  */
-  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_copy_event_queue, 595, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) __PYX_ERR(0, 595, __pyx_L1_error)
+  __pyx_codeobj__52 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_copy_event_queue, 593, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__52)) __PYX_ERR(0, 593, __pyx_L1_error)
 
-  /* "renpy/pygame/event.pyx":604
+  /* "renpy/pygame/event.pyx":602
  * 
  * # Usually called by display.init.
  * def init():             # <<<<<<<<<<<<<<
  *     if not SDL_WasInit(SDL_INIT_EVENTS):
  * 
  */
-  __pyx_codeobj__57 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_init_2, 604, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__57)) __PYX_ERR(0, 604, __pyx_L1_error)
+  __pyx_codeobj__53 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renpy_pygame_event_pyx, __pyx_n_s_init_2, 602, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__53)) __PYX_ERR(0, 602, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -12413,7 +12468,7 @@ if (!__Pyx_RefNanny) {
  * import renpy.pygame
  * import sys
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_threading, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_threading, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_threading, __pyx_t_1) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -12425,7 +12480,7 @@ if (!__Pyx_RefNanny) {
  * import sys
  * 
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renpy_pygame, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renpy_pygame, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_renpy, __pyx_t_1) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -12437,7 +12492,7 @@ if (!__Pyx_RefNanny) {
  * 
  * if sys.version_info[0] >= 3:
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_sys, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_sys, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_sys, __pyx_t_1) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -12504,7 +12559,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_QUIT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_QUIT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_QUIT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":7
@@ -12516,7 +12571,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_TERMINATING); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_TERMINATING) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_TERMINATING) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":8
@@ -12528,7 +12583,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_LOWMEMORY); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_LOWMEMORY) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_LOWMEMORY) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":9
@@ -12540,7 +12595,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_WILLENTERBACKGROUND); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_WILLENTERBACKGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_WILLENTERBACKGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":10
@@ -12552,7 +12607,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_DIDENTERBACKGROUND); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_DIDENTERBACKGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_DIDENTERBACKGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":11
@@ -12564,7 +12619,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_WILLENTERFOREGROUND); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_WILLENTERFOREGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_WILLENTERFOREGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":12
@@ -12576,7 +12631,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_APP_DIDENTERFOREGROUND); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_APP_DIDENTERFOREGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_APP_DIDENTERFOREGROUND) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":13
@@ -12588,7 +12643,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DISPLAYEVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 13, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DISPLAYEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DISPLAYEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":14
@@ -12600,7 +12655,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_WINDOWEVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_WINDOWEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_WINDOWEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":15
@@ -12612,7 +12667,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_SYSWMEVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_SYSWMEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_SYSWMEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":16
@@ -12624,7 +12679,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_KEYDOWN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_KEYDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_KEYDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":17
@@ -12636,7 +12691,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_KEYUP); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_KEYUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_KEYUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":18
@@ -12648,7 +12703,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_TEXTEDITING); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_TEXTEDITING) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_TEXTEDITING) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":19
@@ -12660,7 +12715,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_TEXTINPUT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_TEXTINPUT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_TEXTINPUT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":20
@@ -12672,7 +12727,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_KEYMAPCHANGED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_KEYMAPCHANGED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_KEYMAPCHANGED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":21
@@ -12684,7 +12739,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_MOUSEMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_MOUSEMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_MOUSEMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":22
@@ -12696,7 +12751,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_MOUSEBUTTONDOWN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_MOUSEBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_MOUSEBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":23
@@ -12708,7 +12763,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_MOUSEBUTTONUP); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_MOUSEBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_MOUSEBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":24
@@ -12720,7 +12775,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_MOUSEWHEEL); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_MOUSEWHEEL) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_MOUSEWHEEL) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":25
@@ -12732,7 +12787,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYAXISMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYAXISMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYAXISMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":26
@@ -12744,7 +12799,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYBALLMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYBALLMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYBALLMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":27
@@ -12756,7 +12811,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYHATMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 27, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYHATMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYHATMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":28
@@ -12768,7 +12823,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYBUTTONDOWN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":29
@@ -12780,7 +12835,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYBUTTONUP); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":30
@@ -12792,7 +12847,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYDEVICEADDED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYDEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYDEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":31
@@ -12804,7 +12859,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_JOYDEVICEREMOVED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_JOYDEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_JOYDEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":32
@@ -12816,7 +12871,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERAXISMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERAXISMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERAXISMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":33
@@ -12828,7 +12883,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERBUTTONDOWN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERBUTTONDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":34
@@ -12840,7 +12895,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERBUTTONUP); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERBUTTONUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":35
@@ -12852,7 +12907,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERDEVICEADDED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 35, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERDEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERDEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":36
@@ -12864,7 +12919,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERDEVICEREMOVED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERDEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERDEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":37
@@ -12876,7 +12931,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CONTROLLERDEVICEREMAPPED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CONTROLLERDEVICEREMAPPED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CONTROLLERDEVICEREMAPPED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":38
@@ -12888,7 +12943,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_FINGERDOWN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_FINGERDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_FINGERDOWN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":39
@@ -12900,7 +12955,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_FINGERUP); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 39, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_FINGERUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_FINGERUP) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":40
@@ -12912,7 +12967,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_FINGERMOTION); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_FINGERMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_FINGERMOTION) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":41
@@ -12924,7 +12979,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DOLLARGESTURE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DOLLARGESTURE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DOLLARGESTURE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":42
@@ -12936,7 +12991,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DOLLARRECORD); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DOLLARRECORD) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DOLLARRECORD) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":43
@@ -12948,7 +13003,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_MULTIGESTURE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_MULTIGESTURE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_MULTIGESTURE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":44
@@ -12960,7 +13015,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_CLIPBOARDUPDATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_CLIPBOARDUPDATE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_CLIPBOARDUPDATE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":45
@@ -12972,7 +13027,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DROPFILE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DROPFILE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DROPFILE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":46
@@ -12984,7 +13039,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DROPTEXT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DROPTEXT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DROPTEXT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":47
@@ -12996,7 +13051,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DROPBEGIN); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DROPBEGIN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DROPBEGIN) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":48
@@ -13008,7 +13063,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_DROPCOMPLETE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_DROPCOMPLETE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_DROPCOMPLETE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":49
@@ -13020,7 +13075,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_AUDIODEVICEADDED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_AUDIODEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_AUDIODEVICEADDED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":50
@@ -13032,7 +13087,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_AUDIODEVICEREMOVED); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_AUDIODEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_AUDIODEVICEREMOVED) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":51
@@ -13044,7 +13099,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_SENSORUPDATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_SENSORUPDATE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_SENSORUPDATE) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":52
@@ -13056,7 +13111,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_RENDER_TARGETS_RESET); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_RENDER_TARGETS_RESET) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_RENDER_TARGETS_RESET) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":53
@@ -13068,7 +13123,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_RENDER_DEVICE_RESET); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_RENDER_DEVICE_RESET) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_RENDER_DEVICE_RESET) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":54
@@ -13080,7 +13135,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_USEREVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_USEREVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_USEREVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event_names.pxi":55
@@ -13091,7 +13146,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = __Pyx_PyInt_From_SDL_EventType(SDL_LASTEVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_LASTEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_LASTEVENT) < 0) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_event_names, __pyx_t_2) < 0) __PYX_ERR(4, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -13155,7 +13210,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ACTIVEEVENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(PyObject_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_ACTIVEEVENT) < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
+  if (unlikely(PyObject_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_ACTIVEEVENT) < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -13170,7 +13225,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_VIDEORESIZE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_2, __pyx_n_u_VIDEORESIZE) < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_2, __pyx_n_s_VIDEORESIZE) < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
@@ -13185,7 +13240,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_VIDEOEXPOSE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (unlikely(PyObject_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_u_VIDEOEXPOSE) < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (unlikely(PyObject_SetItem(__pyx_t_2, __pyx_t_1, __pyx_n_s_VIDEOEXPOSE) < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -13200,7 +13255,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_WINDOWMOVED); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_2, __pyx_n_u_WINDOWMOVED) < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
+  if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_2, __pyx_n_s_WINDOWMOVED) < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
@@ -13250,9 +13305,9 @@ if (!__Pyx_RefNanny) {
  * 
  *     def __init__(self, type, dict=None, **kwargs):
  */
-  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_tuple__9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_tuple__5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_tuple__9, __pyx_n_s_EventType, __pyx_n_s_EventType, (PyObject *) NULL, __pyx_n_s_renpy_pygame_event, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_tuple__5, __pyx_n_s_EventType, __pyx_n_s_EventType, (PyObject *) NULL, __pyx_n_s_renpy_pygame_event, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
   /* "renpy/pygame/event.pyx":65
@@ -13262,9 +13317,9 @@ if (!__Pyx_RefNanny) {
  *         self._type = type
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_1__init__, 0, __pyx_n_s_EventType___init, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_1__init__, 0, __pyx_n_s_EventType___init, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_4, __pyx_tuple__12);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_4, __pyx_tuple__8);
   if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_init, __pyx_t_4) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
@@ -13275,7 +13330,7 @@ if (!__Pyx_RefNanny) {
  *         if SDL_USEREVENT <= self.type < WINDOWMOVED:
  *             ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_3__repr__, 0, __pyx_n_s_EventType___repr, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_3__repr__, 0, __pyx_n_s_EventType___repr, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_repr, __pyx_t_4) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13287,7 +13342,7 @@ if (!__Pyx_RefNanny) {
  *         return self.__dict__
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_5dict, 0, __pyx_n_s_EventType_dict, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_5dict, 0, __pyx_n_s_EventType_dict, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
   /* "renpy/pygame/event.pyx":92
@@ -13310,7 +13365,7 @@ if (!__Pyx_RefNanny) {
  *         return self._type
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_7type, 0, __pyx_n_s_EventType_type, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_7type, 0, __pyx_n_s_EventType_type, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
 
   /* "renpy/pygame/event.pyx":96
@@ -13333,7 +13388,7 @@ if (!__Pyx_RefNanny) {
  *         return self.__dict__ == other.__dict__
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_9__eq__, 0, __pyx_n_s_EventType___eq, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_9__eq__, 0, __pyx_n_s_EventType___eq, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_eq, __pyx_t_4) < 0) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13345,7 +13400,7 @@ if (!__Pyx_RefNanny) {
  *         return not (self == other)
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_11__ne__, 0, __pyx_n_s_EventType___ne, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__22)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_11__ne__, 0, __pyx_n_s_EventType___ne, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_ne, __pyx_t_4) < 0) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13357,7 +13412,7 @@ if (!__Pyx_RefNanny) {
  *         return self.type != 0
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_13__nonzero__, 0, __pyx_n_s_EventType___nonzero, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5renpy_6pygame_5event_9EventType_13__nonzero__, 0, __pyx_n_s_EventType___nonzero, NULL, __pyx_n_s_renpy_pygame_event, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_nonzero, __pyx_t_4) < 0) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13369,7 +13424,7 @@ if (!__Pyx_RefNanny) {
  * 
  *     def __init__(self, type, dict=None, **kwargs):
  */
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EventType, __pyx_tuple__9, __pyx_t_1, NULL, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EventType, __pyx_tuple__5, __pyx_t_1, NULL, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_EventType, __pyx_t_4) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13385,7 +13440,7 @@ if (!__Pyx_RefNanny) {
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_EventType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Event_2, __pyx_t_2) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Event, __pyx_t_2) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "renpy/pygame/event.pyx":307
@@ -13429,7 +13484,7 @@ if (!__Pyx_RefNanny) {
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_EventType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 313, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_NOEVENT_EVENT, __pyx_t_1) < 0) __PYX_ERR(0, 313, __pyx_L1_error)
@@ -13483,184 +13538,184 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_wait, __pyx_t_1) < 0) __PYX_ERR(0, 451, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":473
+  /* "renpy/pygame/event.pyx":471
  * 
  * 
  * def peek(t=None):             # <<<<<<<<<<<<<<
  * 
  *     with lock:
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_9peek, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 473, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_9peek, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 471, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_peek, __pyx_t_1) < 0) __PYX_ERR(0, 473, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_peek, __pyx_t_1) < 0) __PYX_ERR(0, 471, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":486
+  /* "renpy/pygame/event.pyx":484
  * 
  * 
  * def clear(t=None):             # <<<<<<<<<<<<<<
  * 
  *     # Clear is implemented in terms of get.
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_11clear, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 486, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_11clear, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_clear, __pyx_t_1) < 0) __PYX_ERR(0, 486, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_clear, __pyx_t_1) < 0) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":491
+  /* "renpy/pygame/event.pyx":489
  *     get(t)
  * 
  * def get_standard_events():             # <<<<<<<<<<<<<<
  *     """
  *     Returns a list of standard events that renpy.pygame knows about.
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_13get_standard_events, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 491, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_13get_standard_events, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 489, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_standard_events, __pyx_t_1) < 0) __PYX_ERR(0, 491, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_standard_events, __pyx_t_1) < 0) __PYX_ERR(0, 489, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":498
+  /* "renpy/pygame/event.pyx":496
  *     return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]
  * 
  * def event_name(t):             # <<<<<<<<<<<<<<
  *     try:
  *         return event_names[t]
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_15event_name, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 498, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_15event_name, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 496, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_event_name, __pyx_t_1) < 0) __PYX_ERR(0, 498, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_event_name, __pyx_t_1) < 0) __PYX_ERR(0, 496, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":504
+  /* "renpy/pygame/event.pyx":502
  *         return "UNKNOWN"
  * 
  * def set_blocked(t=None):             # <<<<<<<<<<<<<<
  *     if t == None:
  *         for et in event_names.keys():
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_17set_blocked, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 504, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_17set_blocked, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 502, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_blocked, __pyx_t_1) < 0) __PYX_ERR(0, 504, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_blocked, __pyx_t_1) < 0) __PYX_ERR(0, 502, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":514
+  /* "renpy/pygame/event.pyx":512
  *             SDL_EventState(et, SDL_IGNORE)
  * 
  * def set_allowed(t=None):             # <<<<<<<<<<<<<<
  *     if t == None:
  *         for et in event_names.keys():
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_19set_allowed, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 514, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_19set_allowed, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 512, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_allowed, __pyx_t_1) < 0) __PYX_ERR(0, 514, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_allowed, __pyx_t_1) < 0) __PYX_ERR(0, 512, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":524
+  /* "renpy/pygame/event.pyx":522
  *             SDL_EventState(et, SDL_ENABLE)
  * 
  * def get_blocked(t):             # <<<<<<<<<<<<<<
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_21get_blocked, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 524, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_21get_blocked, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 522, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_blocked, __pyx_t_1) < 0) __PYX_ERR(0, 524, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_blocked, __pyx_t_1) < 0) __PYX_ERR(0, 522, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":527
+  /* "renpy/pygame/event.pyx":525
  *     return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
  * 
  * def set_grab(on):             # <<<<<<<<<<<<<<
  *     if main_window is None or main_window.window == NULL:
  *         return
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_23set_grab, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 527, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_23set_grab, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 525, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_grab, __pyx_t_1) < 0) __PYX_ERR(0, 527, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_grab, __pyx_t_1) < 0) __PYX_ERR(0, 525, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":536
+  /* "renpy/pygame/event.pyx":534
  *         SDL_SetRelativeMouseMode(on)
  * 
  * def get_grab():             # <<<<<<<<<<<<<<
  *     if main_window is None or main_window.window == NULL:
  *         return False
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_25get_grab, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 536, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_25get_grab, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 534, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_grab, __pyx_t_1) < 0) __PYX_ERR(0, 536, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_grab, __pyx_t_1) < 0) __PYX_ERR(0, 534, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":542
+  /* "renpy/pygame/event.pyx":540
  *     return SDL_GetWindowGrab(main_window.window)
  * 
  * def set_mousewheel_buttons(flag):             # <<<<<<<<<<<<<<
  *     """
  *     If true (the default), the mousewheel will generate events involving
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_27set_mousewheel_buttons, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 542, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_27set_mousewheel_buttons, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_mousewheel_buttons, __pyx_t_1) < 0) __PYX_ERR(0, 542, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_set_mousewheel_buttons, __pyx_t_1) < 0) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":554
+  /* "renpy/pygame/event.pyx":552
  *     mousewheel_buttons = flag
  * 
  * def get_mousewheel_buttons():             # <<<<<<<<<<<<<<
  *     """
  *     Returns the value set by mousehweel buttons,.
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_29get_mousewheel_buttons, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_29get_mousewheel_buttons, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_mousewheel_buttons, __pyx_t_1) < 0) __PYX_ERR(0, 554, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_mousewheel_buttons, __pyx_t_1) < 0) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":561
+  /* "renpy/pygame/event.pyx":559
  *     return mousewheel_buttons
  * 
  * def post(e):             # <<<<<<<<<<<<<<
  *     """
  *     Posts event object `e` to the event queue.
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_31post, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 561, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_31post, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 559, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_post, __pyx_t_1) < 0) __PYX_ERR(0, 561, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_post, __pyx_t_1) < 0) __PYX_ERR(0, 559, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":581
+  /* "renpy/pygame/event.pyx":579
  *     SDL_PushEvent(&event)
  * 
  * def register(name):             # <<<<<<<<<<<<<<
  *     """
  *     Registers a unique event number and returns that number.
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_33register, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 581, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_33register, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_register, __pyx_t_1) < 0) __PYX_ERR(0, 581, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_register, __pyx_t_1) < 0) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":595
+  /* "renpy/pygame/event.pyx":593
  *     return rv
  * 
  * def copy_event_queue():             # <<<<<<<<<<<<<<
  *     """
  *     Returns a copy of the event queue. The copy cannot be used for modifying
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_35copy_event_queue, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 595, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_35copy_event_queue, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_copy_event_queue, __pyx_t_1) < 0) __PYX_ERR(0, 595, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_copy_event_queue, __pyx_t_1) < 0) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renpy/pygame/event.pyx":604
+  /* "renpy/pygame/event.pyx":602
  * 
  * # Usually called by display.init.
  * def init():             # <<<<<<<<<<<<<<
  *     if not SDL_WasInit(SDL_INIT_EVENTS):
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_37init, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 604, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renpy_6pygame_5event_37init, NULL, __pyx_n_s_renpy_pygame_event); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 602, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_init_2, __pyx_t_1) < 0) __PYX_ERR(0, 604, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_init_2, __pyx_t_1) < 0) __PYX_ERR(0, 602, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renpy/pygame/event.pyx":1
@@ -14714,86 +14769,12 @@ return_ne:
 #endif
 }
 
-/* PyObjectFormatAndDecref */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatSimpleAndDecref(PyObject* s, PyObject* f) {
-    if (unlikely(!s)) return NULL;
-    if (likely(PyUnicode_CheckExact(s))) return s;
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyString_CheckExact(s))) {
-        PyObject *result = PyUnicode_FromEncodedObject(s, NULL, "strict");
-        Py_DECREF(s);
-        return result;
-    }
-    #endif
-    return __Pyx_PyObject_FormatAndDecref(s, f);
+/* StringJoin */
+#if !CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyBytes_Join(PyObject* sep, PyObject* values) {
+    return PyObject_CallMethodObjArgs(sep, __pyx_n_s_join, values, NULL);
 }
-static CYTHON_INLINE PyObject* __Pyx_PyObject_FormatAndDecref(PyObject* s, PyObject* f) {
-    PyObject *result = PyObject_Format(s, f);
-    Py_DECREF(s);
-    return result;
-}
-
-/* JoinPyUnicode */
-static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
-                                      CYTHON_UNUSED Py_UCS4 max_char) {
-#if CYTHON_USE_UNICODE_INTERNALS && CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    PyObject *result_uval;
-    int result_ukind;
-    Py_ssize_t i, char_pos;
-    void *result_udata;
-#if CYTHON_PEP393_ENABLED
-    result_uval = PyUnicode_New(result_ulength, max_char);
-    if (unlikely(!result_uval)) return NULL;
-    result_ukind = (max_char <= 255) ? PyUnicode_1BYTE_KIND : (max_char <= 65535) ? PyUnicode_2BYTE_KIND : PyUnicode_4BYTE_KIND;
-    result_udata = PyUnicode_DATA(result_uval);
-#else
-    result_uval = PyUnicode_FromUnicode(NULL, result_ulength);
-    if (unlikely(!result_uval)) return NULL;
-    result_ukind = sizeof(Py_UNICODE);
-    result_udata = PyUnicode_AS_UNICODE(result_uval);
 #endif
-    char_pos = 0;
-    for (i=0; i < value_count; i++) {
-        int ukind;
-        Py_ssize_t ulength;
-        void *udata;
-        PyObject *uval = PyTuple_GET_ITEM(value_tuple, i);
-        if (unlikely(__Pyx_PyUnicode_READY(uval)))
-            goto bad;
-        ulength = __Pyx_PyUnicode_GET_LENGTH(uval);
-        if (unlikely(!ulength))
-            continue;
-        if (unlikely(char_pos + ulength < 0))
-            goto overflow;
-        ukind = __Pyx_PyUnicode_KIND(uval);
-        udata = __Pyx_PyUnicode_DATA(uval);
-        if (!CYTHON_PEP393_ENABLED || ukind == result_ukind) {
-            memcpy((char *)result_udata + char_pos * result_ukind, udata, (size_t) (ulength * result_ukind));
-        } else {
-            #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030300F0 || defined(_PyUnicode_FastCopyCharacters)
-            _PyUnicode_FastCopyCharacters(result_uval, char_pos, uval, 0, ulength);
-            #else
-            Py_ssize_t j;
-            for (j=0; j < ulength; j++) {
-                Py_UCS4 uchar = __Pyx_PyUnicode_READ(ukind, udata, j);
-                __Pyx_PyUnicode_WRITE(result_ukind, result_udata, char_pos+j, uchar);
-            }
-            #endif
-        }
-        char_pos += ulength;
-    }
-    return result_uval;
-overflow:
-    PyErr_SetString(PyExc_OverflowError, "join() result is too long for a Python string");
-bad:
-    Py_DECREF(result_uval);
-    return NULL;
-#else
-    result_ulength++;
-    value_count++;
-    return PyUnicode_Join(__pyx_empty_unicode, value_tuple);
-#endif
-}
 
 /* PyIntCompare */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_NeObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED long inplace) {
@@ -15249,203 +15230,6 @@ static PyObject* __Pyx__PyList_PopIndex(PyObject* L, PyObject* py_ix, Py_ssize_t
     }
 }
 #endif
-
-/* PyObjectCallMethod0 */
-static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name) {
-    PyObject *method = NULL, *result = NULL;
-    int is_method = __Pyx_PyObject_GetMethod(obj, method_name, &method);
-    if (likely(is_method)) {
-        result = __Pyx_PyObject_CallOneArg(method, obj);
-        Py_DECREF(method);
-        return result;
-    }
-    if (unlikely(!method)) goto bad;
-    result = __Pyx_PyObject_CallNoArg(method);
-    Py_DECREF(method);
-bad:
-    return result;
-}
-
-/* RaiseNoneIterError */
-static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-}
-
-/* UnpackTupleError */
-static void __Pyx_UnpackTupleError(PyObject *t, Py_ssize_t index) {
-    if (t == Py_None) {
-      __Pyx_RaiseNoneNotIterableError();
-    } else if (PyTuple_GET_SIZE(t) < index) {
-      __Pyx_RaiseNeedMoreValuesError(PyTuple_GET_SIZE(t));
-    } else {
-      __Pyx_RaiseTooManyValuesError(index);
-    }
-}
-
-/* UnpackTuple2 */
-static CYTHON_INLINE int __Pyx_unpack_tuple2_exact(
-        PyObject* tuple, PyObject** pvalue1, PyObject** pvalue2, int decref_tuple) {
-    PyObject *value1 = NULL, *value2 = NULL;
-#if CYTHON_COMPILING_IN_PYPY
-    value1 = PySequence_ITEM(tuple, 0);  if (unlikely(!value1)) goto bad;
-    value2 = PySequence_ITEM(tuple, 1);  if (unlikely(!value2)) goto bad;
-#else
-    value1 = PyTuple_GET_ITEM(tuple, 0);  Py_INCREF(value1);
-    value2 = PyTuple_GET_ITEM(tuple, 1);  Py_INCREF(value2);
-#endif
-    if (decref_tuple) {
-        Py_DECREF(tuple);
-    }
-    *pvalue1 = value1;
-    *pvalue2 = value2;
-    return 0;
-#if CYTHON_COMPILING_IN_PYPY
-bad:
-    Py_XDECREF(value1);
-    Py_XDECREF(value2);
-    if (decref_tuple) { Py_XDECREF(tuple); }
-    return -1;
-#endif
-}
-static int __Pyx_unpack_tuple2_generic(PyObject* tuple, PyObject** pvalue1, PyObject** pvalue2,
-                                       int has_known_size, int decref_tuple) {
-    Py_ssize_t index;
-    PyObject *value1 = NULL, *value2 = NULL, *iter = NULL;
-    iternextfunc iternext;
-    iter = PyObject_GetIter(tuple);
-    if (unlikely(!iter)) goto bad;
-    if (decref_tuple) { Py_DECREF(tuple); tuple = NULL; }
-    iternext = Py_TYPE(iter)->tp_iternext;
-    value1 = iternext(iter); if (unlikely(!value1)) { index = 0; goto unpacking_failed; }
-    value2 = iternext(iter); if (unlikely(!value2)) { index = 1; goto unpacking_failed; }
-    if (!has_known_size && unlikely(__Pyx_IternextUnpackEndCheck(iternext(iter), 2))) goto bad;
-    Py_DECREF(iter);
-    *pvalue1 = value1;
-    *pvalue2 = value2;
-    return 0;
-unpacking_failed:
-    if (!has_known_size && __Pyx_IterFinish() == 0)
-        __Pyx_RaiseNeedMoreValuesError(index);
-bad:
-    Py_XDECREF(iter);
-    Py_XDECREF(value1);
-    Py_XDECREF(value2);
-    if (decref_tuple) { Py_XDECREF(tuple); }
-    return -1;
-}
-
-/* dict_iter */
-static CYTHON_INLINE PyObject* __Pyx_dict_iterator(PyObject* iterable, int is_dict, PyObject* method_name,
-                                                   Py_ssize_t* p_orig_length, int* p_source_is_dict) {
-    is_dict = is_dict || likely(PyDict_CheckExact(iterable));
-    *p_source_is_dict = is_dict;
-    if (is_dict) {
-#if !CYTHON_COMPILING_IN_PYPY
-        *p_orig_length = PyDict_Size(iterable);
-        Py_INCREF(iterable);
-        return iterable;
-#elif PY_MAJOR_VERSION >= 3
-        static PyObject *py_items = NULL, *py_keys = NULL, *py_values = NULL;
-        PyObject **pp = NULL;
-        if (method_name) {
-            const char *name = PyUnicode_AsUTF8(method_name);
-            if (strcmp(name, "iteritems") == 0) pp = &py_items;
-            else if (strcmp(name, "iterkeys") == 0) pp = &py_keys;
-            else if (strcmp(name, "itervalues") == 0) pp = &py_values;
-            if (pp) {
-                if (!*pp) {
-                    *pp = PyUnicode_FromString(name + 4);
-                    if (!*pp)
-                        return NULL;
-                }
-                method_name = *pp;
-            }
-        }
-#endif
-    }
-    *p_orig_length = 0;
-    if (method_name) {
-        PyObject* iter;
-        iterable = __Pyx_PyObject_CallMethod0(iterable, method_name);
-        if (!iterable)
-            return NULL;
-#if !CYTHON_COMPILING_IN_PYPY
-        if (PyTuple_CheckExact(iterable) || PyList_CheckExact(iterable))
-            return iterable;
-#endif
-        iter = PyObject_GetIter(iterable);
-        Py_DECREF(iterable);
-        return iter;
-    }
-    return PyObject_GetIter(iterable);
-}
-static CYTHON_INLINE int __Pyx_dict_iter_next(
-        PyObject* iter_obj, CYTHON_NCP_UNUSED Py_ssize_t orig_length, CYTHON_NCP_UNUSED Py_ssize_t* ppos,
-        PyObject** pkey, PyObject** pvalue, PyObject** pitem, int source_is_dict) {
-    PyObject* next_item;
-#if !CYTHON_COMPILING_IN_PYPY
-    if (source_is_dict) {
-        PyObject *key, *value;
-        if (unlikely(orig_length != PyDict_Size(iter_obj))) {
-            PyErr_SetString(PyExc_RuntimeError, "dictionary changed size during iteration");
-            return -1;
-        }
-        if (unlikely(!PyDict_Next(iter_obj, ppos, &key, &value))) {
-            return 0;
-        }
-        if (pitem) {
-            PyObject* tuple = PyTuple_New(2);
-            if (unlikely(!tuple)) {
-                return -1;
-            }
-            Py_INCREF(key);
-            Py_INCREF(value);
-            PyTuple_SET_ITEM(tuple, 0, key);
-            PyTuple_SET_ITEM(tuple, 1, value);
-            *pitem = tuple;
-        } else {
-            if (pkey) {
-                Py_INCREF(key);
-                *pkey = key;
-            }
-            if (pvalue) {
-                Py_INCREF(value);
-                *pvalue = value;
-            }
-        }
-        return 1;
-    } else if (PyTuple_CheckExact(iter_obj)) {
-        Py_ssize_t pos = *ppos;
-        if (unlikely(pos >= PyTuple_GET_SIZE(iter_obj))) return 0;
-        *ppos = pos + 1;
-        next_item = PyTuple_GET_ITEM(iter_obj, pos);
-        Py_INCREF(next_item);
-    } else if (PyList_CheckExact(iter_obj)) {
-        Py_ssize_t pos = *ppos;
-        if (unlikely(pos >= PyList_GET_SIZE(iter_obj))) return 0;
-        *ppos = pos + 1;
-        next_item = PyList_GET_ITEM(iter_obj, pos);
-        Py_INCREF(next_item);
-    } else
-#endif
-    {
-        next_item = PyIter_Next(iter_obj);
-        if (unlikely(!next_item)) {
-            return __Pyx_IterFinish();
-        }
-    }
-    if (pitem) {
-        *pitem = next_item;
-    } else if (pkey && pvalue) {
-        if (__Pyx_unpack_tuple2(next_item, pkey, pvalue, source_is_dict, source_is_dict, 1))
-            return -1;
-    } else if (pkey) {
-        *pkey = next_item;
-    } else {
-        *pvalue = next_item;
-    }
-    return 1;
-}
 
 /* RaiseException */
 #if PY_MAJOR_VERSION < 3

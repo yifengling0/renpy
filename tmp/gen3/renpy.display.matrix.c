@@ -958,10 +958,10 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\display\\matrix.pyx",
+  "renpy/display/matrix.pyx",
   "stringsource",
-  "renpy\\display\\matrix.pxd",
-  "renpy\\display\\matrix_functions.pxi",
+  "renpy/display/matrix.pxd",
+  "renpy/display/matrix_functions.pxi",
 };
 
 /*--- Type declarations ---*/
@@ -1591,7 +1591,7 @@ static const char __pyx_k_screen_projection[] = "screen_projection";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_texture_projection[] = "texture_projection";
 static const char __pyx_k_renpy_display_matrix[] = "renpy.display.matrix";
-static const char __pyx_k_renpy_display_matrix_pyx[] = "renpy\\display\\matrix.pyx";
+static const char __pyx_k_renpy_display_matrix_pyx[] = "renpy/display/matrix.pyx";
 static const char __pyx_k_Unsupported_matrix_length_must_b[] = "Unsupported matrix length {} (must be 4, 9, or 16).";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static PyObject *__pyx_kp_s_10_7f;

@@ -960,10 +960,10 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "stringsource",
-  "renpy\\gl2\\gl2mesh.pyx",
-  "renpy\\gl2\\gl2mesh.pxd",
-  "renpy\\display\\matrix.pxd",
-  "renpy\\gl2\\gl2polygon.pxd",
+  "renpy/gl2/gl2mesh.pyx",
+  "renpy/gl2/gl2mesh.pxd",
+  "renpy/display/matrix.pxd",
+  "renpy/gl2/gl2polygon.pxd",
 };
 
 /*--- Type declarations ---*/

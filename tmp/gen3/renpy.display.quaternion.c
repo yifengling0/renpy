@@ -957,7 +957,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\display\\quaternion.pyx",
+  "renpy/display/quaternion.pyx",
 };
 
 /*--- Type declarations ---*/
@@ -1249,7 +1249,7 @@ static const char __pyx_k_old_z_div_2[] = "old_z_div_2";
 static const char __pyx_k_old_q_mul_new_q[] = "old_q_mul_new_q";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_display_quaternion[] = "renpy.display.quaternion";
-static const char __pyx_k_renpy_display_quaternion_pyx[] = "renpy\\display\\quaternion.pyx";
+static const char __pyx_k_renpy_display_quaternion_pyx[] = "renpy/display/quaternion.pyx";
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_coeff1;
 static PyObject *__pyx_n_s_coeff2;

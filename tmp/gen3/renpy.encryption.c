@@ -959,7 +959,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\encryption.pyx",
+  "renpy/encryption.pyx",
 };
 
 /*--- Type declarations ---*/
@@ -1265,7 +1265,7 @@ static const char __pyx_k_secretbox_encrypt[] = "secretbox_encrypt";
 static const char __pyx_k_SECRETBOX_KEYBYTES[] = "SECRETBOX_KEYBYTES";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_Key_must_be_d_bytes[] = "Key must be %d bytes";
-static const char __pyx_k_renpy_encryption_pyx[] = "renpy\\encryption.pyx";
+static const char __pyx_k_renpy_encryption_pyx[] = "renpy/encryption.pyx";
 static const char __pyx_k_Failed_to_initialize_libhydrogen[] = "Failed to initialize libhydrogen.";
 static PyObject *__pyx_kp_s_Decryption_failed;
 static PyObject *__pyx_kp_s_Encryption_failed;

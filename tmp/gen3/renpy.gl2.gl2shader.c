@@ -961,16 +961,16 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\gl2\\gl2shader.pyx",
+  "renpy/gl2/gl2shader.pyx",
   "stringsource",
-  "renpy\\gl2\\gl2shader.pxd",
-  "renpy\\display\\matrix.pxd",
-  "renpy\\gl2\\gl2polygon.pxd",
-  "renpy\\gl2\\gl2mesh.pxd",
-  "renpy\\gl2\\gl2model.pxd",
-  "renpy\\display\\render.pxd",
-  "renpy\\gl2\\gl2draw.pxd",
-  "renpy\\gl2\\gl2texture.pxd",
+  "renpy/gl2/gl2shader.pxd",
+  "renpy/display/matrix.pxd",
+  "renpy/gl2/gl2polygon.pxd",
+  "renpy/gl2/gl2mesh.pxd",
+  "renpy/gl2/gl2model.pxd",
+  "renpy/display/render.pxd",
+  "renpy/gl2/gl2draw.pxd",
+  "renpy/gl2/gl2texture.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -4758,7 +4758,7 @@ static const char __pyx_k_nearest_mipmap_linear[] = "nearest_mipmap_linear";
 static const char __pyx_k_Couldn_t_finds_name_in[] = "Couldn't finds name in {}";
 static const char __pyx_k_nearest_mipmap_nearest[] = "nearest_mipmap_nearest";
 static const char __pyx_k_pyx_unpickle_Attribute[] = "__pyx_unpickle_Attribute";
-static const char __pyx_k_renpy_gl2_gl2shader_pyx[] = "renpy\\gl2\\gl2shader.pyx";
+static const char __pyx_k_renpy_gl2_gl2shader_pyx[] = "renpy/gl2/gl2shader.pyx";
 static const char __pyx_k_Error_compiling_shader_s[] = "Error compiling shader %s:";
 static const char __pyx_k_pyx_unpickle_UniformMat4[] = "__pyx_unpickle_UniformMat4";
 static const char __pyx_k_pyx_unpickle_UniformVec2[] = "__pyx_unpickle_UniformVec2";

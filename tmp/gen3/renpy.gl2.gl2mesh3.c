@@ -959,11 +959,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\gl2\\gl2mesh3.pyx",
+  "renpy/gl2/gl2mesh3.pyx",
   "stringsource",
-  "renpy\\display\\matrix.pxd",
-  "renpy\\gl2\\gl2polygon.pxd",
-  "renpy\\gl2\\gl2mesh.pxd",
+  "renpy/display/matrix.pxd",
+  "renpy/gl2/gl2polygon.pxd",
+  "renpy/gl2/gl2mesh.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -1698,7 +1698,7 @@ static const char __pyx_k_renpy_gl2_gl2mesh[] = "renpy.gl2.gl2mesh";
 static const char __pyx_k_texture_rectangle[] = "texture_rectangle";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_gl2_gl2mesh3[] = "renpy.gl2.gl2mesh3";
-static const char __pyx_k_renpy_gl2_gl2mesh3_pyx[] = "renpy\\gl2\\gl2mesh3.pyx";
+static const char __pyx_k_renpy_gl2_gl2mesh3_pyx[] = "renpy/gl2/gl2mesh3.pyx";
 static const char __pyx_k_self_attribute_self_point_self_p[] = "self.attribute,self.point,self.point_data,self.triangle cannot be converted to a Python object for pickling";
 static PyObject *__pyx_kp_s_;
 static PyObject *__pyx_kp_s_8_3f;

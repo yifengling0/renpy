@@ -956,10 +956,10 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\display\\render.pyx",
-  "renpy\\display\\render.pxd",
+  "renpy/display/render.pyx",
+  "renpy/display/render.pxd",
   "stringsource",
-  "renpy\\display\\matrix.pxd",
+  "renpy/display/matrix.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -2201,7 +2201,7 @@ static const char __pyx_k_renpy_display_matrix[] = "renpy.display.matrix";
 static const char __pyx_k_renpy_display_render[] = "renpy.display.render";
 static const char __pyx_k_Can_t_pickle_a_Render[] = "Can't pickle a Render.";
 static const char __pyx_k_Render_depends_on_itself[] = "Render depends on itself.";
-static const char __pyx_k_renpy_display_render_pyx[] = "renpy\\display\\render.pyx";
+static const char __pyx_k_renpy_display_render_pyx[] = "renpy/display/render.pyx";
 static const char __pyx_k_adjust_render_cache_times[] = "adjust_render_cache_times";
 static const char __pyx_k_main_displayables_at_point[] = "main_displayables_at_point";
 static const char __pyx_k_check_redraws_locals_lambda[] = "check_redraws.<locals>.<lambda>";

@@ -960,7 +960,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "renpy\\audio\\filter.pyx",
+  "renpy/audio/filter.pyx",
   "stringsource",
   "type.pxd",
 };
@@ -2080,7 +2080,7 @@ static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_renpy_audio_filter[] = "renpy.audio.filter.{}({})";
 static const char __pyx_k_NotImplementedError[] = "NotImplementedError";
 static const char __pyx_k_renpy_audio_filter_2[] = "renpy.audio.filter";
-static const char __pyx_k_renpy_audio_filter_pyx[] = "renpy\\audio\\filter.pyx";
+static const char __pyx_k_renpy_audio_filter_pyx[] = "renpy/audio/filter.pyx";
 static const char __pyx_k_deallocate_audio_filter[] = "deallocate_audio_filter";
 static const char __pyx_k_pyx_unpickle_AudioFilter[] = "__pyx_unpickle_AudioFilter";
 static const char __pyx_k_Expected_an_AudioFilter_got_r[] = "Expected an AudioFilter, got {!r}.";
