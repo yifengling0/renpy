@@ -467,8 +467,9 @@ def generate_all_cython():
                 sys.exit(1)
     else:
         with ThreadPoolExecutor() as executor:
-            for args in generate_cython_queue:
-                executor.submit(generate_cython, *args)
+            futures = [executor.submit(generate_cython, *args) for args in generate_cython_queue]
+            for future in futures:
+                future.result()
 
         if cython_failure:
             sys.exit(1)

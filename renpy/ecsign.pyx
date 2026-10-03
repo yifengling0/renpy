@@ -94,8 +94,7 @@ def validate_private_key(private_key : bytes) -> bool:
 def validate_public_key(public_key : bytes) -> bool:
     return ECValidateKey(1, public_key, len(public_key))
 
-def _pem_lines(contents: bytes):
-    # type: (bytes) -> typing.Iterator[bytes]
+def _pem_lines(contents: bytes) -> typing.Iterator[bytes]:
     in_pem_part = False
     seen_pem_start = False
 

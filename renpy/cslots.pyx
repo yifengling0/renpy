@@ -29,16 +29,9 @@ This is done through indirection. Each Object has a storage allocation consistin
 Value unions, followed by a series of byes that give the value union corresponding to a given slot.
 """
 
-from cpython.mem cimport PyMem_RawCalloc, PyMem_RawFree
+from cpython.mem cimport PyMem_Calloc, PyMem_Free
 from cpython.object cimport PyObject, PyTypeObject, Py_TPFLAGS_HAVE_GC, PyObject_Free
 from cpython.ref cimport Py_XINCREF, Py_XDECREF, Py_CLEAR
-
-# Backward compatibility alias for Cython 0.29
-cdef inline void *PyMem_Calloc(size_t n, size_t s):
-    return PyMem_RawCalloc(n, s)
-
-cdef inline void PyMem_Free(void *p):
-    PyMem_RawFree(p)
 
 from copyreg import __newobj__
 

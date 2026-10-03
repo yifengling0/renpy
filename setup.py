@@ -111,7 +111,7 @@ def main():
     cython("renpy.text.texwrap")
     cython("renpy.text.ftfont", [ "src/ftsupport.c", "src/ttgsubtable.c" ], packages="freetype2 harfbuzz")
     cython("renpy.text.hbfont", [ "src/ftsupport.c" ], packages="freetype2 harfbuzz")
-    cython("renpy.text.bidi", [ "src/renpybidicore.c" ], packages="fribidi")
+    cython("renpy.text.bidi", [ "src/renpybidicore.c", "src/vp_renpybidi_alias.c" ], packages="fribidi")
 
     # renpy.pygame
     cython("renpy.pygame.error", packages="sdl2")

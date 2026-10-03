@@ -1,4 +1,4 @@
-# Copyright 2004-2025 Tom Rothamel <pytom@bishoujo.us>
+# Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -29,8 +29,7 @@ def expose_file(fn):
     that may not be the default.
     """
 
-    if renpy.android:
-
+    if renpy.android or renpy.harmonyos:
         try:
             os.chmod(fn, 0o660)
         except Exception:
@@ -43,8 +42,7 @@ def expose_directory(dn):
     that may not be the default.
     """
 
-    if renpy.android:
-
+    if renpy.android or renpy.harmonyos:
         try:
             os.chmod(dn, 0o770)
         except Exception:

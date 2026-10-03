@@ -31,6 +31,5 @@ class APK:
 
     def open(self, fn, mode='rb'):
         """Assets are accessed via the filesystem, not APK."""
-        raise FileNotFoundError(
-            f"APK resource not available on HarmonyOS: {fn}")
-
+        raise OSError(
+            "APK resource not available on HarmonyOS: {0}".format(fn))
